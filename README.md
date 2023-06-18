@@ -1,0 +1,18 @@
+WIP
+- [ ] get the cursor word
+- [ ] goto next
+- [ ] move the main cursor to next match
+- [ ] wrap around the buffer when moving
+- [ ] skip forward and backward
+- [ ] goto prev
+- [ ] moving the cursors
+- [ ] count goto
+- [ ] moving cursor overlap? maybe merge
+- [ ] insert mode
+- [ ] change mode
+- [ ] completion works
+- [ ] live update every char
+- [ ] create a mod to show to user
+- [ ] pasting
+- [ ] yanking
+- [ ] deleting
