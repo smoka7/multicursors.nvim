@@ -1,16 +1,10 @@
 local api = vim.api
 
 local highlight = require 'multicursors.highlight'
-local config = require 'multicursors.config'
+local insert_mode = require 'multicursors.insert_mode'
 
 local ns_id = api.nvim_create_namespace 'multicursors'
-
----@param any any
-local function debug(any)
-    if config.DEBUG_MODE then
-        vim.notify(vim.inspect(any), vim.log.levels.DEBUG)
-    end
-end
+local debug = require('multicursors.utils').debug
 
 local M = {}
 
@@ -196,6 +190,11 @@ M.start = function()
             last_mark = M.find_next(w)
         elseif key == 'q' then
             last_mark = M.skip_forward(w, last_mark)
+        elseif key == 'i' then
+            api.nvim_feedkeys('i', 'm', false)
+            insert_mode.start()
+            -- not returning causes infinite loop
+            return
         end
     end
 end
