@@ -52,6 +52,19 @@ local create_extmark = function(match)
     })
 end
 
+local ESC = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
+
+--- gets a single char from user
+--- when intrupted returns nil
+---@return string?
+local function get_char()
+    local ok, key = pcall(vim.fn.getcharstr)
+    if not ok then
+        return nil
+    end
+
+    return key
+end
 
 --- Returns the first match for pattern after a offset in a string
 ---@param string string
@@ -159,3 +172,36 @@ M.find_next = function(pattern)
         end
     end
 end
+
+M.start = function()
+    local last_mark, w = M.find_cursor_word()
+
+    --TODO when nil just add the cursor???
+    if not w or not last_mark then
+        return
+    end
+
+    while true do
+        local key = get_char()
+        if not key then
+            M.exit()
+            return
+        end
+
+        debug 'listening for mod selector'
+        if key == ESC then
+            M.exit()
+            return
+        elseif key == 'n' then
+            last_mark = M.find_next(w)
+        elseif key == 'q' then
+            last_mark = M.skip_forward(w, last_mark)
+        end
+    end
+end
+
+M.exit = function()
+    api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+end
+
+return M
