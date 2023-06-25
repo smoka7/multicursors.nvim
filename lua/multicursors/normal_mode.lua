@@ -1,6 +1,9 @@
 local api = vim.api
 local utils = require 'multicursors.utils'
+
+---@class InsertMode
 local insert_mode = require 'multicursors.insert_mode'
+
 local debug = utils.debug
 
 local ns_id = api.nvim_create_namespace 'multicursors'
@@ -36,7 +39,7 @@ local find_next_match = function(string, pattern, row_idx, offset)
 
     -- jump the cursor to last char of match
     match.row = row_idx
-    utils.move_cursor({ row_idx, match.finish }, nil)
+    utils.move_cursor({ row_idx, match.start }, nil)
 
     return utils.create_extmark(match)
 end
@@ -64,7 +67,7 @@ M.find_cursor_word = function()
     }
 
     local mark_id = utils.create_extmark(word)
-    utils.move_cursor { cursor[1], cursor[2] + right[3] }
+    utils.move_cursor { cursor[1], cursor[2] }
 
     return mark_id, left[1] .. right[1]:sub(2)
 end
@@ -89,9 +92,10 @@ M.find_next = function(pattern)
     local line_count = api.nvim_buf_line_count(0)
 
     local row_idx = cursor[1]
+    local column = cursor[2] + #pattern
     -- search the same line as cursor with cursor col as offset cursor
     local line = api.nvim_buf_get_lines(0, row_idx - 1, row_idx, true)[1]
-    local mark_id = find_next_match(line, pattern, row_idx, cursor[2])
+    local mark_id = find_next_match(line, pattern, row_idx, column)
     if mark_id then
         return mark_id
     end
@@ -123,8 +127,11 @@ M.start = function()
     if not w or not last_mark then
         return
     end
-
     debug 'listening for mod selector'
+    M.listen(last_mark, w)
+end
+
+M.listen = function(last_mark, w)
     while true do
         local key = utils.get_char()
         if not key then
@@ -140,9 +147,20 @@ M.start = function()
         elseif key == 'q' then
             last_mark = M.skip_forward(w, last_mark)
         elseif key == 'i' then
-            api.nvim_feedkeys('i', 'm', false)
+            api.nvim_feedkeys('i', 't', false)
             insert_mode.start()
             -- not returning causes infinite loop
+            return
+        elseif key == 'a' then
+            api.nvim_feedkeys('i', 't', false)
+            local mark = api.nvim_buf_get_extmark_by_id(
+                0,
+                ns_id,
+                last_mark,
+                { details = true }
+            )
+            utils.move_cursor { mark[3].end_row + 1, mark[3].end_col }
+            insert_mode.append()
             return
         elseif key == 'c' then
             --M.change()

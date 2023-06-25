@@ -3,6 +3,7 @@ local config = require 'multicursors.config'
 
 local ns_id = api.nvim_create_namespace 'multicursors'
 
+---@class Utils
 local M = {}
 
 --- creates a extmark for the the match
@@ -18,7 +19,7 @@ M.create_extmark = function(match)
         {}
     )
     if #marks > 0 then
-        debug('found ' .. #marks .. ' duplicate marks:')
+        M.debug('found ' .. #marks .. ' duplicate marks:')
         return marks[1][1]
     end
 
@@ -69,7 +70,8 @@ end
 ---
 ---@param text string
 ---@param skip_current boolean
-M.insert_text = function(text, skip_current)
+---@param before boolean wheter or not insert text before cursor
+M.insert_text = function(text, skip_current, before)
     local marks = M.getAllCursors(false)
     for _, value in pairs(marks) do
         -- get each mark again cause inserting text might moved the other marks
@@ -93,12 +95,16 @@ M.insert_text = function(text, skip_current)
                 )
             )
         then
+            local col = mark[3].end_col
+            if before then
+                col = mark[2]
+            end
             api.nvim_buf_set_text(
                 0,
                 mark[3].end_row,
-                mark[3].end_col,
+                col,
                 mark[3].end_row,
-                mark[3].end_col,
+                col,
                 { text }
             )
         end

@@ -1,3 +1,4 @@
+---@class Utils
 local utils = require 'multicursors.utils'
 local api = vim.api
 
@@ -12,11 +13,7 @@ M._au_group = api.nvim_create_augroup('multicursors', { clear = true })
 ---@type any[]?
 M._user_mappings = nil
 
---- listens for every char press and inserts the text before leaving insert mode
---TODO create a timer and update the cursors for better ux
---TODO sholud remap all cursor movements
---TODO esc go to multicursor normal
-M.start = function()
+M._on_insert_enter = function()
     api.nvim_create_autocmd({ 'InsertEnter' }, {
         group = M._au_group,
         callback = function()
@@ -24,26 +21,47 @@ M.start = function()
             M._register_mappings()
         end,
     })
+end
 
-    api.nvim_create_autocmd({ 'InsertLeave' }, {
-        group = M._au_group,
-        callback = function()
-            M._restore_user_mappings()
-            if M._inserted_text == '' then
-                return
-            end
-            utils.insert_text(M._inserted_text, true)
-            M._inserted_text = ''
-            M.exit()
-        end,
-    })
-
+M._on_insert_char_pre = function()
     api.nvim_create_autocmd({ 'InsertCharPre' }, {
         group = M._au_group,
         callback = function()
             M._inserted_text = M._inserted_text .. vim.v.char
         end,
     })
+end
+
+---@param insert_before boolean
+M._on_leave = function(insert_before)
+    api.nvim_create_autocmd({ 'InsertLeave' }, {
+        group = M._au_group,
+        callback = function()
+            M._restore_user_mappings()
+            if M._inserted_text == '' then
+                M.exit()
+                return
+            end
+            utils.insert_text(M._inserted_text, true, insert_before)
+            M._inserted_text = ''
+            M.exit()
+        end,
+    })
+end
+--- listens for every char press and inserts the text before leaving insert mode
+--TODO create a timer and update the cursors for better ux
+--TODO sholud remap all cursor movements
+--TODO esc go to multicursor normal
+M.start = function()
+    M._on_insert_enter()
+    M._on_insert_char_pre()
+    M._on_leave(true)
+end
+
+M.append = function()
+    M._on_insert_enter()
+    M._on_insert_char_pre()
+    M._on_leave(false)
 end
 
 M._save_user_mappings = function()
@@ -99,6 +117,8 @@ M._insert_mode_mappings = {
 
 M.exit = function()
     api.nvim_clear_autocmds { group = M._au_group }
+    utils.exit()
+    vim.cmd [[redraw!]]
 end
 
 return M
