@@ -52,7 +52,7 @@ local find_next_match = function(string, last_match, row_idx, offset, skip)
         utils.create_extmark(last_match, ns_id)
     end
     utils.create_extmark(found, main_cursor)
-    utils.move_cursor({ row_idx, found.start }, nil)
+    utils.move_cursor({ row_idx + 1, found.start }, nil)
 
     return found
 end
@@ -73,7 +73,7 @@ M.find_cursor_word = function()
         return
     end
     local match = {
-        row = cursor[1],
+        row = cursor[1] - 1,
         start = left[2],
         finish = right[3] + cursor[2],
         pattern = left[1] .. right[1]:sub(2),
@@ -95,15 +95,15 @@ M.find_next = function(last_match, skip)
     local column = last_match.finish
 
     -- search the same line as cursor with cursor col as offset cursor
-    local line = api.nvim_buf_get_lines(0, row_idx - 1, row_idx, true)[1]
+    local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
     local match = find_next_match(line, last_match, row_idx, column, skip)
     if match then
         return match
     end
 
     -- search from cursor to end of buffer for pattern
-    for idx = row_idx + 1, line_count, 1 do
-        line = api.nvim_buf_get_lines(0, idx - 1, idx, true)[1]
+    for idx = row_idx + 1, line_count - 1, 1 do
+        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
         match = find_next_match(line, last_match, idx, 0, skip)
         if match then
             return match
@@ -113,7 +113,7 @@ M.find_next = function(last_match, skip)
     -- when we didn't find the pattern we start searching again
     -- from start of the buffer
     for idx = 0, row_idx, 1 do
-        line = api.nvim_buf_get_lines(0, idx - 1, idx, true)[1]
+        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
         match = find_next_match(line, last_match, idx, 0, skip)
         if match then
             return match
@@ -149,12 +149,11 @@ M.listen = function(last_mark)
         elseif key == 'q' then
             last_mark = M.find_next(last_mark, true)
         elseif key == 'i' then
-            api.nvim_feedkeys('i', 't', false)
+            vim.cmd.startinsert()
             insert_mode.start()
-            -- not returning causes infinite loop
             return
         elseif key == 'a' then
-            api.nvim_feedkeys('i', 't', false)
+            vim.cmd.startinsert()
             insert_mode.append()
             return
         elseif key == 'c' then

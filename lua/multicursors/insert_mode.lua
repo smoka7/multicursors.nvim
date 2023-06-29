@@ -3,20 +3,25 @@ local utils = require 'multicursors.utils'
 local api = vim.api
 
 ---@class InsertMode
+---@field _au_group number
+---@field _inserted_text string
+---@field _user_mappings any[]?
 local M = {}
 
 M._inserted_text = ''
 
---- @type number
 M._au_group = api.nvim_create_augroup('multicursors', { clear = true })
 
----@type any[]?
 M._user_mappings = nil
+M._user_update_time = 4000
 
 M._on_insert_enter = function()
     api.nvim_create_autocmd({ 'InsertEnter' }, {
         group = M._au_group,
         callback = function()
+            M._user_update_time = vim.opt.updatetime
+            ---TODO make it configurable
+            vim.opt.updatetime = 50
             M._save_user_mappings()
             M._register_mappings()
         end,
@@ -32,36 +37,41 @@ M._on_insert_char_pre = function()
     })
 end
 
----@param insert_before boolean
-M._on_leave = function(insert_before)
+M._on_cursor_hold = function()
+    api.nvim_create_autocmd({ 'CursorHoldI' }, {
+        group = M._au_group,
+        callback = function()
+            if M._inserted_text == '' then
+                return
+            end
+            utils.insert_text(M._inserted_text)
+            M._inserted_text = ''
+        end,
+    })
+end
+
+M._on_insert_leave = function()
     api.nvim_create_autocmd({ 'InsertLeave' }, {
         group = M._au_group,
         callback = function()
+            vim.opt.updatetime = M._user_update_time
             M._restore_user_mappings()
             if M._inserted_text == '' then
                 M.exit()
                 return
             end
-            utils.insert_text(M._inserted_text, true, insert_before)
+            utils.insert_text(M._inserted_text)
             M._inserted_text = ''
             M.exit()
         end,
     })
 end
---- listens for every char press and inserts the text before leaving insert mode
---TODO create a timer and update the cursors for better ux
---TODO sholud remap all cursor movements
---TODO esc go to multicursor normal
-M.start = function()
-    M._on_insert_enter()
-    M._on_insert_char_pre()
-    M._on_leave(true)
-end
 
-M.append = function()
+local function set_insert_autocommands()
     M._on_insert_enter()
+    M._on_cursor_hold()
     M._on_insert_char_pre()
-    M._on_leave(false)
+    M._on_insert_leave()
 end
 
 M._save_user_mappings = function()
@@ -74,17 +84,26 @@ M._register_mappings = function()
             'i',
             map.lhs,
             map.rhs,
-            { expr = true, buffer = true, noremap = true }
+            { expr = false, buffer = true, noremap = true }
         )
     end
+end
+
+M._insert_and_clear = function()
+    if M._inserted_text == '' then
+        return
+    end
+    utils.insert_text(M._inserted_text)
+    M._inserted_text = ''
 end
 
 --- returns true if we have a mapping for lhs in insert mode
 ---@param lhs string
 ---@return boolean
 local mapped = function(lhs)
-    for _, value in ipairs(M._insert_mode_mappings) do
-        if lhs == value.lhs then
+    for _, map in ipairs(M._user_mappings) do
+        if lhs == map.lhs then
+            vim.keymap.set('i', map.lhs, map.rhs or map.callback)
             return true
         end
     end
@@ -92,28 +111,65 @@ local mapped = function(lhs)
 end
 
 M._restore_user_mappings = function()
-    for _, map in ipairs(M._user_mappings) do
-        if map.lhs == '<BS>' then
-            if mapped(map.lhs) then
-                vim.keymap.set('i', map.lhs, map.rhs or map.callback)
-            end
+    for _, map in ipairs(M._insert_mode_mappings) do
+        if not mapped(map.lhs) then
+            vim.keymap.del('i', map.lhs, { buffer = 0 })
         end
     end
     M._user_mappings = nil
 end
 
 M.BS_method = function()
-    if M._inserted_text ~= '' then
+    if M._inserted_text == '' then
+        utils.delete_char()
+    else
+        --delete the text under the cursor cause we can't modify buffer content with expr mappings
+        vim.cmd 'normal X'
         M._inserted_text = M._inserted_text:sub(0, #M._inserted_text - 1)
     end
+end
 
-    return '<BS>'
+M.Left_method = function()
+    M._insert_and_clear()
+    utils.move_selections_horizontal(-1)
+end
+
+M.Right_method = function()
+    M._insert_and_clear()
+    utils.move_selections_horizontal(1)
+end
+
+M.UP_method = function()
+    M._insert_and_clear()
+    utils.move_selections_vertical(-1)
+end
+
+M.Down_method = function()
+    M._insert_and_clear()
+    utils.move_selections_vertical(1)
 end
 
 ---@type Mapping[]
 M._insert_mode_mappings = {
     { lhs = '<BS>', rhs = M.BS_method },
+    { lhs = '<Left>', rhs = M.Left_method },
+    { lhs = '<Right>', rhs = M.Right_method },
+    { lhs = '<Up>', rhs = M.UP_method },
+    { lhs = '<Down>', rhs = M.Down_method },
 }
+
+--- listens for every char press and inserts the text before leaving insert mode
+--TODO create a timer and update the cursors for better ux
+--TODO esc go to multicursor normal
+M.start = function()
+    utils.update_selections(utils.position.before)
+    set_insert_autocommands()
+end
+
+M.append = function()
+    utils.update_selections(utils.position.after)
+    set_insert_autocommands()
+end
 
 M.exit = function()
     api.nvim_clear_autocmds { group = M._au_group }
