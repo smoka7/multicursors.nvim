@@ -2,7 +2,7 @@ local api = vim.api
 local config = require 'multicursors.config'
 
 local ns_id = api.nvim_create_namespace 'multicursors'
-local maincursor = api.nvim_create_namespace 'multicursorsmaincursor'
+local main_ns_id = api.nvim_create_namespace 'multicursorsmaincursor'
 
 ---@class Utils
 local M = {}
@@ -13,15 +13,26 @@ M.position = {
     after = false,
 }
 
+--- @enum Namespace
+M.namespace = {
+    Main = 'MultiCursorMain',
+    Multi = 'MultiCursor',
+}
+
 --- creates a extmark for the the match
 --- doesn't create a duplicate mark
 ---@param match Match
----@param namespace integer
+---@param namespace Namespace
 ---@return integer id of created mark
 M.create_extmark = function(match, namespace)
+    local ns = ns_id
+    if namespace == M.namespace.Main then
+        ns = main_ns_id
+    end
+
     local marks = api.nvim_buf_get_extmarks(
         0,
-        namespace,
+        ns,
         { match.row, match.start },
         { match.row, match.finish },
         {}
@@ -31,13 +42,23 @@ M.create_extmark = function(match, namespace)
         return marks[1][1]
     end
 
-    local s = api.nvim_buf_set_extmark(0, namespace, match.row, match.start, {
+    local s = api.nvim_buf_set_extmark(0, ns, match.row, match.start, {
         end_row = match.row,
         end_col = match.finish,
-        hl_group = 'MultiCursor',
+        hl_group = namespace,
     })
     vim.cmd [[ redraw! ]]
     return s
+end
+
+--- clears the namespace in current buffer
+---@param namespace  Namespace
+M.clear_namespace = function(namespace)
+    local ns = ns_id
+    if namespace == M.namespace.Main then
+        ns = main_ns_id
+    end
+    api.nvim_buf_clear_namespace(0, ns, 0, -1)
 end
 
 ---@param any any
@@ -52,7 +73,7 @@ end
 M.get_main_selection = function(details)
     return api.nvim_buf_get_extmarks(
         0,
-        maincursor,
+        main_ns_id,
         0,
         -1,
         { details = details }
@@ -118,11 +139,10 @@ M.update_selections = function(before)
         M.move_cursor { main[4].end_row + 1, main[4].end_col }
     end
 
-    api.nvim_buf_set_extmark(0, maincursor, main[4].end_row, col, {
-        end_row = main[4].end_row,
-        end_col = col + 1,
-        hl_group = 'MultiCursor',
-    })
+    M.create_extmark(
+        { row = main[4].end_row, start = col, finish = col + 1 },
+        M.namespace.Main
+    )
 
     for _, mark in pairs(marks) do
         col = mark[4].end_col - 1
@@ -130,11 +150,10 @@ M.update_selections = function(before)
             col = mark[3] - 1
         end
 
-        api.nvim_buf_set_extmark(0, ns_id, mark[4].end_row, col, {
-            end_row = mark[4].end_row,
-            end_col = col + 1,
-            hl_group = 'MultiCursor',
-        })
+        M.create_extmark(
+            { row = mark[4].end_row, start = col, finish = col + 1 },
+            M.namespace.Multi
+        )
     end
 end
 
@@ -160,13 +179,19 @@ M.move_selections_horizontal = function(length)
     end
 
     local row, col = get_position(main)
-    M.create_extmark({ start = col, finish = col + 1, row = row }, maincursor)
+    M.create_extmark(
+        { start = col, finish = col + 1, row = row },
+        M.namespace.Main
+    )
     M.move_cursor { row + 1, col + 1 }
 
     for _, mark in pairs(marks) do
         row, col = get_position(mark)
 
-        M.create_extmark({ start = col, finish = col + 1, row = row }, ns_id)
+        M.create_extmark(
+            { start = col, finish = col + 1, row = row },
+            M.namespace.Multi
+        )
     end
 end
 
@@ -201,12 +226,18 @@ M.move_selections_vertical = function(length)
     end
 
     local row, col = get_position(main)
-    M.create_extmark({ start = col, finish = col + 1, row = row }, maincursor)
+    M.create_extmark(
+        { start = col, finish = col + 1, row = row },
+        M.namespace.Main
+    )
     M.move_cursor { row + 1, col + 1 }
 
     for _, mark in pairs(marks) do
         row, col = get_position(mark)
-        M.create_extmark({ start = col, finish = col + 1, row = row }, ns_id)
+        M.create_extmark(
+            { start = col, finish = col + 1, row = row },
+            M.namespace.Multi
+        )
     end
 end
 
@@ -251,8 +282,8 @@ M.move_cursor = function(pos, current)
 end
 
 M.exit = function()
-    api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
-    api.nvim_buf_clear_namespace(0, maincursor, 0, -1)
+    M.clear_namespace(M.namespace.Main)
+    M.clear_namespace(M.namespace.Multi)
 end
 
 return M

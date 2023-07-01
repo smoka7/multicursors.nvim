@@ -8,8 +8,6 @@ local insert_mode = require 'multicursors.insert_mode'
 
 local debug = utils.debug
 
-local ns_id = api.nvim_create_namespace 'multicursors'
-local main_cursor = api.nvim_create_namespace 'multicursorsmaincursor'
 local ESC = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
 
 ---@class NormalMode
@@ -47,11 +45,11 @@ local find_next_match = function(string, last_match, row_idx, offset, skip)
     found.row = row_idx
 
     -- jump the cursor to last match
-    api.nvim_buf_clear_namespace(0, main_cursor, 0, -1)
+    utils.clear_namespace(utils.namespace.Main)
     if not skip then
-        utils.create_extmark(last_match, ns_id)
+        utils.create_extmark(last_match, utils.namespace.Multi)
     end
-    utils.create_extmark(found, main_cursor)
+    utils.create_extmark(found, utils.namespace.Main)
     utils.move_cursor({ row_idx + 1, found.start }, nil)
 
     return found
@@ -97,11 +95,11 @@ local find_prev_match = function(string, last_match, row_idx, till, skip)
     end
 
     -- jump the cursor to last match
-    api.nvim_buf_clear_namespace(0, main_cursor, 0, -1)
+    utils.clear_namespace(utils.namespace.Main)
     if not skip then
-        utils.create_extmark(last_match, ns_id)
+        utils.create_extmark(last_match, utils.namespace.Multi)
     end
-    utils.create_extmark(found, main_cursor)
+    utils.create_extmark(found, utils.namespace.Main)
     utils.move_cursor({ row_idx + 1, found.start }, nil)
 
     return found
@@ -128,7 +126,7 @@ M.find_cursor_word = function()
         finish = right[3] + cursor[2],
         pattern = left[1] .. right[1]:sub(2),
     }
-    utils.create_extmark(match, main_cursor)
+    utils.create_extmark(match, utils.namespace.Main)
     return match
 end
 
