@@ -15,13 +15,14 @@ M._au_group = api.nvim_create_augroup('multicursors', { clear = true })
 M._user_mappings = nil
 M._user_update_time = 4000
 
-M._on_insert_enter = function()
+---
+---@param config Config
+M._on_insert_enter = function(config)
     api.nvim_create_autocmd({ 'InsertEnter' }, {
         group = M._au_group,
         callback = function()
             M._user_update_time = vim.opt.updatetime
-            ---TODO make it configurable
-            vim.opt.updatetime = 50
+            vim.opt.updatetime = config.updatetime
             M._save_user_mappings()
             M._register_mappings()
         end,
@@ -67,8 +68,9 @@ M._on_insert_leave = function()
     })
 end
 
-local function set_insert_autocommands()
-    M._on_insert_enter()
+---@param config Config
+local function set_insert_autocommands(config)
+    M._on_insert_enter(config)
     M._on_cursor_hold()
     M._on_insert_char_pre()
     M._on_insert_leave()
@@ -159,16 +161,17 @@ M._insert_mode_mappings = {
 }
 
 --- listens for every char press and inserts the text before leaving insert mode
---TODO create a timer and update the cursors for better ux
 --TODO esc go to multicursor normal
-M.start = function()
+---@param config Config
+M.start = function(config)
     utils.update_selections(utils.position.before)
-    set_insert_autocommands()
+    set_insert_autocommands(config)
 end
 
-M.append = function()
+---@param config Config
+M.append = function(config)
     utils.update_selections(utils.position.after)
-    set_insert_autocommands()
+    set_insert_autocommands(config)
 end
 
 M.exit = function()

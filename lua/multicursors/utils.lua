@@ -1,5 +1,4 @@
 local api = vim.api
-local config = require 'multicursors.config'
 
 local ns_id = api.nvim_create_namespace 'multicursors'
 local main_ns_id = api.nvim_create_namespace 'multicursorsmaincursor'
@@ -63,7 +62,7 @@ end
 
 ---@param any any
 M.debug = function(any)
-    if config.DEBUG_MODE then
+    if vim.g.MultiCursorDebug then
         vim.notify(vim.inspect(any), vim.log.levels.DEBUG)
     end
 end

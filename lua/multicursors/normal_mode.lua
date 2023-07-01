@@ -216,10 +216,11 @@ M.find_prev = function(last_match, skip)
 end
 
 --- runs a macro on the beginning of every selection
-M.run_macro = function()
+---@param config Config
+M.run_macro = function(config)
     local register = utils.get_char()
     if not register or register == ESC then
-        M.listen()
+        M.listen(config)
         return
     end
 
@@ -231,7 +232,9 @@ M.run_macro = function()
     utils.exit()
 end
 
-M.start = function()
+--- Selects the word under cursor and starts listening for the actions
+---@param config Config
+M.start = function(config)
     local last_mark = M.find_cursor_word()
 
     --TODO when nil just add the cursor???
@@ -239,11 +242,12 @@ M.start = function()
         return
     end
     debug 'listening for mod selector'
-    M.listen(last_mark)
+    M.listen(config, last_mark)
 end
 
+---@param config Config
 ---@param last_mark? Match
-M.listen = function(last_mark)
+M.listen = function(config, last_mark)
     while true do
         local key = utils.get_char()
         if not key then
@@ -264,14 +268,14 @@ M.listen = function(last_mark)
             last_mark = M.find_prev(last_mark, true)
         elseif key == 'i' then
             vim.cmd.startinsert()
-            insert_mode.start()
+            insert_mode.start(config)
             return
         elseif key == 'a' then
             vim.cmd.startinsert()
-            insert_mode.append()
+            insert_mode.append(config)
             return
         elseif key == '@' then
-            M.run_macro()
+            M.run_macro(config)
             return
         elseif key == 'c' then
             --M.change()

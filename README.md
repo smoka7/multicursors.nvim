@@ -27,7 +27,11 @@ Install with your preferred package manager:
 ## Configuration
 
 ```lua
-{}
+{
+    DEBUG_MODE = false,
+    create_commands = true, -- create Multicursor user commands
+    updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
+}
 ```
 
 ## Usage
