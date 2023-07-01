@@ -63,15 +63,8 @@ end
 ---@param details boolean
 ---@return any[]  [extmark_id, row, col] tuples in "traversal order".
 M.get_all_selections = function(details)
-    local last = api.nvim_buf_line_count(0)
-    local line = api.nvim_buf_get_lines(0, last - 1, last, true)[1]
-    local extmarks = api.nvim_buf_get_extmarks(
-        0,
-        ns_id,
-        0,
-        { last, #line },
-        { details = details }
-    )
+    local extmarks =
+        api.nvim_buf_get_extmarks(0, ns_id, 0, -1, { details = details })
     return extmarks
 end
 
@@ -91,7 +84,7 @@ end
 ---@param callback function function to call
 ---@param on_main boolean execute the callback on main selesction
 ---@param with_details boolean get the selection details
-local call_on_selections = function(callback, on_main, with_details)
+M.call_on_selections = function(callback, on_main, with_details)
     local marks = M.get_all_selections(with_details)
     for _, selection in pairs(marks) do
         -- get each mark again cause inserting text might moved the other marks
@@ -102,12 +95,12 @@ local call_on_selections = function(callback, on_main, with_details)
             { details = true }
         )
 
-        callback(mark[3])
+        callback(mark)
     end
 
     if on_main then
         local main = M.get_main_selection(true)
-        callback(main[4])
+        callback { main[2], main[3], main[4] }
     end
 end
 
@@ -220,9 +213,9 @@ end
 ---
 ---@param text string
 M.insert_text = function(text)
-    call_on_selections(function(selection)
-        local col = selection.end_col
-        local row = selection.end_row
+    M.call_on_selections(function(selection)
+        local col = selection[3].end_col
+        local row = selection[3].end_row
         api.nvim_buf_set_text(0, row, col, row, col, { text })
     end, false, false)
 
@@ -230,13 +223,13 @@ M.insert_text = function(text)
 end
 
 M.delete_char = function()
-    call_on_selections(function(mark)
-        local col = mark.end_col - 1
+    M.call_on_selections(function(mark)
+        local col = mark[3].end_col - 1
         if col < 0 then
             return
         end
 
-        api.nvim_win_set_cursor(0, { mark.end_row + 1, col })
+        api.nvim_win_set_cursor(0, { mark[3].end_row + 1, col })
         vim.cmd [[normal x]]
     end, true, false)
 

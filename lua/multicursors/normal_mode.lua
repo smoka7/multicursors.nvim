@@ -217,6 +217,22 @@ M.find_prev = function(last_match, skip)
     end
 end
 
+--- runs a macro on the beginning of every selection
+M.run_macro = function()
+    local register = utils.get_char()
+    if not register or register == ESC then
+        M.listen()
+        return
+    end
+
+    utils.call_on_selections(function(mark)
+        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+        vim.cmd('normal @' .. register)
+    end, true, true)
+
+    utils.exit()
+end
+
 M.start = function()
     local last_mark = M.find_cursor_word()
 
@@ -256,10 +272,14 @@ M.listen = function(last_mark)
             vim.cmd.startinsert()
             insert_mode.append()
             return
+        elseif key == '@' then
+            M.run_macro()
+            return
         elseif key == 'c' then
             --M.change()
             return
         end
     end
 end
+
 return M
