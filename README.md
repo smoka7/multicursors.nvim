@@ -54,6 +54,8 @@ In multi cursor mode
 | `N` | Moves to the previous match before the main selection |
 | `q` | Skips the current match and moves to the next one |
 | `Q` | Skips the current match and moves to the previous one |
+| `p` | puts the text inside unnamed register before selections |
+| `P` | puts the text inside unnamed register after selections |
 | `@` | Executes a macro at beginning of every selection |
 
 In insert and append mode:
@@ -65,6 +67,7 @@ In insert and append mode:
 | `<Up>`    | Move the selections to Up |
 | `<Right>` | Move the selections to Right |
 | `<Down>`  | Move the selections to Down |
+| `<C-v>`  | Pastes the text from system clipboard |
 
 ## TODOS
 - [x] Get the word under the cursor
@@ -84,7 +87,7 @@ In insert and append mode:
 - [x] Enter change mode
 - [ ] Completion works, but doesn't clear duplicates
 - [x] Live update matches with every character
-- [x] Pasting (insert mode works)
+- [x] Pasting
 - [x] Macros
 - [ ] Yanking
 - [ ] Deleting

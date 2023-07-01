@@ -232,6 +232,21 @@ M.run_macro = function(config)
     utils.exit()
 end
 
+--- puts the text inside unnamed register before or after selections
+---@param pos ActionPosition
+M.paste = function(pos)
+    utils.call_on_selections(function(mark)
+        local position = { mark[1] + 1, mark[2] }
+        if pos == utils.position.after then
+            position = { mark[3].end_row + 1, mark[3].end_col }
+        end
+
+        api.nvim_win_set_cursor(0, position)
+        vim.cmd 'normal P'
+        vim.cmd 'redraw!'
+    end, true, true)
+end
+
 --- Deletes the text inside selections and starts insert mode
 ---@param config Config
 M.change = function(config)
@@ -282,6 +297,10 @@ M.listen = function(config, last_mark)
             last_mark = M.find_next(last_mark, true)
         elseif key == 'Q' then
             last_mark = M.find_prev(last_mark, true)
+        elseif key == 'p' then
+            last_mark = M.paste(utils.position.after)
+        elseif key == 'P' then
+            last_mark = M.paste(utils.position.before)
         elseif key == 'i' then
             insert_mode.start(config)
             return
