@@ -74,6 +74,7 @@ local function set_insert_autocommands(config)
     M._on_cursor_hold()
     M._on_insert_char_pre()
     M._on_insert_leave()
+    vim.cmd.startinsert()
 end
 
 M._save_user_mappings = function()

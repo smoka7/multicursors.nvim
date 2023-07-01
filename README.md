@@ -49,6 +49,7 @@ In multi cursor mode
 | `<Esc>` | Clear the selections and go back to normal mode |
 | `i` | Enters insert mode |
 | `a` | Enters append mode |
+| `c` | Deletes the text inside selections and starts insert mode |
 | `n` | Moves to the next match after the main selection |
 | `N` | Moves to the previous match before the main selection |
 | `q` | Skips the current match and moves to the next one |
@@ -80,7 +81,7 @@ In insert and append mode:
 - [ ] Handle overlapping selections (for now we merge them)
 - [x] Enter insert mode
 - [x] Enter append mode
-- [ ] Enter change mode
+- [x] Enter change mode
 - [ ] Completion works, but doesn't clear duplicates
 - [x] Live update matches with every character
 - [x] Pasting (insert mode works)

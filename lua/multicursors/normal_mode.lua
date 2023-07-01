@@ -232,6 +232,22 @@ M.run_macro = function(config)
     utils.exit()
 end
 
+--- Deletes the text inside selections and starts insert mode
+---@param config Config
+M.change = function(config)
+    utils.call_on_selections(function(mark)
+        api.nvim_buf_set_text(
+            0,
+            mark[1],
+            mark[2],
+            mark[3].end_row,
+            mark[3].end_col,
+            {}
+        )
+    end, true, true)
+    insert_mode.start(config)
+end
+
 --- Selects the word under cursor and starts listening for the actions
 ---@param config Config
 M.start = function(config)
@@ -267,18 +283,16 @@ M.listen = function(config, last_mark)
         elseif key == 'Q' then
             last_mark = M.find_prev(last_mark, true)
         elseif key == 'i' then
-            vim.cmd.startinsert()
             insert_mode.start(config)
             return
         elseif key == 'a' then
-            vim.cmd.startinsert()
             insert_mode.append(config)
             return
         elseif key == '@' then
             M.run_macro(config)
             return
         elseif key == 'c' then
-            --M.change()
+            M.change(config)
             return
         end
     end
