@@ -50,6 +50,27 @@ M.create_extmark = function(match, namespace)
     return s
 end
 
+--- Deletes the extmark in current buffer in range of match
+---@param match Match
+---@param namespace Namespace
+M.delete_extmark = function(match, namespace)
+    local ns = ns_id
+    if namespace == M.namespace.Main then
+        ns = main_ns_id
+    end
+
+    local marks = api.nvim_buf_get_extmarks(
+        0,
+        ns,
+        { match.row, match.start },
+        { match.row, match.finish },
+        {}
+    )
+    if #marks > 0 then
+        api.nvim_buf_del_extmark(0, ns, marks[1][1])
+    end
+end
+
 --- clears the namespace in current buffer
 ---@param namespace  Namespace
 M.clear_namespace = function(namespace)
@@ -277,7 +298,6 @@ M.move_cursor = function(pos, current)
 
     api.nvim_buf_set_mark(0, "'", current[1], current[2], {})
     api.nvim_win_set_cursor(0, { pos[1], pos[2] })
-    vim.cmd [[ redraw! ]]
 end
 
 M.exit = function()

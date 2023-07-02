@@ -16,12 +16,11 @@ local M = {}
 
 --- Returns the first match for pattern after a offset in a string
 ---@param string string
----@param last_match Match
 ---@param row_idx integer
 ---@param offset integer
 ---@param skip boolean
 ---@return Match?
-local find_next_match = function(string, last_match, row_idx, offset, skip)
+local find_next_match = function(string, row_idx, offset, skip)
     if not string or string == '' then
         return
     end
@@ -29,28 +28,34 @@ local find_next_match = function(string, last_match, row_idx, offset, skip)
     if offset ~= 0 then
         string = string:sub(offset + 1, -1)
     end
+    local pattern = vim.b.MultiCursorPattern
 
-    local match =
-        vim.fn.matchstrpos(string, '\\<' .. last_match.pattern .. '\\>')
+    local match = vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>')
     -- -1 range means not found
     if match[2] == -1 and match[3] == -1 then
         return
     end
 
     --- @class Match
-    local found = { pattern = last_match.pattern }
-
-    -- add offset to match position index
-    found.start = match[2] + offset
-    found.finish = match[3] + offset
-    found.row = row_idx
+    local found = {
+        -- add offset to match position index
+        start = match[2] + offset,
+        finish = match[3] + offset,
+        row = row_idx,
+    }
 
     -- jump the cursor to last match
+    local main = utils.get_main_selection(true)
     utils.clear_namespace(utils.namespace.Main)
     if not skip then
-        utils.create_extmark(last_match, utils.namespace.Multi)
+        --api.nvim_buf_del_extmark(0,utils.namespace.Main)
+        utils.create_extmark(
+            { row = main[2], start = main[3], finish = main[4].end_col },
+            utils.namespace.Multi
+        )
     end
     utils.create_extmark(found, utils.namespace.Main)
+    utils.delete_extmark(found, utils.namespace.Multi)
     utils.move_cursor({ row_idx + 1, found.start }, nil)
 
     return found
@@ -58,12 +63,11 @@ end
 
 --- Returns the last match before the cursor
 ---@param string string
----@param last_match Match
 ---@param row_idx integer
 ---@param till integer
 ---@param skip boolean
 ---@return Match?
-local find_prev_match = function(string, last_match, row_idx, till, skip)
+local find_prev_match = function(string, row_idx, till, skip)
     if not string or string == '' then
         return
     end
@@ -76,12 +80,12 @@ local find_prev_match = function(string, last_match, row_idx, till, skip)
     ---@type Match?
     local found = nil
     local offset = 0
+    local pattern = vim.b.MultiCursorPattern
     repeat
-        match = vim.fn.matchstrpos(sub, '\\<' .. last_match.pattern .. '\\>')
+        match = vim.fn.matchstrpos(sub, '\\<' .. pattern .. '\\>')
         -- -1 range means not found
         if match[2] ~= -1 and match[3] ~= -1 then
             found = {
-                pattern = last_match.pattern,
                 start = match[2] + offset, -- add offset to match position index
                 finish = match[3] + offset,
                 row = row_idx,
@@ -96,18 +100,22 @@ local find_prev_match = function(string, last_match, row_idx, till, skip)
     end
 
     -- jump the cursor to last match
+    local main = utils.get_main_selection(true)
     utils.clear_namespace(utils.namespace.Main)
     if not skip then
-        utils.create_extmark(last_match, utils.namespace.Multi)
+        utils.create_extmark(
+            { row = main[2], start = main[3], finish = main[4].end_col },
+            utils.namespace.Multi
+        )
     end
     utils.create_extmark(found, utils.namespace.Main)
+    utils.delete_extmark(found, utils.namespace.Multi)
     utils.move_cursor({ row_idx + 1, found.start }, nil)
 
     return found
 end
 --
 -- creates a mark for word under the cursor
----@return Match?
 M.find_cursor_word = function()
     local line = api.nvim_get_current_line()
     if not line then
@@ -128,24 +136,21 @@ M.find_cursor_word = function()
         pattern = left[1] .. right[1]:sub(2),
     }
     utils.create_extmark(match, utils.namespace.Main)
-    return match
+    vim.b.MultiCursorPattern = left[1] .. right[1]:sub(2)
 end
 
 ---finds next match and marks it
----@param last_match Match?
 ---@param skip boolean
 ---@return Match? next next Match
-M.find_next = function(last_match, skip)
-    if not last_match then
-        return
-    end
+M.find_next = function(skip)
     local line_count = api.nvim_buf_line_count(0)
-    local row_idx = last_match.row
-    local column = last_match.finish
+    local cursor = api.nvim_win_get_cursor(0)
+    local row_idx = cursor[1] - 1
+    local column = cursor[2] + #vim.b.MultiCursorPattern
 
     -- search the same line as cursor with cursor col as offset cursor
     local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = find_next_match(line, last_match, row_idx, column, skip)
+    local match = find_next_match(line, row_idx, column, skip)
     if match then
         return match
     end
@@ -153,7 +158,7 @@ M.find_next = function(last_match, skip)
     -- search from cursor to end of buffer for pattern
     for idx = row_idx + 1, line_count - 1, 1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_next_match(line, last_match, idx, 0, skip)
+        match = find_next_match(line, idx, 0, skip)
         if match then
             return match
         end
@@ -163,7 +168,7 @@ M.find_next = function(last_match, skip)
     -- from start of the buffer
     for idx = 0, row_idx, 1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_next_match(line, last_match, idx, 0, skip)
+        match = find_next_match(line, idx, 0, skip)
         if match then
             return match
         end
@@ -171,26 +176,17 @@ M.find_next = function(last_match, skip)
 end
 
 ---finds previous match and marks it
----@param last_match Match?
 ---@param skip boolean
 ---@return Match? prev previus match
-M.find_prev = function(last_match, skip)
-    if not last_match then
-        return
-    end
+M.find_prev = function(skip)
     local line_count = api.nvim_buf_line_count(0)
-    local row_idx = last_match.row
-    local column = last_match.finish
+    local cursor = api.nvim_win_get_cursor(0)
+    local row_idx = cursor[1] - 1
+    local column = cursor[2] - #vim.b.MultiCursorPattern
 
     -- search the same line untill the cursor
     local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = find_prev_match(
-        line,
-        last_match,
-        row_idx,
-        column - #last_match.pattern,
-        skip
-    )
+    local match = find_prev_match(line, row_idx, column, skip)
     if match then
         return match
     end
@@ -199,7 +195,7 @@ M.find_prev = function(last_match, skip)
     -- fo
     for idx = row_idx - 1, 0, -1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_prev_match(line, last_match, idx, -1, skip)
+        match = find_prev_match(line, idx, -1, skip)
         if match then
             return match
         end
@@ -209,7 +205,7 @@ M.find_prev = function(last_match, skip)
     -- from start of the buffer
     for idx = line_count - 1, row_idx, -1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_prev_match(line, last_match, idx, -1, skip)
+        match = find_prev_match(line, idx, -1, skip)
         if match then
             return match
         end
@@ -274,19 +270,13 @@ end
 --- Selects the word under cursor and starts listening for the actions
 ---@param config Config
 M.start = function(config)
-    local last_mark = M.find_cursor_word()
-
-    --TODO when nil just add the cursor???
-    if not last_mark then
-        return
-    end
+    M.find_cursor_word()
     debug 'listening for mod selector'
-    M.listen(config, last_mark)
+    M.listen(config)
 end
 
 ---@param config Config
----@param last_mark? Match
-M.listen = function(config, last_mark)
+M.listen = function(config)
     while true do
         local key = utils.get_char()
         if not key then
@@ -298,13 +288,12 @@ M.listen = function(config, last_mark)
             utils.exit()
             return
         elseif key == 'n' then
-            last_mark = M.find_next(last_mark, false)
+            M.find_next(false)
         elseif key == 'N' then
-            last_mark = M.find_prev(last_mark, false)
+            M.find_prev(false)
         elseif key == 'q' then
-            last_mark = M.find_next(last_mark, true)
+            M.find_next(true)
         elseif key == 'Q' then
-            last_mark = M.find_prev(last_mark, true)
         elseif key == 'p' then
             last_mark = M.paste(utils.position.after)
         elseif key == 'P' then
@@ -328,6 +317,7 @@ M.listen = function(config, last_mark)
         elseif key == 'c' then
             M.change(config)
             return
+            M.find_prev(true)
         end
     end
 end
