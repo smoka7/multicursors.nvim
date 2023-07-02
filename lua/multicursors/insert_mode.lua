@@ -164,15 +164,15 @@ M._insert_mode_mappings = {
 --- listens for every char press and inserts the text before leaving insert mode
 --TODO esc go to multicursor normal
 ---@param config Config
-M.start = function(config)
-    utils.update_selections(utils.position.before)
+M.insert = function(config)
     set_insert_autocommands(config)
+    utils.update_selections(utils.position.before)
 end
 
 ---@param config Config
 M.append = function(config)
-    utils.update_selections(utils.position.after)
     set_insert_autocommands(config)
+    utils.update_selections(utils.position.after)
 end
 
 M.exit = function()

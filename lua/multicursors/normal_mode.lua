@@ -264,7 +264,7 @@ M.change = function(config)
             {}
         )
     end, true, true)
-    insert_mode.start(config)
+    insert_mode.insert(config)
 end
 
 --- Selects the word under cursor and starts listening for the actions
@@ -294,10 +294,11 @@ M.listen = function(config)
         elseif key == 'q' then
             M.find_next(true)
         elseif key == 'Q' then
+            M.find_prev(true)
         elseif key == 'p' then
-            last_mark = M.paste(utils.position.after)
+            M.paste(utils.position.after)
         elseif key == 'P' then
-            last_mark = M.paste(utils.position.before)
+            M.paste(utils.position.before)
         elseif key == 'u' then
             vim.cmd.undo()
         elseif key == '.' then
@@ -306,7 +307,7 @@ M.listen = function(config)
         elseif key == C_R then
             vim.cmd.redo()
         elseif key == 'i' then
-            insert_mode.start(config)
+            insert_mode.insert(config)
             return
         elseif key == 'a' then
             insert_mode.append(config)
@@ -317,7 +318,6 @@ M.listen = function(config)
         elseif key == 'c' then
             M.change(config)
             return
-            M.find_prev(true)
         end
     end
 end
