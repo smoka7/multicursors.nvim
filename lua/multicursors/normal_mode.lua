@@ -229,6 +229,26 @@ M.run_macro = function(config)
     utils.exit()
 end
 
+--- executes a normal command at every selection 
+---@param config Config
+M.normal_command = function(config)
+    vim.ui.input(
+        { prompt = 'Enter normal command: ', completion = 'command' },
+        function(input)
+            if not input then
+                M.listen(config)
+                return
+            end
+            utils.call_on_selections(function(mark)
+                api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+                vim.cmd('normal ' .. input)
+            end, true, true)
+        end
+    )
+
+    utils.exit()
+end
+
 --- puts the text inside unnamed register before or after selections
 ---@param pos ActionPosition
 M.paste = function(pos)
@@ -314,6 +334,9 @@ M.listen = function(config)
             return
         elseif key == '@' then
             M.run_macro(config)
+            return
+        elseif key == ':' then
+            M.normal_command(config)
             return
         elseif key == 'c' then
             M.change(config)

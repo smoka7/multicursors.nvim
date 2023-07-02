@@ -47,6 +47,7 @@ In multi cursor mode
 | Key | Description |
 |---|---|
 | `<Esc>` | Clear the selections and go back to normal mode |
+| `<C-c>` | Clear the selections and go back to normal mode |
 | `i` | Enters insert mode |
 | `a` | Enters append mode |
 | `c` | Deletes the text inside selections and starts insert mode |
@@ -58,6 +59,7 @@ In multi cursor mode
 | `P` | puts the text inside unnamed register after selections |
 | `@` | Executes a macro at beginning of every selection |
 | `.` | Reapets last change at the beginning of every selection |
+| `:` | prompts for a normal command and Executes it at beginning of every selection |
 | `u` | Undo changes |
 | `<C-r>` | Redo changes |
 
