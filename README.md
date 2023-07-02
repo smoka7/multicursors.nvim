@@ -55,11 +55,13 @@ In multi cursor mode
 | `N` | Moves to the previous match before the main selection |
 | `q` | Skips the current match and moves to the next one |
 | `Q` | Skips the current match and moves to the previous one |
-| `p` | puts the text inside unnamed register before selections |
-| `P` | puts the text inside unnamed register after selections |
+| `p` | Puts the text inside `unnamed register` before selections |
+| `P` | Puts the text inside `unnamed register` after selections |
+| `y` | Yanks the text inside selection to `unnamed register` |
+| `d` | Delete the text inside selections |
 | `@` | Executes a macro at beginning of every selection |
 | `.` | Reapets last change at the beginning of every selection |
-| `:` | prompts for a normal command and Executes it at beginning of every selection |
+| `:` | Prompts for a normal command and Executes it at beginning of every selection |
 | `u` | Undo changes |
 | `<C-r>` | Redo changes |
 
@@ -94,8 +96,8 @@ In insert and append mode:
 - [x] Live update matches with every character
 - [x] Pasting
 - [x] Macros
-- [ ] Yanking
-- [ ] Deleting
+- [x] Yanking
+- [x] Deleting
 - [ ]  - Create a mod to show to the user
 - [ ]  - Create a selection in the next line
 - [ ]  - Create a selection in the previous line

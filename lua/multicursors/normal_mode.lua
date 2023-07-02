@@ -229,7 +229,7 @@ M.run_macro = function(config)
     utils.exit()
 end
 
---- executes a normal command at every selection 
+--- executes a normal command at every selection
 ---@param config Config
 M.normal_command = function(config)
     vim.ui.input(
@@ -287,6 +287,42 @@ M.change = function(config)
     insert_mode.insert(config)
 end
 
+--- Deletes the text inside selections
+---@param config Config
+M.delete = function(config)
+    utils.call_on_selections(function(mark)
+        api.nvim_buf_set_text(
+            0,
+            mark[1],
+            mark[2],
+            mark[3].end_row,
+            mark[3].end_col,
+            {}
+        )
+    end, true, true)
+    M.listen(config)
+end
+
+--- yanks the text inside selections to unnamed register
+---@param config Config
+M.yank = function(config)
+    ---@type string[]
+    local contents = {}
+    utils.call_on_selections(function(mark)
+        local text = api.nvim_buf_get_text(
+            0,
+            mark[1],
+            mark[2],
+            mark[3].end_row,
+            mark[3].end_col,
+            {}
+        )
+        contents[#contents + 1] = text[1]
+    end, true, true)
+    vim.fn.setreg('', contents)
+    M.listen(config)
+end
+
 --- Selects the word under cursor and starts listening for the actions
 ---@param config Config
 M.start = function(config)
@@ -319,6 +355,12 @@ M.listen = function(config)
             M.paste(utils.position.after)
         elseif key == 'P' then
             M.paste(utils.position.before)
+        elseif key == 'y' then
+            M.yank(config)
+            return
+        elseif key == 'd' then
+            M.delete(config)
+            return
         elseif key == 'u' then
             vim.cmd.undo()
         elseif key == '.' then
