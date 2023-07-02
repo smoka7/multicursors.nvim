@@ -9,6 +9,7 @@ local insert_mode = require 'multicursors.insert_mode'
 local debug = utils.debug
 
 local ESC = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
+local C_R = vim.api.nvim_replace_termcodes('<C-r>', true, false, true)
 
 ---@class NormalMode
 local M = {}
@@ -247,6 +248,13 @@ M.paste = function(pos)
     end, true, true)
 end
 
+M.dot_repeat = function()
+    utils.call_on_selections(function(mark)
+        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+        vim.cmd 'normal .'
+    end, true, true)
+end
+
 --- Deletes the text inside selections and starts insert mode
 ---@param config Config
 M.change = function(config)
@@ -301,6 +309,13 @@ M.listen = function(config, last_mark)
             last_mark = M.paste(utils.position.after)
         elseif key == 'P' then
             last_mark = M.paste(utils.position.before)
+        elseif key == 'u' then
+            vim.cmd.undo()
+        elseif key == '.' then
+            M.dot_repeat()
+            return
+        elseif key == C_R then
+            vim.cmd.redo()
         elseif key == 'i' then
             insert_mode.start(config)
             return

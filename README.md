@@ -57,6 +57,9 @@ In multi cursor mode
 | `p` | puts the text inside unnamed register before selections |
 | `P` | puts the text inside unnamed register after selections |
 | `@` | Executes a macro at beginning of every selection |
+| `.` | Reapets last change at the beginning of every selection |
+| `u` | Undo changes |
+| `<C-r>` | Redo changes |
 
 In insert and append mode:
 | Key | Description |
