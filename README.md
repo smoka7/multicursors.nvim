@@ -11,7 +11,7 @@ Install with your preferred package manager:
 
 ```lua
 {
-    "smoka7/multicursor.nvim",
+    "smoka7/multicursors.nvim",
     event = "VeryLazy",
     opts = {},
     keys = {
@@ -84,39 +84,13 @@ In insert and append mode:
 | `<C-v>`  | Pastes the text from system clipboard |
 
 ## TODOS
-- [x] Get the word under the cursor
-- [x] Go to the next match
-- [x] Move the main selection to the next match
-- [x] Wrap around the buffer when searching for a match
-- [x] Skip forward to the next match
-- [x] Go to the previous match and skip it
-- [x] Move the selections 
-- [x] Select all matches of a pattern within the visual selection
 - [ ] Move the selection by "ts" nodes (unclear)
 - [ ] Move the selection by Vim motions (unclear)
 - [ ] Support count + actions
 - [ ] Handle overlapping selections (for now we merge them)
-- [x] Enter insert mode
-- [x] Enter append mode
-- [x] Enter change mode
 - [ ] Completion works, but doesn't clear duplicates
-- [x] Live update matches with every character
-- [x] Pasting
-- [x] Macros
-- [x] Yanking
-- [x] Deleting
 - [ ]  - Create a mod to show to the user
-- [x]  - Create a selection in the next line
-- [x]  - Create a selection in the previous line
 - [ ]  - Clear other selections and only keep the main one
-- [x]  - Clear all matches
-- [x] `i` - Enter insert mode
-- [x] `a` - Enter append mode
-- [x] `n` - Go to the next match after the main selection
-- [x] `N` - Go to the previous match before the main selection
-- [x] `q` - Skip the current match and go to the next one
-- [x] `Q` - Skip the current match and go to the previous one
-- [x] `@` - Run a macro on every selection
 - [ ] `[` - Go to the next selection
 - [ ] `]` - Go to the previous selection
 - [ ] `z` - Align matches by inserting spaces before the first character of each selection
