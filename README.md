@@ -39,6 +39,9 @@ Install with your preferred package manager:
 | Command | Description |
 |---|---|
 | MCstart | Selects the word under cursor and starts listening for the actions. |
+| MCpattern | Prompts for a pattern and selects every match in the buffer. |
+| MCvisualPattern | Prompts for a pattern and selects every match in the visual selection. |
+| MCunderCursor | Selects the char under cursor and starts listening for the actions. |
 | MCclear | Clears all the selection. |
 
 To enter multi cursor mode, use the `MCstart` command. Note that keys that aren't mapped will have no effect in this mode.
@@ -51,10 +54,14 @@ In multi cursor mode
 | `i` | Enters insert mode |
 | `a` | Enters append mode |
 | `c` | Deletes the text inside selections and starts insert mode |
-| `n` | Moves to the next match after the main selection |
-| `N` | Moves to the previous match before the main selection |
-| `q` | Skips the current match and moves to the next one |
-| `Q` | Skips the current match and moves to the previous one |
+| `n` | Finds the next match after the main selection |
+| `N` | Finds the previous match before the main selection |
+| `q` | Skips the current selection and finds the next one |
+| `Q` | Skips the current selection and finds the previous one |
+| `j` | Creates a selection on the char below the cursor |
+| `J` | Skips the current selection and Creates a selection on the char below |
+| `k` | Creates a selection on the char above the cursor |
+| `K` | Skips the current selection and Creates a selection on the char above |
 | `p` | Puts the text inside `unnamed register` before selections |
 | `P` | Puts the text inside `unnamed register` after selections |
 | `y` | Yanks the text inside selection to `unnamed register` |
@@ -84,7 +91,7 @@ In insert and append mode:
 - [x] Skip forward to the next match
 - [x] Go to the previous match and skip it
 - [x] Move the selections 
-- [ ] Select all matches of a pattern within the visual selection
+- [x] Select all matches of a pattern within the visual selection
 - [ ] Move the selection by "ts" nodes (unclear)
 - [ ] Move the selection by Vim motions (unclear)
 - [ ] Support count + actions
@@ -99,8 +106,8 @@ In insert and append mode:
 - [x] Yanking
 - [x] Deleting
 - [ ]  - Create a mod to show to the user
-- [ ]  - Create a selection in the next line
-- [ ]  - Create a selection in the previous line
+- [x]  - Create a selection in the next line
+- [x]  - Create a selection in the previous line
 - [ ]  - Clear other selections and only keep the main one
 - [x]  - Clear all matches
 - [x] `i` - Enter insert mode
@@ -119,6 +126,7 @@ In insert and append mode:
 - [ ] Should selection movements wrap horizontally?
 - [ ] Should `<bs>` wrap?
 - [ ] Should folded lines get ignored when searching?
+- [ ] show help window for mapping and registers ?
 
 ## Acknowledgment
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)

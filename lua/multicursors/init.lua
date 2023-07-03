@@ -1,6 +1,13 @@
+---@type Highlight
 local highlight = require 'multicursors.highlight'
+
+---@type Config
 local default_config = require 'multicursors.config'
+
+---@type Utils
 local utils = require 'multicursors.utils'
+
+---@type NormalMode
 local normal_mode = require 'multicursors.normal_mode'
 
 local M = {}
@@ -9,6 +16,10 @@ local M = {}
 local function create_commands(config)
     vim.api.nvim_create_user_command('MCstart', function()
         normal_mode.start(config)
+    end, {})
+
+    vim.api.nvim_create_user_command('MCunderCursor', function()
+        normal_mode.new_selection(config)
     end, {})
 
     vim.api.nvim_create_user_command('MCclear', function()

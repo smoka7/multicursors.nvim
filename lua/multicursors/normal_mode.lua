@@ -1,13 +1,13 @@
 local api = vim.api
 
----@class Utils
+---@type Utils
 local utils = require 'multicursors.utils'
+
+---@type Search
 local search = require 'multicursors.search'
 
 ---@class InsertMode
 local insert_mode = require 'multicursors.insert_mode'
-
-local debug = utils.debug
 
 local ESC = api.nvim_replace_termcodes('<Esc>', true, false, true)
 local C_R = api.nvim_replace_termcodes('<C-r>', true, false, true)
@@ -17,7 +17,7 @@ local BS = api.nvim_replace_termcodes('<bs>', true, false, true)
 ---@class NormalMode
 local M = {}
 
--- selects the word under the cursor as main selection
+--- Selects the word under the cursor as main selection
 M.find_cursor_word = function()
     local match = search.find_cursor_word()
     if not match then
@@ -27,10 +27,13 @@ M.find_cursor_word = function()
     utils.create_extmark(match, utils.namespace.Main)
 end
 
----finds next match and marks it
+--- Finds next match and marks it
 ---@param skip boolean
 ---@return Match? next next Match
 M.find_next = function(skip)
+    if vim.b.MultiCursorPattern == '' then
+        return
+    end
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
     local row_idx = cursor[1] - 1
@@ -67,6 +70,9 @@ end
 ---@param skip boolean
 ---@return Match? prev previus match
 M.find_prev = function(skip)
+    if vim.b.MultiCursorPattern == '' then
+        return
+    end
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
     local row_idx = cursor[1] - 1
@@ -100,7 +106,7 @@ M.find_prev = function(skip)
     end
 end
 
---- runs a macro on the beginning of every selection
+--- Runs a macro on the beginning of every selection
 ---@param config Config
 M.run_macro = function(config)
     api.nvim_echo({}, false, {})
@@ -119,7 +125,7 @@ M.run_macro = function(config)
     utils.exit()
 end
 
---- executes a normal command at every selection
+--- Executes a normal command at every selection
 ---@param config Config
 M.normal_command = function(config)
     vim.ui.input(
@@ -139,7 +145,7 @@ M.normal_command = function(config)
     utils.exit()
 end
 
---- puts the text inside unnamed register before or after selections
+--- Puts the text inside unnamed register before or after selections
 ---@param pos ActionPosition
 M.paste = function(pos)
     utils.call_on_selections(function(mark)
@@ -154,6 +160,7 @@ M.paste = function(pos)
     end, true, true)
 end
 
+--- Repeats last edit on every selection
 M.dot_repeat = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
@@ -193,7 +200,7 @@ M.delete = function(config)
     M.listen(config)
 end
 
---- yanks the text inside selections to unnamed register
+--- Yanks the text inside selections to unnamed register
 ---@param config Config
 M.yank = function(config)
     ---@type string[]
@@ -213,13 +220,15 @@ M.yank = function(config)
     M.listen(config)
 end
 
+--- Searches for a pattern across buffer and creates
+--- a selection for every match
 ---@param config Config
 ---@param whole_buffer boolean
 M.pattern = function(config, whole_buffer)
     local range = utils.get_visual_range()
     local content = utils.get_buffer_content(whole_buffer, range)
 
-    if #content == 0 then
+    if not content or #content == 0 then
         vim.notify('buffer or visual selection is empty', vim.log.levels.WARN)
         return
     end
@@ -266,14 +275,52 @@ M.pattern = function(config, whole_buffer)
     M.listen(config)
 end
 
---- Selects the word under cursor and starts listening for the actions
+--- Selects the word under the cursor and starts listening for the actions
 ---@param config Config
 M.start = function(config)
     M.find_cursor_word()
-    debug 'listening for mod selector'
     M.listen(config)
 end
 
+--- Selects the char under the cursor and starts listening for the actions
+---@param config Config
+M.new_selection = function(config)
+    M.new_under_cursor()
+    M.listen(config)
+end
+
+--- Selects the char under the cursor as main selection
+M.new_under_cursor = function()
+    local cursor = api.nvim_win_get_cursor(0)
+
+    ---@type Match
+    local match = {
+        row = cursor[1] - 1,
+        start = cursor[2],
+        finish = cursor[2] + 1,
+    }
+
+    if match.start == 0 then
+        match.finish = 0
+    end
+
+    vim.b.MultiCursorPattern = ''
+    utils.create_extmark(match, utils.namespace.Main)
+end
+
+--- Creates a selection on the line top of the cursor
+---@param skip boolean
+M.create_up = function(skip)
+    search.create_up(skip)
+end
+
+--- Creates a selection on the line below the cursor
+---@param skip boolean
+M.create_down = function(skip)
+    search.create_down(skip)
+end
+
+--- Listens for user actions
 ---@param config Config
 M.listen = function(config)
     api.nvim_echo({}, false, {})
@@ -288,6 +335,14 @@ M.listen = function(config)
         if key == ESC then
             utils.exit()
             return
+        elseif key == 'j' then
+            M.create_down(false)
+        elseif key == 'k' then
+            M.create_up(false)
+        elseif key == 'J' then
+            M.create_down(true)
+        elseif key == 'K' then
+            M.create_up(true)
         elseif key == 'n' then
             M.find_next(false)
         elseif key == 'N' then

@@ -1,3 +1,4 @@
+---@class Highlight
 local M = {}
 
 function M.set_highlights()

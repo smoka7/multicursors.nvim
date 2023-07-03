@@ -1,8 +1,11 @@
 local utils = require 'multicursors.utils'
 local api = vim.api
+
+---@class Search
 local S = {}
 
----
+--- Creates a extmark for current match and
+--- updates the main selection
 ---@param match Match match to mark
 ---@param skip boolean wheter or not skip current match
 local mark_found_match = function(match, skip)
@@ -25,7 +28,7 @@ local mark_found_match = function(match, skip)
     utils.move_cursor({ match.row + 1, match.start }, nil)
 end
 
---- finds the word under the cursor
+--- Finds the word under the cursor
 ---@return Match?
 S.find_cursor_word = function()
     local line = api.nvim_get_current_line()
@@ -49,7 +52,7 @@ S.find_cursor_word = function()
     }
 end
 
---- finds and marks all matches of a pattern in content
+--- Finds and marks all matches of a pattern in content
 ---@param content string[]
 ---@param pattern string
 ---@param start_row integer row offset in case of searching in a visual range
@@ -167,6 +170,54 @@ S.find_prev_match = function(string, row_idx, till, skip)
 
     mark_found_match(found, skip)
     return found
+end
+
+--- Creates a selection on the char below the cursor
+---@param skip boolean skips the current selection
+S.create_down = function(skip)
+    local cursor = api.nvim_win_get_cursor(0)
+    local row = cursor[1]
+    local col = cursor[2]
+    local buf_count = api.nvim_buf_line_count(0)
+    if row >= buf_count then
+        return
+    end
+
+    local row_text = api.nvim_buf_get_lines(0, row, row + 1, true)[1]
+    if col > #row_text then
+        col = #row_text - 1
+    end
+
+    local finish = col + 1
+    if #row_text == 0 then
+        col = 0
+        finish = 0
+    end
+
+    mark_found_match({ row = row, start = col, finish = finish }, skip)
+end
+
+--- Creates a selection on the char above the cursor
+---@param skip boolean skips the current selection
+S.create_up = function(skip)
+    local cursor = api.nvim_win_get_cursor(0)
+    local row = cursor[1] - 2
+    local col = cursor[2]
+    if row < 0 then
+        return
+    end
+
+    local row_text = api.nvim_buf_get_lines(0, row, row + 1, true)[1]
+    if col > #row_text then
+        col = #row_text - 1
+    end
+
+    local finish = col + 1
+    if #row_text == 0 then
+        col = 0
+        finish = 0
+    end
+    mark_found_match({ row = row, start = col, finish = finish }, skip)
 end
 
 return S
