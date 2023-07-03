@@ -2,141 +2,29 @@ local api = vim.api
 
 ---@class Utils
 local utils = require 'multicursors.utils'
+local search = require 'multicursors.search'
 
 ---@class InsertMode
 local insert_mode = require 'multicursors.insert_mode'
 
 local debug = utils.debug
 
-local ESC = vim.api.nvim_replace_termcodes('<Esc>', true, false, true)
-local C_R = vim.api.nvim_replace_termcodes('<C-r>', true, false, true)
+local ESC = api.nvim_replace_termcodes('<Esc>', true, false, true)
+local C_R = api.nvim_replace_termcodes('<C-r>', true, false, true)
+local CR = api.nvim_replace_termcodes('<cr>', true, false, true)
+local BS = api.nvim_replace_termcodes('<bs>', true, false, true)
 
 ---@class NormalMode
 local M = {}
 
---- Returns the first match for pattern after a offset in a string
----@param string string
----@param row_idx integer
----@param offset integer
----@param skip boolean
----@return Match?
-local find_next_match = function(string, row_idx, offset, skip)
-    if not string or string == '' then
-        return
-    end
-
-    if offset ~= 0 then
-        string = string:sub(offset + 1, -1)
-    end
-    local pattern = vim.b.MultiCursorPattern
-
-    local match = vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>')
-    -- -1 range means not found
-    if match[2] == -1 and match[3] == -1 then
-        return
-    end
-
-    --- @class Match
-    local found = {
-        -- add offset to match position index
-        start = match[2] + offset,
-        finish = match[3] + offset,
-        row = row_idx,
-    }
-
-    -- jump the cursor to last match
-    local main = utils.get_main_selection(true)
-    utils.clear_namespace(utils.namespace.Main)
-    if not skip then
-        --api.nvim_buf_del_extmark(0,utils.namespace.Main)
-        utils.create_extmark(
-            { row = main[2], start = main[3], finish = main[4].end_col },
-            utils.namespace.Multi
-        )
-    end
-    utils.create_extmark(found, utils.namespace.Main)
-    utils.delete_extmark(found, utils.namespace.Multi)
-    utils.move_cursor({ row_idx + 1, found.start }, nil)
-
-    return found
-end
-
---- Returns the last match before the cursor
----@param string string
----@param row_idx integer
----@param till integer
----@param skip boolean
----@return Match?
-local find_prev_match = function(string, row_idx, till, skip)
-    if not string or string == '' then
-        return
-    end
-    local sub = string
-    if till ~= -1 then
-        sub = string:sub(0, till)
-    end
-    ---@type any[]?
-    local match = nil
-    ---@type Match?
-    local found = nil
-    local offset = 0
-    local pattern = vim.b.MultiCursorPattern
-    repeat
-        match = vim.fn.matchstrpos(sub, '\\<' .. pattern .. '\\>')
-        -- -1 range means not found
-        if match[2] ~= -1 and match[3] ~= -1 then
-            found = {
-                start = match[2] + offset, -- add offset to match position index
-                finish = match[3] + offset,
-                row = row_idx,
-            }
-            offset = offset + match[3]
-            sub = string:sub(offset + 1, till)
-        end
-    until match and match[2] == -1 and match[3] == -1
-
-    if not found then
-        return
-    end
-
-    -- jump the cursor to last match
-    local main = utils.get_main_selection(true)
-    utils.clear_namespace(utils.namespace.Main)
-    if not skip then
-        utils.create_extmark(
-            { row = main[2], start = main[3], finish = main[4].end_col },
-            utils.namespace.Multi
-        )
-    end
-    utils.create_extmark(found, utils.namespace.Main)
-    utils.delete_extmark(found, utils.namespace.Multi)
-    utils.move_cursor({ row_idx + 1, found.start }, nil)
-
-    return found
-end
---
--- creates a mark for word under the cursor
+-- selects the word under the cursor as main selection
 M.find_cursor_word = function()
-    local line = api.nvim_get_current_line()
-    if not line then
+    local match = search.find_cursor_word()
+    if not match then
         return
     end
 
-    local cursor = api.nvim_win_get_cursor(0)
-    local left = vim.fn.matchstrpos(line:sub(1, cursor[2] + 1), [[\k*$]])
-    local right = vim.fn.matchstrpos(line:sub(cursor[2] + 1), [[^\k*]])
-
-    if left == -1 and right == -1 then
-        return
-    end
-    local match = {
-        row = cursor[1] - 1,
-        start = left[2],
-        finish = right[3] + cursor[2],
-        pattern = left[1] .. right[1]:sub(2),
-    }
     utils.create_extmark(match, utils.namespace.Main)
-    vim.b.MultiCursorPattern = left[1] .. right[1]:sub(2)
 end
 
 ---finds next match and marks it
@@ -150,7 +38,7 @@ M.find_next = function(skip)
 
     -- search the same line as cursor with cursor col as offset cursor
     local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = find_next_match(line, row_idx, column, skip)
+    local match = search.find_next_match(line, row_idx, column, skip)
     if match then
         return match
     end
@@ -158,7 +46,7 @@ M.find_next = function(skip)
     -- search from cursor to end of buffer for pattern
     for idx = row_idx + 1, line_count - 1, 1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_next_match(line, idx, 0, skip)
+        match = search.find_next_match(line, idx, 0, skip)
         if match then
             return match
         end
@@ -168,7 +56,7 @@ M.find_next = function(skip)
     -- from start of the buffer
     for idx = 0, row_idx, 1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_next_match(line, idx, 0, skip)
+        match = search.find_next_match(line, idx, 0, skip)
         if match then
             return match
         end
@@ -186,7 +74,7 @@ M.find_prev = function(skip)
 
     -- search the same line untill the cursor
     local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = find_prev_match(line, row_idx, column, skip)
+    local match = search.find_prev_match(line, row_idx, column, skip)
     if match then
         return match
     end
@@ -195,7 +83,7 @@ M.find_prev = function(skip)
     -- fo
     for idx = row_idx - 1, 0, -1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_prev_match(line, idx, -1, skip)
+        match = search.find_prev_match(line, idx, -1, skip)
         if match then
             return match
         end
@@ -205,7 +93,7 @@ M.find_prev = function(skip)
     -- from start of the buffer
     for idx = line_count - 1, row_idx, -1 do
         line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = find_prev_match(line, idx, -1, skip)
+        match = search.find_prev_match(line, idx, -1, skip)
         if match then
             return match
         end
@@ -215,6 +103,8 @@ end
 --- runs a macro on the beginning of every selection
 ---@param config Config
 M.run_macro = function(config)
+    api.nvim_echo({}, false, {})
+    api.nvim_echo({ { 'enter a macro register: ' } }, false, {})
     local register = utils.get_char()
     if not register or register == ESC then
         M.listen(config)
@@ -323,6 +213,59 @@ M.yank = function(config)
     M.listen(config)
 end
 
+---@param config Config
+---@param whole_buffer boolean
+M.pattern = function(config, whole_buffer)
+    local range = utils.get_visual_range()
+    local content = utils.get_buffer_content(whole_buffer, range)
+
+    if #content == 0 then
+        vim.notify('buffer or visual selection is empty', vim.log.levels.WARN)
+        return
+    end
+
+    api.nvim_echo({}, false, {})
+    api.nvim_echo({ { 'enter a pattern : ' } }, false, {})
+
+    local pattern = ''
+    while true do
+        local key = utils.get_char()
+        if not key then
+            utils.exit()
+            return
+        end
+
+        if key == ESC or key == CR then
+            break
+        end
+
+        if key == BS and #pattern then
+            pattern = pattern:sub(0, #pattern - 1)
+        else
+            pattern = pattern .. key
+        end
+        --clear the old selection every key press
+        vim.b.MultiCursorPattern = pattern
+        utils.clear_namespace 'MultiCursor'
+        utils.clear_namespace 'MultiCursorMain'
+
+        if pattern ~= '' then
+            if range and not whole_buffer then
+                search.find_all_matches(
+                    content,
+                    pattern,
+                    range.start_row,
+                    range.start_col
+                )
+            else
+                search.find_all_matches(content, pattern, 0, 0)
+            end
+        end
+    end
+
+    M.listen(config)
+end
+
 --- Selects the word under cursor and starts listening for the actions
 ---@param config Config
 M.start = function(config)
@@ -333,6 +276,8 @@ end
 
 ---@param config Config
 M.listen = function(config)
+    api.nvim_echo({}, false, {})
+    api.nvim_echo({ { 'press a key for action : ' } }, false, {})
     while true do
         local key = utils.get_char()
         if not key then

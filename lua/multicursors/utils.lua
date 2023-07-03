@@ -88,6 +88,55 @@ M.debug = function(any)
     end
 end
 
+--- returns selected range in visual mode
+---@return Range?
+M.get_visual_range = function()
+    local start_pos = api.nvim_buf_get_mark(0, '<')
+    local end_pos = api.nvim_buf_get_mark(0, '>')
+
+    if start_pos[1] == end_pos[1] and start_pos[2] == end_pos[2] then
+        return nil
+    end
+
+    -- when in visual line mode nvim returns v:maxcol instead of line length
+    -- so we have to find line length ourselves
+    local row = api.nvim_buf_get_lines(0, end_pos[1] - 1, end_pos[1], true)[1]
+    return {
+        start_row = start_pos[1] - 1,
+        start_col = start_pos[2],
+        end_row = end_pos[1] - 1,
+        end_col = #row,
+    }
+end
+
+--- returns text inside selected range
+---@param whole_buffer boolean
+---@param range Range?
+---@return string[]?
+M.get_buffer_content = function(whole_buffer, range)
+    if whole_buffer then
+        return api.nvim_buf_get_lines(
+            0,
+            0,
+            api.nvim_buf_line_count(0) - 1,
+            true
+        )
+    end
+
+    if not range then
+        return {}
+    end
+
+    return api.nvim_buf_get_text(
+        0,
+        range.start_row,
+        range.start_col,
+        range.end_row,
+        range.end_col,
+        {}
+    )
+end
+
 ---@param details boolean
 ---@return any
 M.get_main_selection = function(details)

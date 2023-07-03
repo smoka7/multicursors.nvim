@@ -14,6 +14,14 @@ local function create_commands(config)
     vim.api.nvim_create_user_command('MCclear', function()
         utils.exit()
     end, {})
+
+    vim.api.nvim_create_user_command('MCpattern', function()
+        normal_mode.pattern(config, true)
+    end, {})
+
+    vim.api.nvim_create_user_command('MCvisualPattern', function()
+        normal_mode.pattern(config, false)
+    end, { range = 0 })
 end
 
 ---@param opts Config
