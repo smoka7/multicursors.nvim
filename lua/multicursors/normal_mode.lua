@@ -10,7 +10,6 @@ local search = require 'multicursors.search'
 local insert_mode = require 'multicursors.insert_mode'
 
 local ESC = api.nvim_replace_termcodes('<Esc>', true, false, true)
-local C_R = api.nvim_replace_termcodes('<C-r>', true, false, true)
 local CR = api.nvim_replace_termcodes('<cr>', true, false, true)
 local BS = api.nvim_replace_termcodes('<bs>', true, false, true)
 
@@ -30,14 +29,14 @@ end
 --- Finds next match and marks it
 ---@param skip boolean
 ---@return Match? next next Match
-M.find_next = function(skip)
+local find_next = function(skip)
     if vim.b.MultiCursorPattern == '' then
         return
     end
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
     local row_idx = cursor[1] - 1
-    local column = cursor[2] + #vim.b.MultiCursorPattern
+    local column = cursor[2] + 1
 
     -- search the same line as cursor with cursor col as offset cursor
     local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
@@ -66,6 +65,14 @@ M.find_next = function(skip)
     end
 end
 
+M.find_next = function()
+    find_next(false)
+end
+
+M.skip_find_next = function()
+    find_next(true)
+end
+
 --- Moves the main selection to next selction
 M.goto_next = function()
     utils.goto_next_selection()
@@ -79,14 +86,14 @@ end
 ---finds previous match and marks it
 ---@param skip boolean
 ---@return Match? prev previus match
-M.find_prev = function(skip)
+local find_prev = function(skip)
     if vim.b.MultiCursorPattern == '' then
         return
     end
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
     local row_idx = cursor[1] - 1
-    local column = cursor[2] - #vim.b.MultiCursorPattern
+    local column = cursor[2] - 1
 
     -- search the same line untill the cursor
     local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
@@ -116,14 +123,20 @@ M.find_prev = function(skip)
     end
 end
 
+M.find_prev = function()
+    find_prev(false)
+end
+
+M.skip_find_prev = function()
+    find_prev(true)
+end
+
 --- Runs a macro on the beginning of every selection
----@param config Config
-M.run_macro = function(config)
+M.run_macro = function()
     api.nvim_echo({}, false, {})
     api.nvim_echo({ { 'enter a macro register: ' } }, false, {})
     local register = utils.get_char()
     if not register or register == ESC then
-        M.listen(config)
         return
     end
 
@@ -131,18 +144,14 @@ M.run_macro = function(config)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd('normal @' .. register)
     end, true, true)
-
-    utils.exit()
 end
 
 --- Executes a normal command at every selection
----@param config Config
-M.normal_command = function(config)
+M.normal_command = function()
     vim.ui.input(
         { prompt = 'Enter normal command: ', completion = 'command' },
         function(input)
             if not input then
-                M.listen(config)
                 return
             end
             utils.call_on_selections(function(mark)
@@ -151,13 +160,11 @@ M.normal_command = function(config)
             end, true, true)
         end
     )
-
-    utils.exit()
 end
 
 --- Puts the text inside unnamed register before or after selections
 ---@param pos ActionPosition
-M.paste = function(pos)
+local paste = function(pos)
     utils.call_on_selections(function(mark)
         local position = { mark[1] + 1, mark[2] }
         if pos == utils.position.after then
@@ -170,36 +177,47 @@ M.paste = function(pos)
     end, true, true)
 end
 
+M.paste_after = function()
+    paste(utils.position.after)
+end
+
+M.paste_before = function()
+    paste(utils.position.before)
+end
+
 --- Repeats last edit on every selection
----@param config Config
-M.dot_repeat = function(config)
+M.dot_repeat = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd 'normal .'
     end, true, true)
     vim.cmd 'redraw!'
-    M.listen(config)
 end
 
 --- Clears the selections Except the main one
----@param config Config
-M.clear_others = function(config)
+M.clear_others = function()
     utils.clear_namespace(utils.namespace.Multi)
     vim.cmd 'redraw!'
-    M.listen(config)
 end
 
 --- Aligns the selections by adding space
----@param config Config
 ---@param line_start boolean
-M.align_selections = function(config, line_start)
+M.align_selections = function(line_start)
     utils.align_text(line_start)
-    M.listen(config)
+end
+
+--- Aligns the selections by adding space before selection
+M.align_selections_before = function()
+    utils.align_text(false)
+end
+
+--- Aligns the selections by adding space at start of line
+M.align_selections_start = function()
+    utils.align_text(true)
 end
 
 --- Deletes the text inside selections and starts insert mode
----@param config Config
-M.change = function(config)
+M.change = function()
     utils.call_on_selections(function(mark)
         api.nvim_buf_set_text(
             0,
@@ -210,12 +228,11 @@ M.change = function(config)
             {}
         )
     end, true, true)
-    insert_mode.insert(config)
+    insert_mode.insert()
 end
 
 --- Deletes the text inside selections
----@param config Config
-M.delete = function(config)
+M.delete = function()
     utils.call_on_selections(function(mark)
         api.nvim_buf_set_text(
             0,
@@ -227,12 +244,10 @@ M.delete = function(config)
         )
     end, true, true)
     vim.cmd 'redraw!'
-    M.listen(config)
 end
 
 --- Yanks the text inside selections to unnamed register
----@param config Config
-M.yank = function(config)
+M.yank = function()
     ---@type string[]
     local contents = {}
     utils.call_on_selections(function(mark)
@@ -247,14 +262,12 @@ M.yank = function(config)
         contents[#contents + 1] = text[1]
     end, true, true)
     vim.fn.setreg('', contents)
-    M.listen(config)
 end
 
 --- Searches for a pattern across buffer and creates
 --- a selection for every match
----@param config Config
 ---@param whole_buffer boolean
-M.pattern = function(config, whole_buffer)
+M.pattern = function(whole_buffer)
     local range = utils.get_visual_range()
     local content = utils.get_buffer_content(whole_buffer, range)
 
@@ -301,23 +314,14 @@ M.pattern = function(config, whole_buffer)
             end
         end
     end
-
-    M.listen(config)
 end
 
 --- Selects the word under the cursor and starts listening for the actions
----@param config Config
-M.start = function(config)
+M.start = function()
     M.find_cursor_word()
-    M.listen(config)
 end
 
 --- Selects the char under the cursor and starts listening for the actions
----@param config Config
-M.new_selection = function(config)
-    M.new_under_cursor()
-    M.listen(config)
-end
 
 --- Selects the char under the cursor as main selection
 M.new_under_cursor = function()
@@ -341,95 +345,20 @@ M.new_under_cursor = function()
 end
 
 --- Creates a selection on the line top of the cursor
----@param skip boolean
-M.create_up = function(skip)
-    search.create_up(skip)
+M.create_up = function()
+    search.create_up(false)
+end
+
+M.skip_create_up = function()
+    search.create_up(true)
 end
 
 --- Creates a selection on the line below the cursor
----@param skip boolean
-M.create_down = function(skip)
-    search.create_down(skip)
+M.create_down = function()
+    search.create_down(false)
 end
 
---- Listens for user actions
----@param config Config
-M.listen = function(config)
-    api.nvim_echo({}, false, {})
-    api.nvim_echo({ { 'press a key for action : ' } }, false, {})
-    while true do
-        local key = utils.get_char()
-        if not key then
-            utils.exit()
-            return
-        end
-
-        if key == ESC then
-            utils.exit()
-            return
-        elseif key == 'j' then
-            M.create_down(false)
-        elseif key == '[' then
-            M.goto_prev()
-        elseif key == ']' then
-            M.goto_next()
-        elseif key == 'k' then
-            M.create_up(false)
-        elseif key == 'J' then
-            M.create_down(true)
-        elseif key == 'K' then
-            M.create_up(true)
-        elseif key == 'n' then
-            M.find_next(false)
-        elseif key == 'N' then
-            M.find_prev(false)
-        elseif key == 'q' then
-            M.find_next(true)
-        elseif key == 'Q' then
-            M.find_prev(true)
-        elseif key == 'p' then
-            M.paste(utils.position.after)
-        elseif key == 'P' then
-            M.paste(utils.position.before)
-        elseif key == 'y' then
-            M.yank(config)
-            return
-        elseif key == 'd' then
-            M.delete(config)
-            return
-        elseif key == 'u' then
-            vim.cmd.undo()
-        elseif key == '.' then
-            M.dot_repeat(config)
-            return
-        elseif key == ',' then
-            M.clear_others(config)
-            return
-        elseif key == C_R then
-            vim.cmd.redo()
-        elseif key == 'i' then
-            insert_mode.insert(config)
-            return
-        elseif key == 'z' then
-            M.align_selections(config, false)
-            return
-        elseif key == 'Z' then
-            M.align_selections(config, true)
-            return
-        elseif key == 'a' then
-            insert_mode.append(config)
-            return
-        elseif key == '@' then
-            M.run_macro(config)
-            return
-        elseif key == ':' then
-            M.normal_command(config)
-            return
-        elseif key == 'c' then
-            M.change(config)
-            return
-        end
-    end
+M.skip_create_down = function()
+    search.create_down(true)
 end
-
 return M
