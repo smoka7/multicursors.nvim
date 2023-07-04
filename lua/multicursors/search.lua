@@ -177,7 +177,7 @@ end
 S.create_down = function(skip)
     local cursor = api.nvim_win_get_cursor(0)
     local row = cursor[1]
-    local col = cursor[2]
+    local col = vim.b.MultiCursorColumn
     local buf_count = api.nvim_buf_line_count(0)
     if row >= buf_count then
         return
@@ -202,13 +202,13 @@ end
 S.create_up = function(skip)
     local cursor = api.nvim_win_get_cursor(0)
     local row = cursor[1] - 2
-    local col = cursor[2]
+    local col = vim.b.MultiCursorColumn
     if row < 0 then
         return
     end
 
     local row_text = api.nvim_buf_get_lines(0, row, row + 1, true)[1]
-    if col > #row_text then
+    if col >= #row_text then
         col = #row_text - 1
     end
 

@@ -305,6 +305,8 @@ M.new_under_cursor = function()
     end
 
     vim.b.MultiCursorPattern = ''
+    -- vim remembers the first column when moving verticaly
+    vim.b.MultiCursorColumn = cursor[2]
     utils.create_extmark(match, utils.namespace.Main)
 end
 
