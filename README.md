@@ -70,6 +70,7 @@ In multi cursor mode
 | `d` | Delete the text inside selections |
 | `@` | Executes a macro at beginning of every selection |
 | `.` | Reapets last change at the beginning of every selection |
+| `,` | Clears All Selections except the main one |
 | `:` | Prompts for a normal command and Executes it at beginning of every selection |
 | `u` | Undo changes |
 | `<C-r>` | Redo changes |
@@ -92,7 +93,7 @@ In insert and append mode:
 - [ ] Handle overlapping selections (for now we merge them)
 - [ ] Completion works, but doesn't clear duplicates
 - [ ]  - Create a mod to show to the user
-- [ ]  - Clear other selections and only keep the main one
+- [x]  - Clear other selections and only keep the main one
 - [x] `[` - Go to the next selection
 - [x] `]` - Go to the previous selection
 - [ ] `z` - Align matches by inserting spaces before the first character of each selection

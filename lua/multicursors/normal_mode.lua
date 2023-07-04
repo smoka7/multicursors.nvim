@@ -181,6 +181,14 @@ M.dot_repeat = function(config)
     M.listen(config)
 end
 
+--- Clears the selections Except the main one
+---@param config Config
+M.clear_others = function(config)
+    utils.clear_namespace(utils.namespace.Multi)
+    vim.cmd 'redraw!'
+    M.listen(config)
+end
+
 --- Deletes the text inside selections and starts insert mode
 ---@param config Config
 M.change = function(config)
@@ -385,6 +393,9 @@ M.listen = function(config)
             vim.cmd.undo()
         elseif key == '.' then
             M.dot_repeat(config)
+            return
+        elseif key == ',' then
+            M.clear_others(config)
             return
         elseif key == C_R then
             vim.cmd.redo()
