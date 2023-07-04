@@ -42,6 +42,12 @@ M.setup = function(opts)
 
     highlight.set_highlights()
 
+    vim.api.nvim_create_autocmd({ 'ColorScheme' }, {
+        callback = function()
+            highlight.set_highlights()
+        end,
+    })
+
     if config.create_commands then
         create_commands(config)
     end
