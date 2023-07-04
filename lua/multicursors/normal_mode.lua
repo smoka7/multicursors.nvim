@@ -189,6 +189,14 @@ M.clear_others = function(config)
     M.listen(config)
 end
 
+--- Aligns the selections by adding space
+---@param config Config
+---@param line_start boolean
+M.align_selections = function(config, line_start)
+    utils.align_text(line_start)
+    M.listen(config)
+end
+
 --- Deletes the text inside selections and starts insert mode
 ---@param config Config
 M.change = function(config)
@@ -401,6 +409,12 @@ M.listen = function(config)
             vim.cmd.redo()
         elseif key == 'i' then
             insert_mode.insert(config)
+            return
+        elseif key == 'z' then
+            M.align_selections(config, false)
+            return
+        elseif key == 'Z' then
+            M.align_selections(config, true)
             return
         elseif key == 'a' then
             insert_mode.append(config)

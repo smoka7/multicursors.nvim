@@ -416,6 +416,37 @@ M.insert_text = function(text)
     M.move_selections_horizontal(#text)
 end
 
+--- Aligns selections by adding space
+---@param line_start boolean add spaces before selection or at the start of line
+M.align_text = function(line_start)
+    local max_col = -1
+    M.call_on_selections(function(selection)
+        if selection[2] > max_col then
+            max_col = selection[2]
+        end
+    end, true, false)
+
+    M.call_on_selections(function(selection)
+        local col = selection[2]
+        local row = selection[1]
+        local count = max_col - col
+        if line_start then
+            col = 0
+        end
+
+        if count > 0 then
+            api.nvim_buf_set_text(
+                0,
+                row,
+                col,
+                row,
+                col,
+                { string.rep(' ', count) }
+            )
+        end
+    end, true, false)
+end
+
 M.delete_char = function()
     M.call_on_selections(function(mark)
         local col = mark[3].end_col - 1

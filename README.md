@@ -67,6 +67,8 @@ In multi cursor mode
 | `p` | Puts the text inside `unnamed register` before selections |
 | `P` | Puts the text inside `unnamed register` after selections |
 | `y` | Yanks the text inside selection to `unnamed register` |
+| `z` | Aligns selections by adding space before selections |
+| `Z` | Aligns selections by adding space at beginning of line |
 | `d` | Delete the text inside selections |
 | `@` | Executes a macro at beginning of every selection |
 | `.` | Reapets last change at the beginning of every selection |
@@ -96,7 +98,7 @@ In insert and append mode:
 - [x]  - Clear other selections and only keep the main one
 - [x] `[` - Go to the next selection
 - [x] `]` - Go to the previous selection
-- [ ] `z` - Align matches by inserting spaces before the first character of each selection
+- [x] `z` - Align matches by inserting spaces before the first character of each selection
 - [ ] `s` - Save matches
 - [ ] `S` - Restore matches
 - [ ] Should selection movements wrap vertically?
