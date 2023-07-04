@@ -58,6 +58,8 @@ In multi cursor mode
 | `N` | Finds the previous match before the main selection |
 | `q` | Skips the current selection and finds the next one |
 | `Q` | Skips the current selection and finds the previous one |
+| `]` | Swaps the main selection with next selection |
+| `[` | Swaps the main selection with previous selection |
 | `j` | Creates a selection on the char below the cursor |
 | `J` | Skips the current selection and Creates a selection on the char below |
 | `k` | Creates a selection on the char above the cursor |
@@ -91,8 +93,8 @@ In insert and append mode:
 - [ ] Completion works, but doesn't clear duplicates
 - [ ]  - Create a mod to show to the user
 - [ ]  - Clear other selections and only keep the main one
-- [ ] `[` - Go to the next selection
-- [ ] `]` - Go to the previous selection
+- [x] `[` - Go to the next selection
+- [x] `]` - Go to the previous selection
 - [ ] `z` - Align matches by inserting spaces before the first character of each selection
 - [ ] `s` - Save matches
 - [ ] `S` - Restore matches

@@ -158,6 +158,100 @@ M.get_all_selections = function(details)
     return extmarks
 end
 
+--- Creates a extmark for current match and
+--- updates the main selection
+---@param match Match match to mark
+---@param skip boolean wheter or not skip current match
+M.mark_found_match = function(match, skip)
+    -- first clear the main selection
+    -- then create a selection in place of main one
+    local main = M.get_main_selection(true)
+    M.clear_namespace(M.namespace.Main)
+
+    if not skip then
+        M.create_extmark(
+            { row = main[2], start = main[3], finish = main[4].end_col },
+            M.namespace.Multi
+        )
+    end
+    --create the main selection
+    M.create_extmark(match, M.namespace.Main)
+    --deletes the selection when there was a selection there
+    M.delete_extmark(match, M.namespace.Multi)
+
+    M.move_cursor({ match.row + 1, match.start }, nil)
+end
+
+--- Swaps the next selection with main selection
+--- wraps around the buffer
+M.goto_next_selection = function()
+    local main = M.get_main_selection(true)
+    local selections = api.nvim_buf_get_extmarks(
+        0,
+        ns_id,
+        { main[4].end_row, main[4].end_col },
+        -1,
+        { details = true }
+    )
+    if #selections > 0 then
+        M.mark_found_match({
+            row = selections[1][4].end_row,
+            start = selections[1][3],
+            finish = selections[1][4].end_col,
+        }, false)
+        return
+    end
+    selections = api.nvim_buf_get_extmarks(
+        0,
+        ns_id,
+        0,
+        { main[4].end_row, main[4].end_col },
+        { details = true }
+    )
+    if #selections > 0 then
+        M.mark_found_match({
+            row = selections[1][4].end_row,
+            start = selections[1][3],
+            finish = selections[1][4].end_col,
+        }, false)
+    end
+end
+
+--- Swaps the previous selection with main selection
+--- wraps around the buffer
+M.goto_prev_selection = function()
+    local main = M.get_main_selection(true)
+    local selections = api.nvim_buf_get_extmarks(
+        0,
+        ns_id,
+        { main[4].end_row, main[4].end_col },
+        0,
+        { details = true }
+    )
+    if #selections > 0 then
+        M.mark_found_match({
+            row = selections[1][4].end_row,
+            start = selections[1][3],
+            finish = selections[1][4].end_col,
+        }, false)
+        return
+    end
+    selections = api.nvim_buf_get_extmarks(
+        0,
+        ns_id,
+        -1,
+        { main[4].end_row, main[4].end_col },
+        { details = true }
+    )
+    if #selections > 0 then
+        M.mark_found_match({
+            row = selections[1][4].end_row,
+            start = selections[1][3],
+            finish = selections[1][4].end_col,
+        }, false)
+    end
+end
+
 --- gets a single char from user
 --- when intrupted returns nil
 ---@return string?

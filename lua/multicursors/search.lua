@@ -4,30 +4,6 @@ local api = vim.api
 ---@class Search
 local S = {}
 
---- Creates a extmark for current match and
---- updates the main selection
----@param match Match match to mark
----@param skip boolean wheter or not skip current match
-local mark_found_match = function(match, skip)
-    -- first clear the main selection
-    -- then create a selection in place of main one
-    local main = utils.get_main_selection(true)
-    utils.clear_namespace(utils.namespace.Main)
-
-    if not skip then
-        utils.create_extmark(
-            { row = main[2], start = main[3], finish = main[4].end_col },
-            utils.namespace.Multi
-        )
-    end
-    --create the main selection
-    utils.create_extmark(match, utils.namespace.Main)
-    --deletes the selection when there was a selection there
-    utils.delete_extmark(match, utils.namespace.Multi)
-
-    utils.move_cursor({ match.row + 1, match.start }, nil)
-end
-
 --- Finds the word under the cursor
 ---@return Match?
 S.find_cursor_word = function()
@@ -128,7 +104,7 @@ S.find_next_match = function(string, row_idx, offset, skip)
         row = row_idx,
     }
 
-    mark_found_match(found, skip)
+    utils.mark_found_match(found, skip)
 
     return found
 end
@@ -168,7 +144,7 @@ S.find_prev_match = function(string, row_idx, till, skip)
         return
     end
 
-    mark_found_match(found, skip)
+    utils.mark_found_match(found, skip)
     return found
 end
 
@@ -194,7 +170,7 @@ S.create_down = function(skip)
         finish = 0
     end
 
-    mark_found_match({ row = row, start = col, finish = finish }, skip)
+    utils.mark_found_match({ row = row, start = col, finish = finish }, skip)
 end
 
 --- Creates a selection on the char above the cursor
@@ -217,7 +193,7 @@ S.create_up = function(skip)
         col = 0
         finish = 0
     end
-    mark_found_match({ row = row, start = col, finish = finish }, skip)
+    utils.mark_found_match({ row = row, start = col, finish = finish }, skip)
 end
 
 return S

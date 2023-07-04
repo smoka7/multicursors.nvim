@@ -66,6 +66,16 @@ M.find_next = function(skip)
     end
 end
 
+--- Moves the main selection to next selction
+M.goto_next = function()
+    utils.goto_next_selection()
+end
+
+--- Moves the main selection to previous selction
+M.goto_prev = function()
+    utils.goto_prev_selection()
+end
+
 ---finds previous match and marks it
 ---@param skip boolean
 ---@return Match? prev previus match
@@ -161,11 +171,14 @@ M.paste = function(pos)
 end
 
 --- Repeats last edit on every selection
-M.dot_repeat = function()
+---@param config Config
+M.dot_repeat = function(config)
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd 'normal .'
     end, true, true)
+    vim.cmd 'redraw!'
+    M.listen(config)
 end
 
 --- Deletes the text inside selections and starts insert mode
@@ -197,6 +210,7 @@ M.delete = function(config)
             {}
         )
     end, true, true)
+    vim.cmd 'redraw!'
     M.listen(config)
 end
 
@@ -339,6 +353,10 @@ M.listen = function(config)
             return
         elseif key == 'j' then
             M.create_down(false)
+        elseif key == '[' then
+            M.goto_prev()
+        elseif key == ']' then
+            M.goto_next()
         elseif key == 'k' then
             M.create_up(false)
         elseif key == 'J' then
@@ -366,7 +384,7 @@ M.listen = function(config)
         elseif key == 'u' then
             vim.cmd.undo()
         elseif key == '.' then
-            M.dot_repeat()
+            M.dot_repeat(config)
             return
         elseif key == C_R then
             vim.cmd.redo()
