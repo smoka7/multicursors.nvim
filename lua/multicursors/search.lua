@@ -154,6 +154,11 @@ S.create_down = function(skip)
     local cursor = api.nvim_win_get_cursor(0)
     local row = cursor[1]
     local col = vim.b.MultiCursorColumn
+    if not col then
+        col = cursor[2] - 1
+        vim.b.MultiCursorColumn = col
+    end
+
     local buf_count = api.nvim_buf_line_count(0)
     if row >= buf_count then
         return
@@ -179,6 +184,11 @@ S.create_up = function(skip)
     local cursor = api.nvim_win_get_cursor(0)
     local row = cursor[1] - 2
     local col = vim.b.MultiCursorColumn
+    if not col then
+        col = cursor[2] - 1
+        vim.b.MultiCursorColumn = col
+    end
+
     if row < 0 then
         return
     end
