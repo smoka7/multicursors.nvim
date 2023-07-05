@@ -46,7 +46,7 @@ M.find_next = function(skip)
     local match = search.find_next_match(buffer[row_idx], pattern, column)
 
     if match then
-        match.row = row_idx - 1
+        match.s_row = row_idx - 1
         utils.mark_found_match(match, skip)
         return match
     end
@@ -56,7 +56,7 @@ M.find_next = function(skip)
     for idx = row_idx + 1, line_count, 1 do
         match = search.find_next_match(buffer[idx], pattern, 0)
         if match then
-            match.row = idx - 1
+            match.s_row = idx - 1
             utils.mark_found_match(match, skip)
             return match
         end
@@ -67,7 +67,7 @@ M.find_next = function(skip)
     for idx = 1, row_idx + 1, 1 do
         match = search.find_next_match(buffer[idx], pattern, 0)
         if match then
-            match.row = idx - 1
+            match.s_row = idx - 1
             utils.mark_found_match(match, skip)
             return match
         end
@@ -102,7 +102,7 @@ M.find_prev = function(skip)
     -- search the cursor line
     local match = search.find_prev_match(buffer[row_idx], pattern, column)
     if match then
-        match.row = row_idx - 1
+        match.s_row = row_idx - 1
         utils.mark_found_match(match, skip)
         return match
     end
@@ -112,7 +112,7 @@ M.find_prev = function(skip)
     for idx = row_idx - 1, 1, -1 do
         match = search.find_prev_match(buffer[idx], pattern, -1)
         if match then
-            match.row = idx - 1
+            match.s_row = idx - 1
             utils.mark_found_match(match, skip)
             return match
         end
@@ -123,7 +123,7 @@ M.find_prev = function(skip)
     for idx = line_count, row_idx, -1 do
         match = search.find_prev_match(buffer[idx], pattern, -1)
         if match then
-            match.row = idx - 1
+            match.s_row = idx - 1
             utils.mark_found_match(match, skip)
             return match
         end
@@ -339,13 +339,13 @@ M.new_under_cursor = function()
 
     ---@type Match
     local match = {
-        row = cursor[1] - 1,
-        start = cursor[2],
-        finish = cursor[2] + 1,
+        s_row = cursor[1] - 1,
+        s_col = cursor[2],
+        e_col = cursor[2] + 1,
     }
 
-    if match.start == 0 then
-        match.finish = 0
+    if match.s_col == 0 then
+        match.e_col = 0
     end
 
     vim.b.MultiCursorPattern = ''

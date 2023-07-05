@@ -6,6 +6,7 @@ local main_ns_id = api.nvim_create_namespace 'multicursorsmaincursor'
 ---@class Utils
 local M = {}
 
+--- Use action before or after cursor
 ---@enum ActionPosition
 M.position = {
     before = true,
@@ -32,8 +33,8 @@ M.create_extmark = function(match, namespace)
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
-        { match.row, match.start },
-        { match.row, match.finish },
+        { match.s_row, match.s_col },
+        { match.e_row or match.s_row, match.e_col },
         {}
     )
     if #marks > 0 then
@@ -41,9 +42,9 @@ M.create_extmark = function(match, namespace)
         return marks[1][1]
     end
 
-    local s = api.nvim_buf_set_extmark(0, ns, match.row, match.start, {
-        end_row = match.row,
-        end_col = match.finish,
+    local s = api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
+        end_row = match.e_row or match.s_row,
+        end_col = match.e_col,
         hl_group = namespace,
     })
     vim.cmd [[ redraw! ]]
@@ -62,8 +63,8 @@ M.delete_extmark = function(match, namespace)
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
-        { match.row, match.start },
-        { match.row, match.finish },
+        { match.s_row, match.s_col },
+        { match.s_row, match.e_col },
         {}
     )
     if #marks > 0 then
@@ -169,17 +170,19 @@ M.mark_found_match = function(match, skip)
     M.clear_namespace(M.namespace.Main)
 
     if not skip then
-        M.create_extmark(
-            { row = main[2], start = main[3], finish = main[4].end_col },
-            M.namespace.Multi
-        )
+        M.create_extmark({
+            s_row = main[2],
+            s_col = main[3],
+            e_col = main[4].end_col,
+            e_row = main[4].end_row,
+        }, M.namespace.Multi)
     end
     --create the main selection
     M.create_extmark(match, M.namespace.Main)
     --deletes the selection when there was a selection there
     M.delete_extmark(match, M.namespace.Multi)
 
-    M.move_cursor({ match.row + 1, match.start }, nil)
+    M.move_cursor({ match.s_row + 1, match.s_col }, nil)
 end
 
 --- Swaps the next selection with main selection
@@ -195,9 +198,10 @@ M.goto_next_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
         return
     end
@@ -210,9 +214,10 @@ M.goto_next_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
     end
 end
@@ -230,9 +235,10 @@ M.goto_prev_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
         return
     end
@@ -245,9 +251,10 @@ M.goto_prev_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
     end
 end
@@ -303,7 +310,7 @@ M.update_selections = function(before)
     end
 
     M.create_extmark(
-        { row = main[4].end_row, start = col, finish = col + 1 },
+        { s_row = main[4].end_row, s_col = col, e_col = col + 1 },
         M.namespace.Main
     )
 
@@ -314,7 +321,7 @@ M.update_selections = function(before)
         end
 
         M.create_extmark(
-            { row = mark[4].end_row, start = col, finish = col + 1 },
+            { s_row = main[4].end_row, s_col = col, e_col = col + 1 },
             M.namespace.Multi
         )
     end
@@ -343,7 +350,7 @@ M.move_selections_horizontal = function(length)
 
     local row, col = get_position(main)
     M.create_extmark(
-        { start = col, finish = col + 1, row = row },
+        { s_col = col, e_col = col + 1, s_row = row },
         M.namespace.Main
     )
     M.move_cursor { row + 1, col + 1 }
@@ -352,7 +359,7 @@ M.move_selections_horizontal = function(length)
         row, col = get_position(mark)
 
         M.create_extmark(
-            { start = col, finish = col + 1, row = row },
+            { s_col = col, e_col = col + 1, s_row = row },
             M.namespace.Multi
         )
     end
@@ -390,7 +397,7 @@ M.move_selections_vertical = function(length)
 
     local row, col = get_position(main)
     M.create_extmark(
-        { start = col, finish = col + 1, row = row },
+        { s_col = col, e_col = col + 1, s_row = row },
         M.namespace.Main
     )
     M.move_cursor { row + 1, col + 1 }
@@ -398,7 +405,7 @@ M.move_selections_vertical = function(length)
     for _, mark in pairs(marks) do
         row, col = get_position(mark)
         M.create_extmark(
-            { start = col, finish = col + 1, row = row },
+            { s_col = col, finish = col + 1, row = row },
             M.namespace.Multi
         )
     end

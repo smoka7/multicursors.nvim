@@ -21,10 +21,11 @@ S.find_cursor_word = function()
     end
 
     vim.b.MultiCursorPattern = left[1] .. right[1]:sub(2)
+
     return {
-        row = cursor[1] - 1,
-        start = left[2],
-        finish = right[3] + cursor[2],
+        s_row = cursor[1] - 1,
+        s_col = left[2],
+        e_col = right[3] + cursor[2],
     }
 end
 
@@ -66,7 +67,7 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
     if #all > 0 then
         -- make last match the main one
         utils.create_extmark(all[#all], utils.namespace.Main)
-        utils.move_cursor { all[#all].row, all[#all].finish }
+        utils.move_cursor { all[#all].s_row, all[#all].e_col }
     else
         vim.notify 'no match found'
     end
@@ -95,8 +96,8 @@ S.find_next_match = function(string, pattern, offset)
 
     --- @type Match
     local found = {
-        start = match[2],
-        finish = match[3],
+        s_col = match[2],
+        e_col = match[3],
     }
 
     return found
@@ -125,8 +126,8 @@ S.find_prev_match = function(string, pattern, till)
             vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>', match[3] or 0)
         if match[2] ~= -1 and match[3] ~= -1 then
             found = {
-                start = match[2],
-                finish = match[3],
+                s_col = match[2],
+                e_col = match[3],
             }
         end
     until match and match[2] == -1 and match[3] == -1
@@ -161,7 +162,7 @@ S.create_down = function(skip)
         finish = 0
     end
 
-    utils.mark_found_match({ row = row, start = col, finish = finish }, skip)
+    utils.mark_found_match({ s_row = row, s_col = col, e_col = finish }, skip)
 end
 
 --- Creates a selection on the char above the cursor
@@ -189,7 +190,116 @@ S.create_up = function(skip)
         col = 0
         finish = 0
     end
-    utils.mark_found_match({ row = row, start = col, finish = finish }, skip)
+    utils.mark_found_match({ s_row = row, s_col = col, e_col = finish }, skip)
+end
+
+--- Finds the actual row,col for start and end of match
+---@param text string
+---@param start integer
+---@param end_ integer
+---@return Match
+local find_real_match = function(text, start, end_)
+    -- Count newlines and characters to get the bounds
+    local row, col = 0, 0
+    for i = 1, start do
+        if text:sub(i, i) == '\n' then
+            row = row + 1
+            col = 0
+        else
+            col = col + 1
+        end
+    end
+    --
+
+    ---@type Match
+    local match = {
+        s_row = row + 1,
+        s_col = col - 1,
+    }
+
+    -- Count till finish
+    for i = start, end_ do
+        if text:sub(i, i) == '\n' then
+            row = row + 1
+            col = 0
+        else
+            col = col + 1
+        end
+    end
+
+    match.e_col = col
+    match.e_row = row + 1
+
+    return match
+end
+
+--- Finds first match of the pattern in text
+---@param text string
+---@param pattern string
+---@return Match?
+S.find_first_multiline = function(text, pattern)
+    local start, end_ = text:find(pattern)
+    if not start or not end_ then
+        return
+    end
+
+    return find_real_match(text, start, end_)
+end
+
+--- Finds last match of the pattern in text
+---@param text string
+---@param pattern string
+---@return Match?
+S.find_last_multiline = function(text, pattern)
+    local s, f, start, end_
+    local offset = 0
+    repeat
+        s, f = text:find(pattern, offset)
+        if s and f then
+            start = s
+            end_ = f
+            offset = f
+        end
+    until not s or not f
+
+    if not start or not end_ then
+        return
+    end
+
+    return find_real_match(text, start, end_)
+end
+
+--- Gets the buffer text after or before the cursor
+--- concatenates lines with `\n`
+---@param pos ActionPosition
+---@return string
+S.merge_buffer_text = function(pos)
+    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+
+    local cursor = api.nvim_win_get_cursor(0)
+
+    if pos == utils.position.after then
+        return lines[cursor[1]]:sub(cursor[2] + 2, -1)
+            .. '\n'
+            .. table.concat(lines, '\n', cursor[1] + 1)
+    end
+
+    return lines[cursor[1]]:sub(cursor[2], -1)
+        .. '\n'
+        .. table.concat(lines, '\n', cursor[1], #lines)
+end
+
+--- Searches for multi line pattern in buffer
+---@param pattern string
+---@param pos ActionPosition
+S.multiline_string = function(pattern, pos)
+    local text = S.merge_buffer_text(pos)
+
+    if pos == utils.position.after then
+        return S.find_first_multiline(text, pattern)
+    end
+
+    return S.find_last_multiline(text, pattern)
 end
 
 return S
