@@ -80,16 +80,12 @@ end
 
 --- Returns the first match for pattern after a offset in a string
 ---@param string string
----@param row_idx integer
 ---@param offset integer
----@param skip boolean
 ---@return Match?
-S.find_next_match = function(string, row_idx, offset, skip)
+S.find_next_match = function(string, pattern, offset)
     if string == '' then
         return
     end
-
-    local pattern = vim.b.MultiCursorPattern
 
     local match = vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>', offset)
     -- -1 range means not found
@@ -97,25 +93,21 @@ S.find_next_match = function(string, row_idx, offset, skip)
         return
     end
 
-    --- @class Match
+    --- @type Match
     local found = {
         start = match[2],
         finish = match[3],
-        row = row_idx,
     }
-
-    utils.mark_found_match(found, skip)
 
     return found
 end
 
 --- Returns the last match before the cursor
 ---@param string string
----@param row_idx integer
+---@param pattern string
 ---@param till integer
----@param skip boolean
 ---@return Match?
-S.find_prev_match = function(string, row_idx, till, skip)
+S.find_prev_match = function(string, pattern, till)
     if string == '' then
         return
     end
@@ -127,7 +119,7 @@ S.find_prev_match = function(string, row_idx, till, skip)
     ---@type any[]
     local match = {}
     local found = nil ---@type Match?
-    local pattern = vim.b.MultiCursorPattern
+
     repeat
         match =
             vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>', match[3] or 0)
@@ -135,16 +127,10 @@ S.find_prev_match = function(string, row_idx, till, skip)
             found = {
                 start = match[2],
                 finish = match[3],
-                row = row_idx,
             }
         end
     until match and match[2] == -1 and match[3] == -1
 
-    if not found then
-        return
-    end
-
-    utils.mark_found_match(found, skip)
     return found
 end
 

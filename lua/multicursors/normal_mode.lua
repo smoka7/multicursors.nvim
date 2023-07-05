@@ -31,36 +31,44 @@ end
 ---@param skip boolean
 ---@return Match? next next Match
 M.find_next = function(skip)
-    if vim.b.MultiCursorPattern == '' then
+    local pattern = vim.b.MultiCursorPattern
+    if not pattern or pattern == '' then
         return
     end
+
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
-    local row_idx = cursor[1] - 1
+    local row_idx = cursor[1]
     local column = cursor[2] + #vim.b.MultiCursorPattern
+    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
 
     -- search the same line as cursor with cursor col as offset cursor
-    local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = search.find_next_match(line, row_idx, column, skip)
+    local match = search.find_next_match(buffer[row_idx], pattern, column)
+
     if match then
+        match.row = row_idx - 1
+        utils.mark_found_match(match, skip)
         return match
     end
+    ---
 
     -- search from cursor to end of buffer for pattern
-    for idx = row_idx + 1, line_count - 1, 1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_next_match(line, idx, 0, skip)
+    for idx = row_idx + 1, line_count, 1 do
+        match = search.find_next_match(buffer[idx], pattern, 0)
         if match then
+            match.row = idx - 1
+            utils.mark_found_match(match, skip)
             return match
         end
     end
+    --
 
-    -- when we didn't find the pattern we start searching again
-    -- from start of the buffer
-    for idx = 0, row_idx, 1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_next_match(line, idx, 0, skip)
+    -- At end wrap around the buffer when we can't match anything
+    for idx = 1, row_idx + 1, 1 do
+        match = search.find_next_match(buffer[idx], pattern, 0)
         if match then
+            match.row = idx - 1
+            utils.mark_found_match(match, skip)
             return match
         end
     end
@@ -80,37 +88,43 @@ end
 ---@param skip boolean
 ---@return Match? prev previus match
 M.find_prev = function(skip)
-    if vim.b.MultiCursorPattern == '' then
+    local pattern = vim.b.MultiCursorPattern
+    if not pattern or pattern == '' then
         return
     end
+
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
-    local row_idx = cursor[1] - 1
+    local row_idx = cursor[1]
     local column = cursor[2] - #vim.b.MultiCursorPattern
+    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
 
-    -- search the same line untill the cursor
-    local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = search.find_prev_match(line, row_idx, column, skip)
+    -- search the cursor line
+    local match = search.find_prev_match(buffer[row_idx], pattern, column)
     if match then
+        match.row = row_idx - 1
+        utils.mark_found_match(match, skip)
         return match
     end
+    --
 
-    -- search from cursor to beginning of buffer for pattern
-    -- fo
-    for idx = row_idx - 1, 0, -1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_prev_match(line, idx, -1, skip)
+    -- search from cursor to start of buffer
+    for idx = row_idx - 1, 1, -1 do
+        match = search.find_prev_match(buffer[idx], pattern, -1)
         if match then
+            match.row = idx - 1
+            utils.mark_found_match(match, skip)
             return match
         end
     end
+    --
 
-    -- when we didn't find the pattern we start searching again
-    -- from start of the buffer
-    for idx = line_count - 1, row_idx, -1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_prev_match(line, idx, -1, skip)
+    --At end wrap around the buffer when we can't match anything
+    for idx = line_count, row_idx, -1 do
+        match = search.find_prev_match(buffer[idx], pattern, -1)
         if match then
+            match.row = idx - 1
+            utils.mark_found_match(match, skip)
             return match
         end
     end
