@@ -1,3 +1,4 @@
+---@type Utils
 local utils = require 'multicursors.utils'
 local api = vim.api
 
@@ -43,9 +44,9 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
         match = vim.fn.matchstrpos(content[1], pattern, match[3] or 0)
         if match[2] ~= -1 and match[3] ~= -1 then
             all[#all + 1] = {
-                start = match[2] + start_col,
-                finish = match[3] + start_col,
-                row = start_row,
+                s_col = match[2] + start_col,
+                e_col = match[3] + start_col,
+                s_row = start_row,
             }
         end
     until match and match[2] == -1 and match[3] == -1
@@ -56,9 +57,9 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
             match = vim.fn.matchstrpos(content[i], pattern, match[3] or 0)
             if match[2] ~= -1 and match[3] ~= -1 then
                 all[#all + 1] = {
-                    start = match[2],
-                    finish = match[3],
-                    row = start_row + i - 1,
+                    s_col = match[2],
+                    e_col = match[3],
+                    s_row = start_row + i - 1,
                 }
             end
         until match and match[2] == -1 and match[3] == -1
@@ -293,13 +294,35 @@ end
 ---@param pattern string
 ---@param pos ActionPosition
 S.multiline_string = function(pattern, pos)
-    local text = S.merge_buffer_text(pos)
-
+    local s, e
     if pos == utils.position.after then
-        return S.find_first_multiline(text, pattern)
+        e = vim.fn.searchpos(pattern, 'wzen')
+        s = vim.fn.searchpos(pattern, 'wzn')
+        if s[1] == 0 and s[1] == 0 then
+            return
+        end
+    elseif pos == utils.position.before then
+        e = vim.fn.searchpos(pattern, 'bwzen')
+        s = vim.fn.searchpos(pattern, 'bwzn')
+        if s[1] == 0 and s[1] == 0 then
+            return
+        end
+    else
+        e = vim.fn.searchpos(pattern, 'wzecn')
+        s = vim.fn.searchpos(pattern, 'wzcn')
+        if s[1] == 0 and s[1] == 0 then
+            return
+        end
     end
 
-    return S.find_last_multiline(text, pattern)
+    local match = {
+        s_row = s[1] - 1,
+        s_col = s[2] - 1,
+        e_row = e[1] - 1,
+        e_col = e[2],
+    }
+
+    return match
 end
 
 return S

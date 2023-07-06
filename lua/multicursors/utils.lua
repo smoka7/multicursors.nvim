@@ -9,8 +9,9 @@ local M = {}
 --- Use action before or after cursor
 ---@enum ActionPosition
 M.position = {
-    before = true,
-    after = false,
+    before = 'before',
+    after = 'after',
+    on = 'on',
 }
 
 --- @enum Namespace
@@ -90,52 +91,95 @@ M.debug = function(any)
 end
 
 --- returns selected range in visual mode
----@return Range?
-M.get_visual_range = function()
-    local start_pos = api.nvim_buf_get_mark(0, '<')
-    local end_pos = api.nvim_buf_get_mark(0, '>')
+---@return Point?,Point?
+M.get_last_visual_range = function()
+    local start = api.nvim_buf_get_mark(0, '<')
+    local end_ = api.nvim_buf_get_mark(0, '>')
 
-    if start_pos[1] == end_pos[1] and start_pos[2] == end_pos[2] then
+    if start[1] == end_[1] and start[2] == end_[2] then
         return nil
     end
 
     -- when in visual line mode nvim returns v:maxcol instead of line length
     -- so we have to find line length ourselves
-    local row = api.nvim_buf_get_lines(0, end_pos[1] - 1, end_pos[1], true)[1]
-    return {
-        start_row = start_pos[1] - 1,
-        start_col = start_pos[2],
-        end_row = end_pos[1] - 1,
-        end_col = #row,
+    --TODO get the text in the same function so we don't have to this
+    local row = api.nvim_buf_get_lines(0, end_[1] - 1, end_[1], true)[1]
+    local e_col = end_[2]
+    if e_col > string.len(row) then
+        e_col = string.len(row)
+    end
+
+    return { row = start[1] - 1, col = start[2] }, {
+        row = end_[1] - 1,
+        col = e_col + 1,
     }
 end
 
---- returns text inside selected range
----@param whole_buffer boolean
----@param range Range?
+--- Swaps ranges when start > end_
+---@param start Point
+---@param end_ Point
+---@return Point,Point
+local function check_bounds(start, end_)
+    if
+        start.row < end_.row
+        or (start.row == end_.row and start.col < end_.col)
+    then
+        return start, end_
+    end
+
+    return end_, start
+end
+
+--- Returns the visual range text
+--- TODO probably unneeded
 ---@return string[]?
-M.get_buffer_content = function(whole_buffer, range)
-    if whole_buffer then
-        return api.nvim_buf_get_lines(
+M.get_visual_range = function()
+    local mode = vim.api.nvim_get_mode().mode
+
+    local v_pos = vim.fn.getpos 'v'
+    local cursor = api.nvim_win_get_cursor(0)
+    if mode:sub(1, 1) == 'v' then
+        -- same row indexing but diffrent column indexing 🫠
+        local start = { row = v_pos[2] - 1, col = v_pos[3] - 1 }
+        local end_ = { row = cursor[1] - 1, col = cursor[2] }
+        start, end_ = check_bounds(start, end_)
+
+        return api.nvim_buf_get_text(
             0,
-            0,
-            api.nvim_buf_line_count(0) - 1,
-            true
+            start.row,
+            start.col,
+            end_.row,
+            end_.col + 1,
+            {}
         )
+    elseif mode:sub(1, 1) == 'V' then
+        return api.nvim_buf_get_lines(0, v_pos[2] - 1, cursor[1] + 1, true)
     end
 
-    if not range then
-        return {}
-    end
+    return nil
+end
 
+--- Returns text inside selected range
+---@param start Point
+---@param end_ Point
+---@return string[]
+M.get_buffer_content = function(start, end_)
     return api.nvim_buf_get_text(
         0,
-        range.start_row,
-        range.start_col,
-        range.end_row,
-        range.end_col,
+        start.row,
+        start.col,
+        end_.row,
+        end_.col,
         {}
     )
+    -- local lines = api.nvim_buf_get_lines(0, start.row, end_.row + 1, true)
+    -- if #lines == 1 then
+    --     lines[1] = lines[1]:sub(start.col + 1, end_.col)
+    -- elseif #lines>=1 then
+    --     lines[1] = lines[1]:sub(start.col + 1)
+    --     lines[#lines] = lines[#lines]:sub(0, end_.col)
+    -- end
+    -- return lines
 end
 
 ---@param details boolean
@@ -484,6 +528,10 @@ end
 M.exit = function()
     M.clear_namespace(M.namespace.Main)
     M.clear_namespace(M.namespace.Multi)
+    ---TODO Merge this
+    vim.b.MultiCursorMultiline = nil
+    vim.b.MultiCursorPattern = nil
+    vim.b.MultiCursorColumn = nil
 end
 
 return M
