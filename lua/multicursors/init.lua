@@ -18,6 +18,10 @@ local function create_commands(config)
         normal_mode.start(config)
     end, {})
 
+    vim.api.nvim_create_user_command('MCvisual', function()
+        normal_mode.search_selected(config)
+    end, { range = 0 })
+
     vim.api.nvim_create_user_command('MCunderCursor', function()
         normal_mode.new_selection(config)
     end, {})

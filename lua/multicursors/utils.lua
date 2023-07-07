@@ -6,10 +6,12 @@ local main_ns_id = api.nvim_create_namespace 'multicursorsmaincursor'
 ---@class Utils
 local M = {}
 
+--- Use action before or after cursor
 ---@enum ActionPosition
 M.position = {
-    before = true,
-    after = false,
+    before = 'before',
+    after = 'after',
+    on = 'on',
 }
 
 --- @enum Namespace
@@ -32,8 +34,8 @@ M.create_extmark = function(match, namespace)
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
-        { match.row, match.start },
-        { match.row, match.finish },
+        { match.s_row, match.s_col },
+        { match.e_row or match.s_row, match.e_col },
         {}
     )
     if #marks > 0 then
@@ -41,9 +43,9 @@ M.create_extmark = function(match, namespace)
         return marks[1][1]
     end
 
-    local s = api.nvim_buf_set_extmark(0, ns, match.row, match.start, {
-        end_row = match.row,
-        end_col = match.finish,
+    local s = api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
+        end_row = match.e_row or match.s_row,
+        end_col = match.e_col,
         hl_group = namespace,
     })
     vim.cmd [[ redraw! ]]
@@ -62,8 +64,8 @@ M.delete_extmark = function(match, namespace)
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
-        { match.row, match.start },
-        { match.row, match.finish },
+        { match.s_row, match.s_col },
+        { match.s_row, match.e_col },
         {}
     )
     if #marks > 0 then
@@ -89,52 +91,95 @@ M.debug = function(any)
 end
 
 --- returns selected range in visual mode
----@return Range?
-M.get_visual_range = function()
-    local start_pos = api.nvim_buf_get_mark(0, '<')
-    local end_pos = api.nvim_buf_get_mark(0, '>')
+---@return Point?,Point?
+M.get_last_visual_range = function()
+    local start = api.nvim_buf_get_mark(0, '<')
+    local end_ = api.nvim_buf_get_mark(0, '>')
 
-    if start_pos[1] == end_pos[1] and start_pos[2] == end_pos[2] then
+    if start[1] == end_[1] and start[2] == end_[2] then
         return nil
     end
 
     -- when in visual line mode nvim returns v:maxcol instead of line length
     -- so we have to find line length ourselves
-    local row = api.nvim_buf_get_lines(0, end_pos[1] - 1, end_pos[1], true)[1]
-    return {
-        start_row = start_pos[1] - 1,
-        start_col = start_pos[2],
-        end_row = end_pos[1] - 1,
-        end_col = #row,
+    --TODO get the text in the same function so we don't have to this
+    local row = api.nvim_buf_get_lines(0, end_[1] - 1, end_[1], true)[1]
+    local e_col = end_[2]
+    if e_col > string.len(row) then
+        e_col = string.len(row)
+    end
+
+    return { row = start[1] - 1, col = start[2] }, {
+        row = end_[1] - 1,
+        col = e_col + 1,
     }
 end
 
---- returns text inside selected range
----@param whole_buffer boolean
----@param range Range?
+--- Swaps ranges when start > end_
+---@param start Point
+---@param end_ Point
+---@return Point,Point
+local function check_bounds(start, end_)
+    if
+        start.row < end_.row
+        or (start.row == end_.row and start.col < end_.col)
+    then
+        return start, end_
+    end
+
+    return end_, start
+end
+
+--- Returns the visual range text
+--- TODO probably unneeded
 ---@return string[]?
-M.get_buffer_content = function(whole_buffer, range)
-    if whole_buffer then
-        return api.nvim_buf_get_lines(
+M.get_visual_range = function()
+    local mode = vim.api.nvim_get_mode().mode
+
+    local v_pos = vim.fn.getpos 'v'
+    local cursor = api.nvim_win_get_cursor(0)
+    if mode:sub(1, 1) == 'v' then
+        -- same row indexing but diffrent column indexing 🫠
+        local start = { row = v_pos[2] - 1, col = v_pos[3] - 1 }
+        local end_ = { row = cursor[1] - 1, col = cursor[2] }
+        start, end_ = check_bounds(start, end_)
+
+        return api.nvim_buf_get_text(
             0,
-            0,
-            api.nvim_buf_line_count(0) - 1,
-            true
+            start.row,
+            start.col,
+            end_.row,
+            end_.col + 1,
+            {}
         )
+    elseif mode:sub(1, 1) == 'V' then
+        return api.nvim_buf_get_lines(0, v_pos[2] - 1, cursor[1] + 1, true)
     end
 
-    if not range then
-        return {}
-    end
+    return nil
+end
 
+--- Returns text inside selected range
+---@param start Point
+---@param end_ Point
+---@return string[]
+M.get_buffer_content = function(start, end_)
     return api.nvim_buf_get_text(
         0,
-        range.start_row,
-        range.start_col,
-        range.end_row,
-        range.end_col,
+        start.row,
+        start.col,
+        end_.row,
+        end_.col,
         {}
     )
+    -- local lines = api.nvim_buf_get_lines(0, start.row, end_.row + 1, true)
+    -- if #lines == 1 then
+    --     lines[1] = lines[1]:sub(start.col + 1, end_.col)
+    -- elseif #lines>=1 then
+    --     lines[1] = lines[1]:sub(start.col + 1)
+    --     lines[#lines] = lines[#lines]:sub(0, end_.col)
+    -- end
+    -- return lines
 end
 
 ---@param details boolean
@@ -169,17 +214,19 @@ M.mark_found_match = function(match, skip)
     M.clear_namespace(M.namespace.Main)
 
     if not skip then
-        M.create_extmark(
-            { row = main[2], start = main[3], finish = main[4].end_col },
-            M.namespace.Multi
-        )
+        M.create_extmark({
+            s_row = main[2],
+            s_col = main[3],
+            e_col = main[4].end_col,
+            e_row = main[4].end_row,
+        }, M.namespace.Multi)
     end
     --create the main selection
     M.create_extmark(match, M.namespace.Main)
     --deletes the selection when there was a selection there
     M.delete_extmark(match, M.namespace.Multi)
 
-    M.move_cursor({ match.row + 1, match.start }, nil)
+    M.move_cursor({ match.s_row + 1, match.s_col }, nil)
 end
 
 --- Swaps the next selection with main selection
@@ -195,9 +242,10 @@ M.goto_next_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
         return
     end
@@ -210,9 +258,10 @@ M.goto_next_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
     end
 end
@@ -230,9 +279,10 @@ M.goto_prev_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
         return
     end
@@ -245,9 +295,10 @@ M.goto_prev_selection = function()
     )
     if #selections > 0 then
         M.mark_found_match({
-            row = selections[1][4].end_row,
-            start = selections[1][3],
-            finish = selections[1][4].end_col,
+            s_row = selections[1][2],
+            s_col = selections[1][3],
+            e_row = selections[1][4].end_row,
+            e_col = selections[1][4].end_col,
         }, false)
     end
 end
@@ -296,25 +347,25 @@ M.update_selections = function(before)
     M.exit()
 
     local col = main[4].end_col - 1
-    if before then
+    if before == M.position.before then
         col = main[3] - 1
     else
         M.move_cursor { main[4].end_row + 1, main[4].end_col }
     end
 
     M.create_extmark(
-        { row = main[4].end_row, start = col, finish = col + 1 },
+        { s_row = main[4].end_row, s_col = col, e_col = col + 1 },
         M.namespace.Main
     )
 
     for _, mark in pairs(marks) do
         col = mark[4].end_col - 1
-        if before then
+        if before == M.position.before then
             col = mark[3] - 1
         end
 
         M.create_extmark(
-            { row = mark[4].end_row, start = col, finish = col + 1 },
+            { s_row = mark[4].end_row, s_col = col, e_col = col + 1 },
             M.namespace.Multi
         )
     end
@@ -343,7 +394,7 @@ M.move_selections_horizontal = function(length)
 
     local row, col = get_position(main)
     M.create_extmark(
-        { start = col, finish = col + 1, row = row },
+        { s_col = col, e_col = col + 1, s_row = row },
         M.namespace.Main
     )
     M.move_cursor { row + 1, col + 1 }
@@ -352,7 +403,7 @@ M.move_selections_horizontal = function(length)
         row, col = get_position(mark)
 
         M.create_extmark(
-            { start = col, finish = col + 1, row = row },
+            { s_col = col, e_col = col + 1, s_row = row },
             M.namespace.Multi
         )
     end
@@ -390,7 +441,7 @@ M.move_selections_vertical = function(length)
 
     local row, col = get_position(main)
     M.create_extmark(
-        { start = col, finish = col + 1, row = row },
+        { s_col = col, e_col = col + 1, s_row = row },
         M.namespace.Main
     )
     M.move_cursor { row + 1, col + 1 }
@@ -398,7 +449,7 @@ M.move_selections_vertical = function(length)
     for _, mark in pairs(marks) do
         row, col = get_position(mark)
         M.create_extmark(
-            { start = col, finish = col + 1, row = row },
+            { s_col = col, finish = col + 1, row = row },
             M.namespace.Multi
         )
     end
@@ -477,6 +528,10 @@ end
 M.exit = function()
     M.clear_namespace(M.namespace.Main)
     M.clear_namespace(M.namespace.Multi)
+    ---TODO Merge this
+    vim.b.MultiCursorMultiline = nil
+    vim.b.MultiCursorPattern = nil
+    vim.b.MultiCursorColumn = nil
 end
 
 return M

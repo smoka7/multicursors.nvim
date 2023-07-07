@@ -31,36 +31,53 @@ end
 ---@param skip boolean
 ---@return Match? next next Match
 M.find_next = function(skip)
-    if vim.b.MultiCursorPattern == '' then
+    local pattern = vim.b.MultiCursorPattern
+    if not pattern or pattern == '' then
         return
     end
-    local line_count = api.nvim_buf_line_count(0)
-    local cursor = api.nvim_win_get_cursor(0)
-    local row_idx = cursor[1] - 1
-    local column = cursor[2] + #vim.b.MultiCursorPattern
 
-    -- search the same line as cursor with cursor col as offset cursor
-    local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = search.find_next_match(line, row_idx, column, skip)
-    if match then
-        return match
-    end
-
-    -- search from cursor to end of buffer for pattern
-    for idx = row_idx + 1, line_count - 1, 1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_next_match(line, idx, 0, skip)
+    if vim.b.MultiCursorMultiline then
+        local match = search.multiline_string(pattern, utils.position.after)
         if match then
+            utils.mark_found_match(match, skip)
+            utils.move_cursor { match.e_row + 1, match.e_col + 1 }
             return match
         end
     end
 
-    -- when we didn't find the pattern we start searching again
-    -- from start of the buffer
-    for idx = 0, row_idx, 1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_next_match(line, idx, 0, skip)
+    local line_count = api.nvim_buf_line_count(0)
+    local cursor = api.nvim_win_get_cursor(0)
+    local row_idx = cursor[1]
+    local column = cursor[2] + #vim.b.MultiCursorPattern
+    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
+
+    -- search the same line as cursor with cursor col as offset cursor
+    local match = search.find_next_match(buffer[row_idx], pattern, column)
+
+    if match then
+        match.s_row = row_idx - 1
+        utils.mark_found_match(match, skip)
+        return match
+    end
+    ---
+
+    -- search from cursor to end of buffer for pattern
+    for idx = row_idx + 1, line_count, 1 do
+        match = search.find_next_match(buffer[idx], pattern, 0)
         if match then
+            match.s_row = idx - 1
+            utils.mark_found_match(match, skip)
+            return match
+        end
+    end
+    --
+
+    -- At end wrap around the buffer when we can't match anything
+    for idx = 1, row_idx + 1, 1 do
+        match = search.find_next_match(buffer[idx], pattern, 0)
+        if match then
+            match.s_row = idx - 1
+            utils.mark_found_match(match, skip)
             return match
         end
     end
@@ -80,37 +97,51 @@ end
 ---@param skip boolean
 ---@return Match? prev previus match
 M.find_prev = function(skip)
-    if vim.b.MultiCursorPattern == '' then
+    local pattern = vim.b.MultiCursorPattern
+    if not pattern or pattern == '' then
         return
     end
-    local line_count = api.nvim_buf_line_count(0)
-    local cursor = api.nvim_win_get_cursor(0)
-    local row_idx = cursor[1] - 1
-    local column = cursor[2] - #vim.b.MultiCursorPattern
 
-    -- search the same line untill the cursor
-    local line = api.nvim_buf_get_lines(0, row_idx, row_idx + 1, true)[1]
-    local match = search.find_prev_match(line, row_idx, column, skip)
-    if match then
-        return match
-    end
-
-    -- search from cursor to beginning of buffer for pattern
-    -- fo
-    for idx = row_idx - 1, 0, -1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_prev_match(line, idx, -1, skip)
+    if vim.b.MultiCursorMultiline then
+        local match = search.multiline_string(pattern, utils.position.before)
         if match then
+            utils.mark_found_match(match, skip)
             return match
         end
     end
 
-    -- when we didn't find the pattern we start searching again
-    -- from start of the buffer
-    for idx = line_count - 1, row_idx, -1 do
-        line = api.nvim_buf_get_lines(0, idx, idx + 1, true)[1]
-        match = search.find_prev_match(line, idx, -1, skip)
+    local line_count = api.nvim_buf_line_count(0)
+    local cursor = api.nvim_win_get_cursor(0)
+    local row_idx = cursor[1]
+    local column = cursor[2] - #vim.b.MultiCursorPattern
+    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
+
+    -- search the cursor line
+    local match = search.find_prev_match(buffer[row_idx], pattern, column)
+    if match then
+        match.s_row = row_idx - 1
+        utils.mark_found_match(match, skip)
+        return match
+    end
+    --
+
+    -- search from cursor to start of buffer
+    for idx = row_idx - 1, 1, -1 do
+        match = search.find_prev_match(buffer[idx], pattern, -1)
         if match then
+            match.s_row = idx - 1
+            utils.mark_found_match(match, skip)
+            return match
+        end
+    end
+    --
+
+    --At end wrap around the buffer when we can't match anything
+    for idx = line_count, row_idx, -1 do
+        match = search.find_prev_match(buffer[idx], pattern, -1)
+        if match then
+            match.s_row = idx - 1
+            utils.mark_found_match(match, skip)
             return match
         end
     end
@@ -250,15 +281,64 @@ M.yank = function(config)
     M.listen(config)
 end
 
+--- Selects the text in visual mode
+---@param config Config
+M.search_selected = function(config)
+    -- Exit out of visual mode
+    -- TODO check from normal that it deosn't have side effects
+    api.nvim_feedkeys(
+        api.nvim_replace_termcodes('<Esc>', false, true, true),
+        'nx',
+        false
+    )
+
+    -- Gets the range of last selected text
+    --- FIXME multibyte characters doesn't get picked correctly
+    local start, end_ = utils.get_last_visual_range()
+    if not start or not end_ then
+        return
+    end
+
+    local lines = utils.get_buffer_content(start, end_)
+
+    -- joins the selected case with newlines
+    -- and searches for it
+    -- FIXME executed from command mode returns the selected range
+    -- but when from visaul mode with a mappings select next match
+    -- when cursur is at end of visual
+    local pattern = table.concat(lines, '\\n')
+    local match = search.multiline_string(pattern, 'on')
+    if not match then
+        return
+    end
+
+    vim.b.MultiCursorPattern = pattern
+    vim.b.MultiCursorMultiline = true
+
+    utils.create_extmark(match, utils.namespace.Main)
+    utils.move_cursor { match.e_row + 1, match.e_col + 1 }
+
+    M.listen(config)
+end
+
 --- Searches for a pattern across buffer and creates
 --- a selection for every match
 ---@param config Config
 ---@param whole_buffer boolean
 M.pattern = function(config, whole_buffer)
-    local range = utils.get_visual_range()
-    local content = utils.get_buffer_content(whole_buffer, range)
+    local content, start, end_
 
-    if not content or #content == 0 then
+    if whole_buffer then
+        content = api.nvim_buf_get_lines(0, 0, -1, true)
+    else
+        start, end_ = utils.get_last_visual_range()
+        if not start or not end_ then
+            return
+        end
+        content = utils.get_buffer_content(start, end_)
+    end
+
+    if #content == 0 then
         vim.notify('buffer or visual selection is empty', vim.log.levels.WARN)
         return
     end
@@ -289,13 +369,8 @@ M.pattern = function(config, whole_buffer)
         utils.clear_namespace 'MultiCursorMain'
 
         if pattern ~= '' then
-            if range and not whole_buffer then
-                search.find_all_matches(
-                    content,
-                    pattern,
-                    range.start_row,
-                    range.start_col
-                )
+            if not whole_buffer then
+                search.find_all_matches(content, pattern, start.row, start.col)
             else
                 search.find_all_matches(content, pattern, 0, 0)
             end
@@ -325,13 +400,13 @@ M.new_under_cursor = function()
 
     ---@type Match
     local match = {
-        row = cursor[1] - 1,
-        start = cursor[2],
-        finish = cursor[2] + 1,
+        s_row = cursor[1] - 1,
+        s_col = cursor[2],
+        e_col = cursor[2] + 1,
     }
 
-    if match.start == 0 then
-        match.finish = 0
+    if match.s_col == 0 then
+        match.e_col = 0
     end
 
     vim.b.MultiCursorPattern = ''

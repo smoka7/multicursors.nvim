@@ -39,6 +39,7 @@ Install with your preferred package manager:
 | Command | Description |
 |---|---|
 | MCstart | Selects the word under cursor and starts listening for the actions. |
+| MCvisual | Selects the last visual mode selection and starts listening for the actions. |
 | MCpattern | Prompts for a pattern and selects every match in the buffer. |
 | MCvisualPattern | Prompts for a pattern and selects every match in the visual selection. |
 | MCunderCursor | Selects the char under cursor and starts listening for the actions. |
