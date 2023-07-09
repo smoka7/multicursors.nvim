@@ -13,7 +13,23 @@ Install with your preferred package manager:
 {
     "smoka7/multicursors.nvim",
     event = "VeryLazy",
-    opts = {},
+    dependencies = {
+        'smoka7/hydra.nvim',
+    },
+    opts = function()
+        local N = require 'multicursors.normal_mode'
+        return {
+            normal_keys = {
+                -- to change default lhs of key mapping change the key
+                ['b'] = { 
+                    -- assigning nil to method exits from multi cursor mode 
+                    method = N.clear_others, 
+                    -- description to show in hint window
+                    desc = 'Clear others' 
+                },
+            },
+        }
+    end,
     keys = {
             {
                 '<Leader>m',
@@ -24,15 +40,48 @@ Install with your preferred package manager:
 }
 ```
 
-## Configuration
+## Default Configuration
+
+<details>
+  <summary>Click me</summary>
 
 ```lua
 {
     DEBUG_MODE = false,
     create_commands = true, -- create Multicursor user commands
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
+    normal_keys = {
+        ['z'] = {
+            method = N.align_selections_before,
+            desc = 'Align selections before',
+        },
+        ['Z'] = {
+            method = N.align_selections_start,
+            desc = 'Align selections start',
+        },
+        [','] = { method = N.clear_others, desc = 'Clear others' },
+        ['j'] = { method = N.create_down, desc = 'Create down' },
+        ['k'] = { method = N.create_up, desc = 'Create up' },
+        ['d'] = { method = N.delete, desc = 'Delete' },
+        ['.'] = { method = N.dot_repeat, desc = 'Dot repeat' },
+        ['n'] = { method = N.find_next, desc = 'Find next' },
+        ['q'] = { method = N.skip_find_next, desc = 'Skip find next' },
+        ['Q'] = { method = N.skip_find_prev, desc = 'Skip find prev' },
+        ['N'] = { method = N.find_prev, desc = 'Find prev' },
+        [']'] = { method = N.goto_next, desc = 'Goto next' },
+        ['['] = { method = N.goto_prev, desc = 'Goto prev' },
+        ['p'] = { method = N.paste_after, desc = 'Paste after' },
+        ['P'] = { method = N.paste_before, desc = 'Paste before' },
+        ['@'] = { method = N.run_macro, desc = 'Run macro' },
+        [':'] = { method = N.normal_command, desc = 'Normal command' },
+        ['J'] = { method = N.skip_create_down, desc = 'Skip create down' },
+        ['K'] = { method = N.skip_create_up, desc = 'Skip create up' },
+        ['y'] = { method = N.yank, desc = 'Yank' },
+        ['dd'] = { method = N.delete_line, desc = 'Delete line' },
+    },
 }
 ```
+</details>
 
 ## Usage
 
@@ -45,9 +94,14 @@ Install with your preferred package manager:
 | MCunderCursor | Selects the char under cursor and starts listening for the actions. |
 | MCclear | Clears all the selection. |
 
-To enter multi cursor mode, use the `MCstart` command. Note that keys that aren't mapped will have no effect in this mode.
+To enter multi cursor mode, use the one of above commands.
 
-In multi cursor mode
+### Multi cursor mode
+Note that keys which aren't mapped **do not affect other selections** .
+
+<details>
+  <summary>Click me</summary>
+
 | Key | Description |
 |---|---|
 | `<Esc>` | Clear the selections and go back to normal mode |
@@ -78,7 +132,13 @@ In multi cursor mode
 | `u` | Undo changes |
 | `<C-r>` | Redo changes |
 
-In insert and append mode:
+</details>
+
+### insert and append mode:
+
+<details>
+  <summary>Click me</summary>
+
 | Key | Description |
 |---|---|
 | `<Esc>`    | Clear the selections and go back to normal mode |
@@ -89,26 +149,21 @@ In insert and append mode:
 | `<Down>`  | Move the selections to Down |
 | `<C-v>`  | Pastes the text from system clipboard |
 
+</details>
+
 ## TODOS
 - [ ] Move the selection by "ts" nodes (unclear)
 - [ ] Move the selection by Vim motions (unclear)
 - [ ] Support count + actions
 - [ ] Handle overlapping selections (for now we merge them)
 - [ ] Completion works, but doesn't clear duplicates
-- [ ]  - Create a mod to show to the user
-- [x]  - Clear other selections and only keep the main one
-- [x] `[` - Go to the next selection
-- [x] `]` - Go to the previous selection
-- [x] `z` - Align matches by inserting spaces before the first character of each selection
-- [ ] `s` - Save matches
-- [ ] `S` - Restore matches
 - [ ] Should selection movements wrap vertically?
 - [ ] Should selection movements wrap horizontally?
 - [ ] Should `<bs>` wrap?
 - [ ] Should folded lines get ignored when searching?
-- [ ] show help window for mapping and registers ?
 
 ## Acknowledgment
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
+[hydra.nvim](https://github.com/anuvyklack/hydra.nvim)
 
 This document is mostly written with Chatgpt.
