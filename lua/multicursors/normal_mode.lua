@@ -142,7 +142,7 @@ M.run_macro = function()
 
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
-        vim.cmd('normal @' .. register)
+        vim.cmd('normal! @' .. register)
     end, true, true)
 end
 
@@ -156,7 +156,7 @@ M.normal_command = function()
             end
             utils.call_on_selections(function(mark)
                 api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
-                vim.cmd('normal ' .. input)
+                vim.cmd('normal! ' .. input)
             end, true, true)
         end
     )
@@ -172,7 +172,7 @@ local paste = function(pos)
         end
 
         api.nvim_win_set_cursor(0, position)
-        vim.cmd 'normal P'
+        vim.cmd 'normal! P'
         vim.cmd 'redraw!'
     end, true, true)
 end
@@ -189,7 +189,7 @@ end
 M.dot_repeat = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
-        vim.cmd 'normal .'
+        vim.cmd 'normal! .'
     end, true, true)
     vim.cmd 'redraw!'
 end
@@ -217,7 +217,8 @@ M.align_selections_start = function()
 end
 
 --- Deletes the text inside selections and starts insert mode
-M.change = function()
+---@param config Config
+M.change = function(config)
     utils.call_on_selections(function(mark)
         api.nvim_buf_set_text(
             0,
@@ -228,7 +229,7 @@ M.change = function()
             {}
         )
     end, true, true)
-    insert_mode.insert()
+    insert_mode.insert(config)
 end
 
 --- Deletes the text inside selections
@@ -242,6 +243,14 @@ M.delete = function()
             mark[3].end_col,
             {}
         )
+    end, true, true)
+    vim.cmd 'redraw!'
+end
+
+M.delete_line = function()
+    utils.call_on_selections(function(mark)
+        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+        vim.cmd [[ normal! "_dd ]]
     end, true, true)
     vim.cmd 'redraw!'
 end

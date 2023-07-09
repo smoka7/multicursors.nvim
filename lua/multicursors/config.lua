@@ -1,32 +1,39 @@
----@class Dictionary: { [string]: string }
-local action_keys = {
-    align_selections_before = 'z',
-    align_selections_start = 'Z',
-    append_mode = 'a',
-    change_mode = 'c',
-    clear_others = ',',
-    create_down = 'j',
-    create_up = 'k',
-    delete = 'd',
-    dot_repeat = '.',
-    find_next = 'n',
-    skip_find_next = 'q',
-    skip_find_prev = 'Q',
-    find_prev = 'N',
-    goto_next = ']',
-    goto_prev = '[',
-    insert_mode = 'i',
-    paste_after = 'p',
-    paste_before = 'P',
-    run_macro = '@',
-    run_normal_command = ':',
-    skip_create_down = 'J',
-    skip_create_up = 'K',
-    yank = 'y',
-    --['dd'] = 'delete_line',
-    --['D'] = 'delete_end',
-    --['yy'] = 'yank_line',
-    --['Y'] = 'yank_end',
+---@type NormalMode
+local N = require 'multicursors.normal_mode'
+
+---@class Action
+---@field method function
+---@field opts table
+
+---@class Dictionary: { [string]: Action }
+local normal_keys = {
+    ['z'] = {
+        method = N.align_selections_before,
+        desc = 'Align selections before',
+    },
+    ['Z'] = {
+        method = N.align_selections_start,
+        desc = 'Align selections start',
+    },
+    [','] = { method = N.clear_others, desc = 'Clear others' },
+    ['j'] = { method = N.create_down, desc = 'Create down' },
+    ['k'] = { method = N.create_up, desc = 'Create up' },
+    ['d'] = { method = N.delete, desc = 'Delete' },
+    ['.'] = { method = N.dot_repeat, desc = 'Dot repeat' },
+    ['n'] = { method = N.find_next, desc = 'Find next' },
+    ['q'] = { method = N.skip_find_next, desc = 'Skip find next' },
+    ['Q'] = { method = N.skip_find_prev, desc = 'Skip find prev' },
+    ['N'] = { method = N.find_prev, desc = 'Find prev' },
+    [']'] = { method = N.goto_next, desc = 'Goto next' },
+    ['['] = { method = N.goto_prev, desc = 'Goto prev' },
+    ['p'] = { method = N.paste_after, desc = 'Paste after' },
+    ['P'] = { method = N.paste_before, desc = 'Paste before' },
+    ['@'] = { method = N.run_macro, desc = 'Run macro' },
+    [':'] = { method = N.normal_command, desc = 'Normal command' },
+    ['J'] = { method = N.skip_create_down, desc = 'Skip create down' },
+    ['K'] = { method = N.skip_create_up, desc = 'Skip create up' },
+    ['y'] = { method = N.yank, desc = 'Yank' },
+    ['dd'] = { method = N.delete_line, desc = 'Delete line' },
 }
 
 --- TODO highlight custumization
@@ -35,7 +42,7 @@ local M = {
     DEBUG_MODE = false,
     create_commands = true, -- create Multicursor user commands
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
-    keys = action_keys,
+    normal_keys = normal_keys,
 }
 
 return M
