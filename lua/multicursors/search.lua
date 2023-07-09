@@ -25,6 +25,7 @@ S.find_cursor_word = function()
 
     return {
         s_row = cursor[1] - 1,
+        e_row = cursor[1] - 1,
         s_col = left[2],
         e_col = right[3] + cursor[2],
     }
@@ -163,7 +164,10 @@ S.create_down = function(skip)
         finish = 0
     end
 
-    utils.mark_found_match({ s_row = row, s_col = col, e_col = finish }, skip)
+    utils.mark_found_match(
+        { s_row = row, e_row = row, s_col = col, e_col = finish },
+        skip
+    )
 end
 
 --- Creates a selection on the char above the cursor
@@ -191,7 +195,10 @@ S.create_up = function(skip)
         col = 0
         finish = 0
     end
-    utils.mark_found_match({ s_row = row, s_col = col, e_col = finish }, skip)
+    utils.mark_found_match(
+        { s_row = row, e_row = row, s_col = col, e_col = finish },
+        skip
+    )
 end
 
 --- Finds the actual row,col for start and end of match

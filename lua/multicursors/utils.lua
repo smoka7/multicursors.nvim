@@ -35,16 +35,17 @@ M.create_extmark = function(match, namespace)
         0,
         ns,
         { match.s_row, match.s_col },
-        { match.e_row or match.s_row, match.e_col },
+        { match.e_row, match.e_col },
         {}
     )
+
     if #marks > 0 then
         M.debug('found ' .. #marks .. ' duplicate marks:')
         return marks[1][1]
     end
 
     local s = api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
-        end_row = match.e_row or match.s_row,
+        end_row = match.e_row,
         end_col = match.e_col,
         hl_group = namespace,
     })
@@ -353,10 +354,12 @@ M.update_selections = function(before)
         M.move_cursor { main[4].end_row + 1, main[4].end_col }
     end
 
-    M.create_extmark(
-        { s_row = main[4].end_row, s_col = col, e_col = col + 1 },
-        M.namespace.Main
-    )
+    M.create_extmark({
+        s_row = main[4].end_row,
+        e_row = main[4].end_row,
+        s_col = col,
+        e_col = col + 1,
+    }, M.namespace.Main)
 
     for _, mark in pairs(marks) do
         col = mark[4].end_col - 1
@@ -364,10 +367,12 @@ M.update_selections = function(before)
             col = mark[3] - 1
         end
 
-        M.create_extmark(
-            { s_row = mark[4].end_row, s_col = col, e_col = col + 1 },
-            M.namespace.Multi
-        )
+        M.create_extmark({
+            s_row = mark[4].end_row,
+            e_row = main[4].end_row,
+            s_col = col,
+            e_col = col + 1,
+        }, M.namespace.Multi)
     end
 end
 
@@ -394,7 +399,7 @@ M.move_selections_horizontal = function(length)
 
     local row, col = get_position(main)
     M.create_extmark(
-        { s_col = col, e_col = col + 1, s_row = row },
+        { s_col = col, e_col = col + 1, s_row = row, e_row = row },
         M.namespace.Main
     )
     M.move_cursor { row + 1, col + 1 }
@@ -403,7 +408,7 @@ M.move_selections_horizontal = function(length)
         row, col = get_position(mark)
 
         M.create_extmark(
-            { s_col = col, e_col = col + 1, s_row = row },
+            { s_col = col, e_col = col + 1, s_row = row, e_row = row },
             M.namespace.Multi
         )
     end
@@ -441,7 +446,7 @@ M.move_selections_vertical = function(length)
 
     local row, col = get_position(main)
     M.create_extmark(
-        { s_col = col, e_col = col + 1, s_row = row },
+        { s_col = col, e_col = col + 1, s_row = row, e_row = row },
         M.namespace.Main
     )
     M.move_cursor { row + 1, col + 1 }
@@ -449,7 +454,7 @@ M.move_selections_vertical = function(length)
     for _, mark in pairs(marks) do
         row, col = get_position(mark)
         M.create_extmark(
-            { s_col = col, finish = col + 1, row = row },
+            { s_col = col, finish = col + 1, row = row, e_row = row },
             M.namespace.Multi
         )
     end
@@ -519,6 +524,10 @@ end
 M.move_cursor = function(pos, current)
     if not current then
         current = api.nvim_win_get_cursor(0)
+    end
+
+    if pos[2] < 1 then
+        pos[2] = 0
     end
 
     api.nvim_buf_set_mark(0, "'", current[1], current[2], {})

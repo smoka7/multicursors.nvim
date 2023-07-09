@@ -433,6 +433,7 @@ M.new_under_cursor = function()
     ---@type Match
     local match = {
         s_row = cursor[1] - 1,
+        e_row = cursor[1] - 1,
         s_col = cursor[2],
         e_col = cursor[2] + 1,
     }
