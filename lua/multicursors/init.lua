@@ -10,33 +10,64 @@ local utils = require 'multicursors.utils'
 ---@type NormalMode
 local normal_mode = require 'multicursors.normal_mode'
 
+---@type Layers
+local layers = require 'multicursors.layers'
+
 local M = {}
 
----@param config Config
-local function create_commands(config)
+local function create_commands()
     vim.api.nvim_create_user_command('MCstart', function()
-        normal_mode.start(config)
+        M.cursor_word()
     end, {})
 
     vim.api.nvim_create_user_command('MCvisual', function()
-        normal_mode.search_selected(config)
+        M.search_visual()
     end, { range = 0 })
 
     vim.api.nvim_create_user_command('MCunderCursor', function()
-        normal_mode.new_selection(config)
+        M.new_under_cursor()
     end, {})
 
     vim.api.nvim_create_user_command('MCclear', function()
-        utils.exit()
+        M.exit()
     end, {})
 
     vim.api.nvim_create_user_command('MCpattern', function()
-        normal_mode.pattern(config, true)
+        M.new_pattern()
     end, {})
 
     vim.api.nvim_create_user_command('MCvisualPattern', function()
-        normal_mode.pattern(config, false)
+        M.new_pattern_visual()
     end, { range = 0 })
+end
+
+M.cursor_word = function()
+    normal_mode.find_cursor_word()
+    layers.normal_hydra:activate()
+end
+
+M.new_under_cursor = function()
+    normal_mode.new_under_cursor()
+    layers.normal_hydra:activate()
+end
+
+M.search_visual = function()
+    normal_mode.search_selected()
+    layers.normal_hydra:activate()
+end
+
+M.new_pattern = function()
+    normal_mode.pattern(true)
+    layers.normal_hydra:activate()
+end
+
+M.new_pattern_visual = function()
+    normal_mode.pattern(false)
+    layers.normal_hydra:activate()
+end
+
+M.exit = function()
+    utils.exit()
 end
 
 ---@param opts Config
@@ -53,8 +84,10 @@ M.setup = function(opts)
     })
 
     if config.create_commands then
-        create_commands(config)
+        create_commands()
     end
+
+    layers.create_normal_hydra(config)
 end
 
 return M
