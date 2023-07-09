@@ -14,7 +14,6 @@ local normal_keys = {
     [','] = { method = N.clear_others, desc = 'Clear others' },
     ['j'] = { method = N.create_down, desc = 'Create down' },
     ['k'] = { method = N.create_up, desc = 'Create up' },
-    ['d'] = { method = N.delete, desc = 'Delete' },
     ['.'] = { method = N.dot_repeat, desc = 'Dot repeat' },
     ['n'] = { method = N.find_next, desc = 'Find next' },
     ['q'] = { method = N.skip_find_next, desc = 'Skip find next' },
@@ -29,7 +28,11 @@ local normal_keys = {
     ['J'] = { method = N.skip_create_down, desc = 'Skip create down' },
     ['K'] = { method = N.skip_create_up, desc = 'Skip create up' },
     ['y'] = { method = N.yank, desc = 'Yank' },
+    ['Y'] = { method = N.yank_end, desc = 'Yank end' },
+    ['yy'] = { method = N.yank_line, desc = 'Yank line' },
+    ['d'] = { method = N.delete, desc = 'Delete' },
     ['dd'] = { method = N.delete_line, desc = 'Delete line' },
+    ['D'] = { method = N.delete_end, desc = 'Delete end' },
 }
 
 --- TODO highlight custumization

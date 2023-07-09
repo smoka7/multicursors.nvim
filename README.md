@@ -62,7 +62,6 @@ Install with your preferred package manager:
         [','] = { method = N.clear_others, desc = 'Clear others' },
         ['j'] = { method = N.create_down, desc = 'Create down' },
         ['k'] = { method = N.create_up, desc = 'Create up' },
-        ['d'] = { method = N.delete, desc = 'Delete' },
         ['.'] = { method = N.dot_repeat, desc = 'Dot repeat' },
         ['n'] = { method = N.find_next, desc = 'Find next' },
         ['q'] = { method = N.skip_find_next, desc = 'Skip find next' },
@@ -77,6 +76,10 @@ Install with your preferred package manager:
         ['J'] = { method = N.skip_create_down, desc = 'Skip create down' },
         ['K'] = { method = N.skip_create_up, desc = 'Skip create up' },
         ['y'] = { method = N.yank, desc = 'Yank' },
+        ['Y'] = { method = N.yank_end, desc = 'Yank end' },
+        ['yy'] = { method = N.yank_line, desc = 'Yank line' },
+        ['d'] = { method = N.delete, desc = 'Delete' },
+        ['D'] = { method = N.delete_end, desc = 'Delete end' },
         ['dd'] = { method = N.delete_line, desc = 'Delete line' },
     },
 }
@@ -122,9 +125,13 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `p` | Puts the text inside `unnamed register` before selections |
 | `P` | Puts the text inside `unnamed register` after selections |
 | `y` | Yanks the text inside selection to `unnamed register` |
+| `Y` | Yanks the text from start of selection till end of line to `unnamed register` |
+| `yy` | Yanks the line of selection to `unnamed register` |
 | `z` | Aligns selections by adding space before selections |
 | `Z` | Aligns selections by adding space at beginning of line |
-| `d` | Delete the text inside selections |
+| `d` | Deletes the text inside selections |
+| `D` | Deletes the text from start of selection till end of line |
+| `dd` | Deletes line of selections |
 | `@` | Executes a macro at beginning of every selection |
 | `.` | Reapets last change at the beginning of every selection |
 | `,` | Clears All Selections except the main one |

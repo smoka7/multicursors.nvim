@@ -209,10 +209,11 @@ M.normal_command = function()
             end
             utils.call_on_selections(function(mark)
                 api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
-                vim.cmd('normal! ' .. input)
+                vim.cmd('normal ' .. input)
             end, true, true)
         end
     )
+    vim.cmd [[redraw!]]
 end
 
 --- Puts the text inside unnamed register before or after selections
@@ -300,10 +301,20 @@ M.delete = function()
     vim.cmd 'redraw!'
 end
 
+--- Deletes the line on selection
 M.delete_line = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd [[ normal! "_dd ]]
+    end, true, true)
+    vim.cmd 'redraw!'
+end
+
+--- Deletes from start of selection till the end of line
+M.delete_end = function()
+    utils.call_on_selections(function(mark)
+        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+        vim.cmd [[ normal! "_D ]]
     end, true, true)
     vim.cmd 'redraw!'
 end
@@ -322,6 +333,30 @@ M.yank = function()
             {}
         )
         contents[#contents + 1] = text[1]
+    end, true, true)
+    vim.fn.setreg('', contents)
+end
+
+--- Yanks the text in the selection line
+M.yank_line = function()
+    ---@type string[]
+    local contents = {}
+    utils.call_on_selections(function(mark)
+        local text =
+            api.nvim_buf_get_lines(0, mark[1], mark[3].end_row + 1, true)
+        contents[#contents + 1] = text[1]
+    end, true, true)
+    vim.fn.setreg('', contents)
+end
+
+--- Yanks the text from start of the selection till end of line
+M.yank_end = function()
+    ---@type string[]
+    local contents = {}
+    utils.call_on_selections(function(mark)
+        local text =
+            api.nvim_buf_get_lines(0, mark[1], mark[3].end_row + 1, true)
+        contents[#contents + 1] = text[1]:sub(mark[2] + 1)
     end, true, true)
     vim.fn.setreg('', contents)
 end
@@ -418,13 +453,6 @@ M.pattern = function(whole_buffer)
         end
     end
 end
-
---- Selects the word under the cursor and starts listening for the actions
-M.start = function()
-    M.find_cursor_word()
-end
-
---- Selects the char under the cursor and starts listening for the actions
 
 --- Selects the char under the cursor as main selection
 M.new_under_cursor = function()
