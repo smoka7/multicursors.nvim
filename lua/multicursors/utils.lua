@@ -348,28 +348,32 @@ M.update_selections = function(before)
     M.exit()
 
     local col = main[4].end_col - 1
+    local row = main[4].end_row
     if before == M.position.before then
         col = main[3] - 1
+        row = main[2]
     else
         M.move_cursor { main[4].end_row + 1, main[4].end_col }
     end
 
     M.create_extmark({
-        s_row = main[4].end_row,
-        e_row = main[4].end_row,
+        s_row = row,
+        e_row = row,
         s_col = col,
         e_col = col + 1,
     }, M.namespace.Main)
 
     for _, mark in pairs(marks) do
         col = mark[4].end_col - 1
+        row = mark[4].end_row
         if before == M.position.before then
             col = mark[3] - 1
+            row = mark[2]
         end
 
         M.create_extmark({
-            s_row = mark[4].end_row,
-            e_row = main[4].end_row,
+            s_row = row,
+            e_row = row,
             s_col = col,
             e_col = col + 1,
         }, M.namespace.Multi)
