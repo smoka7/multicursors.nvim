@@ -458,7 +458,7 @@ M.move_selections_vertical = function(length)
     for _, mark in pairs(marks) do
         row, col = get_position(mark)
         M.create_extmark(
-            { s_col = col, finish = col + 1, row = row, e_row = row },
+            { s_col = col, e_col = col + 1, s_row = row, e_row = row },
             M.namespace.Multi
         )
     end
