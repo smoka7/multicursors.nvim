@@ -18,6 +18,7 @@ Install with your preferred package manager:
     },
     opts = function()
         local N = require 'multicursors.normal_mode'
+        local I = require 'multicursors.insert_mode'
         return {
             normal_keys = {
                 -- to change default lhs of key mapping change the key
@@ -26,6 +27,15 @@ Install with your preferred package manager:
                     method = N.clear_others, 
                     -- description to show in hint window
                     desc = 'Clear others' 
+                },
+            }, 
+            insert_keys = {
+                -- to change default lhs of key mapping change the key
+                ['<CR>'] = { 
+                    -- assigning nil to method exits from multi cursor mode 
+                    method = I.Cr_method, 
+                    -- description to show in hint window
+                    desc = 'new line' 
                 },
             },
         }
@@ -50,38 +60,8 @@ Install with your preferred package manager:
     DEBUG_MODE = false,
     create_commands = true, -- create Multicursor user commands
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
-    normal_keys = {
-        ['z'] = {
-            method = N.align_selections_before,
-            desc = 'Align selections before',
-        },
-        ['Z'] = {
-            method = N.align_selections_start,
-            desc = 'Align selections start',
-        },
-        [','] = { method = N.clear_others, desc = 'Clear others' },
-        ['j'] = { method = N.create_down, desc = 'Create down' },
-        ['k'] = { method = N.create_up, desc = 'Create up' },
-        ['.'] = { method = N.dot_repeat, desc = 'Dot repeat' },
-        ['n'] = { method = N.find_next, desc = 'Find next' },
-        ['q'] = { method = N.skip_find_next, desc = 'Skip find next' },
-        ['Q'] = { method = N.skip_find_prev, desc = 'Skip find prev' },
-        ['N'] = { method = N.find_prev, desc = 'Find prev' },
-        [']'] = { method = N.goto_next, desc = 'Goto next' },
-        ['['] = { method = N.goto_prev, desc = 'Goto prev' },
-        ['p'] = { method = N.paste_after, desc = 'Paste after' },
-        ['P'] = { method = N.paste_before, desc = 'Paste before' },
-        ['@'] = { method = N.run_macro, desc = 'Run macro' },
-        [':'] = { method = N.normal_command, desc = 'Normal command' },
-        ['J'] = { method = N.skip_create_down, desc = 'Skip create down' },
-        ['K'] = { method = N.skip_create_up, desc = 'Skip create up' },
-        ['y'] = { method = N.yank, desc = 'Yank' },
-        ['Y'] = { method = N.yank_end, desc = 'Yank end' },
-        ['yy'] = { method = N.yank_line, desc = 'Yank line' },
-        ['d'] = { method = N.delete, desc = 'Delete' },
-        ['D'] = { method = N.delete_end, desc = 'Delete end' },
-        ['dd'] = { method = N.delete_line, desc = 'Delete line' },
-    },
+    normal_keys = normal_keys,
+    insert_keys = insert_keys
 }
 ```
 </details>
@@ -148,13 +128,22 @@ Note that keys which aren't mapped **do not affect other selections** .
 
 | Key | Description |
 |---|---|
-| `<Esc>`    | Clear the selections and go back to normal mode |
-| `<BS>`    | Delete the char under the selections |
-| `<Left>`  | Move the selections to Left |
-| `<Up>`    | Move the selections to Up |
-| `<Right>` | Move the selections to Right |
-| `<Down>`  | Move the selections to Down |
-| `<C-v>`  | Pastes the text from system clipboard |
+| `<Esc>`   | Goes back to multicursor normal mode |
+| `<C-c>`   | Goes back to multicursor normal mode |
+| `<BS>`    | Deletes the char before the selections |
+| `<Del>`   | Deletes the char under the selections |
+| `<Left>`  | Moves the selections one char Left |
+| `<Up>`    | Moves the selections one line Up |
+| `<Right>` | Moves the selections one char Right |
+| `<Down>`  | Moves the selections one line Down |
+| `<Home>`  | Moves the selections to start of line |
+| `<End>`   | Moves the selections to end of line |
+| `<CR>`    | Insert one line below the selections |
+| `<C-j>`   | Insert one line below the selections |
+| `<C-v>`   | Pastes the text from system clipboard |
+| `<C-r>`   | Insert the contents of a register |
+| `<C-w>`   | Deletes one word before the selections |
+| `<C-u>`   | Deletes froms start of selections till start of line |
 
 </details>
 

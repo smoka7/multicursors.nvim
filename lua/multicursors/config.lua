@@ -1,6 +1,9 @@
 ---@type NormalMode
 local N = require 'multicursors.normal_mode'
 
+---@type InsertMode
+local I = require 'multicursors.insert_mode'
+
 ---@class Dictionary: { [string]: Action }
 local normal_keys = {
     ['z'] = {
@@ -35,6 +38,28 @@ local normal_keys = {
     ['D'] = { method = N.delete_end, desc = 'Delete end' },
 }
 
+---@class Dictionary: { [string]: Action }
+local insert_keys = {
+
+    ['<BS>'] = { method = I.BS_method, desc = '' },
+    ['<CR>'] = { method = I.CR_method, desc = '' },
+    ['<Del>'] = { method = I.Del_method, desc = '' },
+
+    ['<C-w>'] = { method = I.C_w_method, desc = '' },
+    ['<C-u>'] = { method = I.C_u_method, desc = '' },
+    ['<C-j>'] = { method = I.CR_method, desc = '' },
+
+    ['<Esc>'] = { method = nil, desc = '' },
+    ['<C-c>'] = { method = nil, desc = '' },
+
+    ['<End>'] = { method = I.End_method, desc = '' },
+    ['<Home>'] = { method = I.Home_method, desc = '' },
+    ['<Right>'] = { method = I.Right_method, desc = '' },
+    ['<Left>'] = { method = I.Left_method, desc = '' },
+    ['<Down>'] = { method = I.Down_method, desc = '' },
+    ['<Up>'] = { method = I.UP_method, desc = '' },
+}
+
 --- TODO highlight custumization
 ---@class Config
 local M = {
@@ -42,6 +67,7 @@ local M = {
     create_commands = true, -- create Multicursor user commands
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
     normal_keys = normal_keys,
+    insert_keys = insert_keys,
 }
 
 return M

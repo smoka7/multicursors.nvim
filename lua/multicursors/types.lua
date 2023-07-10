@@ -6,7 +6,7 @@
 ---@field e_col integer end column
 
 ---@class Action
----@field method function
+---@field method function?
 ---@field opts table
 
 ---@class Point

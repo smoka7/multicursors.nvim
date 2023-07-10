@@ -38,7 +38,7 @@ L.generate_normal_heads = function(config)
         vim.b.MultiCursorInsert = true
 
         callback()
-        L.create_insert_hydra()
+        L.create_insert_hydra(config)
         L.insert_hydra:activate()
     end
     heads[#heads + 1] = {
@@ -100,20 +100,26 @@ L.create_normal_hydra = function(config)
     }
 end
 
----
+---@param config Config
 ---@return table
-L.generate_insert_heads = function()
-    return {
-        { '<BS>', insert_mode.BS_method },
-        { '<Left>', insert_mode.Left_method },
-        { '<Esc>', nil },
-        { '<Right>', insert_mode.Right_method },
-        { '<Up>', insert_mode.UP_method },
-        { '<Down>', insert_mode.Down_method },
-    }
+L.generate_insert_heads = function(config)
+    local heads = {}
+    for i, value in pairs(config.insert_keys) do
+        if value.method then
+            heads[#heads + 1] = {
+                i,
+                value.method,
+                {
+                    desc = value.desc,
+                },
+            }
+        end
+    end
+    return heads
 end
 
-L.create_insert_hydra = function()
+---@param config Config
+L.create_insert_hydra = function(config)
     L.insert_hydra = Hydra {
         name = 'Multi Cursor insert',
         hint = [[Multi Cursor Insert]],
@@ -131,7 +137,7 @@ L.create_insert_hydra = function()
             end,
             color = 'pink',
         },
-        heads = L.generate_insert_heads(),
+        heads = L.generate_insert_heads(config),
     }
 end
 
