@@ -47,7 +47,7 @@ local find_next = function(skip)
     local line_count = api.nvim_buf_line_count(0)
     local cursor = api.nvim_win_get_cursor(0)
     local row_idx = cursor[1]
-    local column = cursor[2]
+    local column = cursor[2] + 1
     local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
 
     -- search the same line as cursor with cursor col as offset cursor
@@ -88,14 +88,14 @@ end
 M.find_next = function()
     local match = find_next(false)
     if match then
-        utils.move_cursor { match.e_row + 1, match.e_col + 1 }
+        utils.move_cursor { match.e_row + 1, match.e_col - 1 }
     end
 end
 
 M.skip_find_next = function()
     local match = find_next(true)
     if match then
-        utils.move_cursor { match.e_row + 1, match.e_col + 1 }
+        utils.move_cursor { match.e_row + 1, match.e_col - 1 }
     end
 end
 
@@ -169,14 +169,14 @@ end
 M.find_prev = function()
     local match = find_prev(false)
     if match then
-        utils.move_cursor { match.s_row + 1, match.s_col - 1 }
+        utils.move_cursor { match.s_row + 1, match.s_col }
     end
 end
 
 M.skip_find_prev = function()
     local match = find_prev(true)
     if match then
-        utils.move_cursor { match.s_row + 1, match.s_col - 1 }
+        utils.move_cursor { match.s_row + 1, match.s_col }
     end
 end
 

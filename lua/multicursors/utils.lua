@@ -225,8 +225,6 @@ M.mark_found_match = function(match, skip)
     M.create_extmark(match, M.namespace.Main)
     --deletes the selection when there was a selection there
     M.delete_extmark(match, M.namespace.Multi)
-
-    M.move_cursor({ match.s_row + 1, match.s_col }, nil)
 end
 
 --- Swaps the next selection with main selection
@@ -346,10 +344,10 @@ M.update_selections = function(before)
     local main = M.get_main_selection(true)
     M.exit()
 
-    local col = main[4].end_col - 1
+    local col = main[4].end_col
     local row = main[4].end_row
     if before == M.position.before then
-        col = main[3] - 1
+        col = main[3]
         row = main[2]
         M.move_cursor { main[4].end_row + 1, main[3] }
     else
@@ -359,23 +357,23 @@ M.update_selections = function(before)
     M.create_extmark({
         s_row = row,
         e_row = row,
-        s_col = col,
-        e_col = col + 1,
+        s_col = col - 1,
+        e_col = col,
     }, M.namespace.Main)
 
     for _, mark in pairs(marks) do
-        col = mark[4].end_col - 1
+        col = mark[4].end_col
         row = mark[4].end_row
         if before == M.position.before then
-            col = mark[3] - 1
+            col = mark[3]
             row = mark[2]
         end
 
         M.create_extmark({
             s_row = row,
             e_row = row,
-            s_col = col,
-            e_col = col + 1,
+            s_col = col - 1,
+            e_col = col,
         }, M.namespace.Multi)
     end
 end
@@ -524,17 +522,17 @@ end
 --- Moves the cursor to pos and marks current cursor position in jumplist
 --- htpps://github.com/neovim/neovim/issues/20793
 ---@param pos any[]
----@param current any[]?
+---@param current boolean?
 M.move_cursor = function(pos, current)
-    if not current then
-        current = api.nvim_win_get_cursor(0)
+    if current then
+        local cur = api.nvim_win_get_cursor(0)
+        api.nvim_buf_set_mark(0, "'", cur[1], cur[2], {})
     end
 
     if pos[2] < 1 then
         pos[2] = 0
     end
 
-    api.nvim_buf_set_mark(0, "'", current[1], current[2], {})
     api.nvim_win_set_cursor(0, { pos[1], pos[2] })
 end
 
