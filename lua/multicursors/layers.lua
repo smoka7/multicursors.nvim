@@ -126,9 +126,7 @@ L.create_insert_hydra = function(config)
         mode = 'i',
         config = {
             buffer = 0,
-            on_enter = function()
-                vim.cmd.redraw()
-            end,
+            on_enter = function() end,
             on_exit = function()
                 insert_mode.exit()
                 vim.defer_fn(function()

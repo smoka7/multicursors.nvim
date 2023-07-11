@@ -89,7 +89,6 @@ M.find_next = function()
     local match = find_next(false)
     if match then
         utils.move_cursor { match.e_row + 1, match.e_col + 1 }
-        vim.cmd [[redraw!]]
     end
 end
 
@@ -97,7 +96,6 @@ M.skip_find_next = function()
     local match = find_next(true)
     if match then
         utils.move_cursor { match.e_row + 1, match.e_col + 1 }
-        vim.cmd [[redraw!]]
     end
 end
 
@@ -172,7 +170,6 @@ M.find_prev = function()
     local match = find_prev(false)
     if match then
         utils.move_cursor { match.s_row + 1, match.s_col - 1 }
-        vim.cmd [[redraw!]]
     end
 end
 
@@ -180,7 +177,6 @@ M.skip_find_prev = function()
     local match = find_prev(true)
     if match then
         utils.move_cursor { match.s_row + 1, match.s_col - 1 }
-        vim.cmd [[redraw!]]
     end
 end
 
@@ -213,7 +209,6 @@ M.normal_command = function()
             end, true, true)
         end
     )
-    vim.cmd [[redraw!]]
 end
 
 --- Puts the text inside unnamed register before or after selections
@@ -227,7 +222,6 @@ local paste = function(pos)
 
         api.nvim_win_set_cursor(0, position)
         vim.cmd 'normal! P'
-        vim.cmd 'redraw!'
     end, true, true)
 end
 
@@ -245,13 +239,11 @@ M.dot_repeat = function()
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd 'normal! .'
     end, true, true)
-    vim.cmd 'redraw!'
 end
 
 --- Clears the selections Except the main one
 M.clear_others = function()
     utils.clear_namespace(utils.namespace.Multi)
-    vim.cmd 'redraw!'
 end
 
 --- Aligns the selections by adding space
@@ -298,7 +290,6 @@ M.delete = function()
             {}
         )
     end, true, true)
-    vim.cmd 'redraw!'
 end
 
 --- Deletes the line on selection
@@ -307,7 +298,6 @@ M.delete_line = function()
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd [[ normal! "_dd ]]
     end, true, true)
-    vim.cmd 'redraw!'
 end
 
 --- Deletes from start of selection till the end of line
@@ -316,7 +306,6 @@ M.delete_end = function()
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
         vim.cmd [[ normal! "_D ]]
     end, true, true)
-    vim.cmd 'redraw!'
 end
 
 --- Yanks the text inside selections to unnamed register

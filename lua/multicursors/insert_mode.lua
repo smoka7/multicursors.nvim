@@ -203,7 +203,6 @@ M.exit = function()
         true
     )
     vim.b.MultiCursorInsert = nil
-    vim.cmd [[redraw!]]
 end
 
 return M

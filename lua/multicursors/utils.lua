@@ -49,7 +49,6 @@ M.create_extmark = function(match, namespace)
         end_col = match.e_col,
         hl_group = namespace,
     })
-    vim.cmd [[ redraw! ]]
     return s
 end
 
