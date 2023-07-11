@@ -48,6 +48,7 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
                 s_col = match[2] + start_col,
                 e_col = match[3] + start_col,
                 s_row = start_row,
+                e_row = start_row,
             }
         end
     until match and match[2] == -1 and match[3] == -1
@@ -61,6 +62,7 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
                     s_col = match[2],
                     e_col = match[3],
                     s_row = start_row + i - 1,
+                    e_row = start_row + i - 1,
                 }
             end
         until match and match[2] == -1 and match[3] == -1

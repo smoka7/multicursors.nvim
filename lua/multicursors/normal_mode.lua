@@ -444,6 +444,9 @@ M.pattern = function(whole_buffer)
         utils.clear_namespace 'MultiCursor'
         utils.clear_namespace 'MultiCursorMain'
 
+        api.nvim_echo({}, false, {})
+        api.nvim_echo({ { 'enter a pattern : ' .. pattern } }, false, {})
+
         if pattern ~= '' then
             if not whole_buffer then
                 search.find_all_matches(content, pattern, start.row, start.col)
