@@ -352,6 +352,7 @@ M.update_selections = function(before)
     if before == M.position.before then
         col = main[3] - 1
         row = main[2]
+        M.move_cursor { main[4].end_row + 1, main[3] }
     else
         M.move_cursor { main[4].end_row + 1, main[4].end_col }
     end
