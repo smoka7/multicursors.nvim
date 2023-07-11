@@ -302,6 +302,7 @@ end
 --- Searches for multi line pattern in buffer
 ---@param pattern string
 ---@param pos ActionPosition
+---@return Match?
 S.multiline_string = function(pattern, pos)
     local s, e
     if pos == utils.position.after then
