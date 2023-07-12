@@ -2,7 +2,7 @@
 ---@class Match
 ---@field s_row integer start row
 ---@field s_col integer start column
----@field e_row integer? end row
+---@field e_row integer end row
 ---@field e_col integer end column
 
 ---@class Action

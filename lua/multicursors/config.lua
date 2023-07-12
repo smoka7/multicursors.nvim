@@ -4,6 +4,9 @@ local N = require 'multicursors.normal_mode'
 ---@type InsertMode
 local I = require 'multicursors.insert_mode'
 
+---@type ExtendMode
+local E = require 'multicursors.extend_mode'
+
 ---@class Dictionary: { [string]: Action }
 local normal_keys = {
     ['z'] = {
@@ -39,6 +42,21 @@ local normal_keys = {
 }
 
 ---@class Dictionary: { [string]: Action }
+local extend_keys = {
+    ['w'] = { method = E.w_method },
+    ['e'] = { method = E.e_method },
+    ['b'] = { method = E.b_method },
+    ['o'] = { method = E.o_method },
+    ['O'] = { method = E.o_method },
+    ['h'] = { method = E.h_method },
+    ['j'] = { method = E.j_method },
+    ['k'] = { method = E.k_method },
+    ['l'] = { method = E.l_method },
+    ['^'] = { method = E.caret_method },
+    ['$'] = { method = E.dollar_method },
+}
+
+---@class Dictionary: { [string]: Action }
 local insert_keys = {
 
     ['<BS>'] = { method = I.BS_method, desc = '' },
@@ -68,6 +86,7 @@ local M = {
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
     normal_keys = normal_keys,
     insert_keys = insert_keys,
+    extend_keys = extend_keys,
 }
 
 return M

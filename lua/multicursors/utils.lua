@@ -20,6 +20,26 @@ M.namespace = {
     Multi = 'MultiCursor',
 }
 
+--- Checks that start is less than the end
+--- otherwise swap themes.
+---@param match Match
+---@return Match
+local function check_match_bounds(match)
+    if
+        match.s_row > match.e_row
+        or (match.s_row == match.e_row and match.s_col > match.e_col)
+    then
+        local t = match.s_row
+        match.s_row = match.e_row
+        match.e_row = t
+        t = match.s_col
+        match.s_col = match.e_col
+        match.e_col = t
+    end
+
+    return match
+end
+
 --- creates a extmark for the the match
 --- doesn't create a duplicate mark
 ---@param match Match
@@ -43,6 +63,8 @@ M.create_extmark = function(match, namespace)
         M.debug('found ' .. #marks .. ' duplicate marks:')
         return marks[1][1]
     end
+
+    match = check_match_bounds(match)
 
     local s = api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
         end_row = match.e_row,

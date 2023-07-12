@@ -63,7 +63,6 @@ end
 
 ---@param config Config
 local function set_insert_autocommands(config)
-    vim.b.MultiCursorInsert = true
     M._on_insert_enter(config)
     M._on_cursor_hold()
     M._on_insert_char_pre()
@@ -202,7 +201,7 @@ M.exit = function()
         'n',
         true
     )
-    vim.b.MultiCursorInsert = nil
+    vim.b.MultiCursorSubLayer = nil
 end
 
 return M
