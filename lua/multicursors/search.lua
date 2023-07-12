@@ -170,6 +170,7 @@ S.create_down = function(skip)
         { s_row = row, e_row = row, s_col = col, e_col = finish },
         skip
     )
+    utils.move_cursor({ row + 1, col }, nil)
 end
 
 --- Creates a selection on the char above the cursor
@@ -201,6 +202,7 @@ S.create_up = function(skip)
         { s_row = row, e_row = row, s_col = col, e_col = finish },
         skip
     )
+    utils.move_cursor({ row + 1, col }, nil)
 end
 
 --- Finds the actual row,col for start and end of match
