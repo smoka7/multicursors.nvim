@@ -54,6 +54,7 @@ local extend_keys = {
     ['l'] = { method = E.l_method },
     ['^'] = { method = E.caret_method },
     ['$'] = { method = E.dollar_method },
+    ['c'] = { method = E.custom_method },
 }
 
 ---@class Dictionary: { [string]: Action }

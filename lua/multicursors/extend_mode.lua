@@ -124,6 +124,16 @@ E.b_method = function()
     extend_selections 'b'
 end
 
+E.custom_method = function()
+    ---@param motion string
+    vim.ui.input({ prompt = 'Enter a motion: ' }, function(motion)
+        if not motion then
+            return
+        end
+        extend_selections(motion)
+    end)
+end
+
 --- Toggles the anchor position
 E.o_method = function()
     local main = utils.get_main_selection(true)
