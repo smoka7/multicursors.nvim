@@ -5,9 +5,20 @@ local api = vim.api
 ---@class ExtendMode
 local E = {}
 
---- Perform the motion and finds the new range
---- for selection.
---- TODO change anchor when motion passes it
+---@param a integer[]
+---@param b integer[]
+---@return boolean
+local function smaller(a, b)
+    if a[1] < b[1] then
+        return true
+    end
+    if a[1] == b[1] and a[2] <= b[2] then
+        return true
+    end
+    return false
+end
+
+--- Perform the motion and finds the new range for selection.
 ---@param mark any[]
 ---@param motion string
 ---@return Match
@@ -16,10 +27,10 @@ local get_new_position = function(mark, motion)
 
     -- modify float so it has same indexing as win_set_cursor
     local float = { mark[1] + 1, mark[2] - 1 }
-    local anchor = { mark[3].end_row, mark[3].end_col }
+    local anchor = { mark[3].end_row + 1, mark[3].end_col - 1 }
 
     if vim.b.MultiCursorAnchorStart then
-        anchor = { mark[1], mark[2] }
+        anchor = { mark[1] + 1, mark[2] - 1 }
         float = { mark[3].end_row + 1, mark[3].end_col - 1 }
     end
 
@@ -31,14 +42,25 @@ local get_new_position = function(mark, motion)
         new_pos = api.nvim_win_get_cursor(0)
     end)
 
+    -- Revert back the modified values
     ---@type Match
     local match = {
-        s_row = anchor[1],
-        s_col = anchor[2],
-        -- revert back the modified values
+        s_row = anchor[1] - 1,
+        s_col = anchor[2] + 1,
         e_row = new_pos[1] - 1,
         e_col = new_pos[2] + 1,
     }
+
+    -- INFO we could change the anchor here like how visual mode does it
+    -- but for multiple selections is easy to mess up selections
+    -- When motion goes past the anchor do not modify the selection
+    if smaller(anchor, float) and smaller(new_pos, anchor) then
+        match.e_row = float[1] - 1
+        match.e_col = float[2] + 1
+    elseif smaller(float, anchor) and smaller(anchor, new_pos) then
+        match.e_row = float[1] - 1
+        match.e_col = float[2] + 1
+    end
 
     return match
 end
