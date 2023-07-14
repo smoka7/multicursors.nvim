@@ -54,12 +54,13 @@ local get_new_position = function(mark, motion)
     -- INFO we could change the anchor here like how visual mode does it
     -- but for multiple selections is easy to mess up selections
     -- When motion goes past the anchor do not modify the selection
-    if smaller(anchor, float) and smaller(new_pos, anchor) then
+    if
+        (smaller(anchor, float) and smaller(new_pos, anchor))
+        or (smaller(float, anchor) and smaller(anchor, new_pos))
+    then
         match.e_row = float[1] - 1
         match.e_col = float[2] + 1
-    elseif smaller(float, anchor) and smaller(anchor, new_pos) then
-        match.e_row = float[1] - 1
-        match.e_col = float[2] + 1
+        api.nvim_win_set_cursor(0, float)
     end
 
     return match
