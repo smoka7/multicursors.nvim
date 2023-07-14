@@ -62,6 +62,7 @@ Install with your preferred package manager:
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
     normal_keys = normal_keys,
     insert_keys = insert_keys
+    extend_keys = extend_keys
 }
 ```
 </details>
@@ -91,6 +92,7 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `<C-c>` | Clear the selections and go back to normal mode |
 | `i` | Enters insert mode |
 | `a` | Enters append mode |
+| `e` | Enters extend mode |
 | `c` | Deletes the text inside selections and starts insert mode |
 | `n` | Finds the next match after the main selection |
 | `N` | Finds the previous match before the main selection |
@@ -121,7 +123,7 @@ Note that keys which aren't mapped **do not affect other selections** .
 
 </details>
 
-### insert and append mode:
+### Insert, Append and Change mode:
 
 <details>
   <summary>Click me</summary>
@@ -147,16 +149,35 @@ Note that keys which aren't mapped **do not affect other selections** .
 
 </details>
 
+### Extend mode
+Once you enter the Extend mode, you have the ability to expand or shrink your selections using Vim motions.
+The anchor represents one side of the selection and stays put, while the other side moves based on the performed motion.
+<details>
+  <summary>Click me</summary>
+
+| Key | Description |
+|---|---|
+| `<Esc>`   | Goes back to multicursor normal mode |
+| `c` | Prompts user for a motion and performs it |
+| `o` | Toggles the anchor's side |
+| `O` | Toggles the anchor's side |
+| `w` | `[count]` word foreward |
+| `e` | `[count]` foreward to end of word |
+| `b` | `[count]` word backward |
+| `h` | `[count]` char left |
+| `j` | `[count]` char down |
+| `k` | `[count]` char up |
+| `l` | `[count]` char right |
+| `$` | `[count]` to end of line |
+| `^` | To the first non-blank character of the line |
+
+
+</details>
+
 ## TODOS
 - [ ] Move the selection by "ts" nodes (unclear)
-- [ ] Move the selection by Vim motions (unclear)
 - [ ] Support count + actions
-- [ ] Handle overlapping selections (for now we merge them)
 - [ ] Completion works, but doesn't clear duplicates
-- [ ] Should selection movements wrap vertically?
-- [ ] Should selection movements wrap horizontally?
-- [ ] Should `<bs>` wrap?
-- [ ] Should folded lines get ignored when searching?
 
 ## Acknowledgment
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
