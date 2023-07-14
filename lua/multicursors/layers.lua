@@ -35,7 +35,7 @@ L.generate_normal_heads = function(config)
     end
     local enter_insert = function(callback)
         -- tell hydra that we're going to insert mode so it doesn't clear the selection
-        vim.b.MultiCursorInsert = true
+        vim.b.MultiCursorSubLayer = true
 
         callback()
         L.create_insert_hydra(config)
@@ -76,6 +76,16 @@ L.generate_normal_heads = function(config)
         end,
         { desc = 'append mode', exit = true },
     }
+
+    heads[#heads + 1] = {
+        'e',
+        function()
+            vim.b.MultiCursorSubLayer = true
+            L.create_extend_hydra(config)
+            L.extend_hydra:activate()
+        end,
+        { desc = 'extend mode', exit = true },
+    }
     return heads
 end
 
@@ -87,9 +97,11 @@ L.create_normal_hydra = function(config)
         hint = [[Multi Cursor]],
         config = {
             buffer = 0,
-            on_enter = function() end,
+            on_enter = function()
+                vim.b.MultiCursorAnchorStart = true
+            end,
             on_exit = function()
-                if not vim.b.MultiCursorInsert then
+                if not vim.b.MultiCursorSubLayer then
                     utils.exit()
                 end
             end,
@@ -139,4 +151,44 @@ L.create_insert_hydra = function(config)
     }
 end
 
+---@param config Config
+---@return table
+L.generate_extend_head = function(config)
+    local heads = {}
+    for i, value in pairs(config.extend_keys) do
+        if value.method then
+            heads[#heads + 1] = {
+                i,
+                value.method,
+                {
+                    desc = value.desc,
+                },
+            }
+        end
+    end
+    return heads
+end
+
+---@param config Config
+L.create_extend_hydra = function(config)
+    L.extend_hydra = Hydra {
+        name = 'Multi Cursor Extend',
+        hint = [[Multi Cursor Extend]],
+        mode = 'n',
+        config = {
+            buffer = 0,
+            on_enter = function()
+                vim.cmd.redraw()
+            end,
+            on_exit = function()
+                vim.b.MultiCursorSubLayer = nil
+                vim.defer_fn(function()
+                    L.normal_hydra:activate()
+                end, 20)
+            end,
+            color = 'pink',
+        },
+        heads = L.generate_extend_head(config),
+    }
+end
 return L
