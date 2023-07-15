@@ -2,6 +2,10 @@
 local utils = require 'multicursors.utils'
 local api = vim.api
 
+local parsers = require 'nvim-treesitter.parsers'
+
+local ts = require 'multicursors.ts'
+
 ---@class ExtendMode
 local E = {}
 
@@ -147,4 +151,45 @@ E.o_method = function()
     vim.b.MultiCursorAnchorStart = true
 end
 
+local extend_selections_ts = function(callback)
+    if not parsers.has_parser() then
+        return
+    end
+    local marks = utils.get_all_selections(true)
+    local main = utils.get_main_selection(true)
+
+    utils.clear_namespace(utils.namespace.Main)
+    utils.clear_namespace(utils.namespace.Multi)
+
+    local new_pos
+    for _, selection in pairs(marks) do
+        new_pos = callback {
+            s_row = selection[2],
+            s_col = selection[3],
+            e_row = selection[4].end_row,
+            e_col = selection[4].end_col,
+        }
+        utils.create_extmark(new_pos, utils.namespace.Multi)
+    end
+
+    new_pos = callback {
+        s_row = main[2],
+        s_col = main[3],
+        e_row = main[4].end_row,
+        e_col = main[4].end_col,
+    }
+    utils.create_extmark(new_pos, utils.namespace.Main)
+end
+
+E.node_parent = function()
+    extend_selections_ts(ts.extend_node)
+end
+
+E.node_first_child = function()
+    extend_selections_ts(ts.get_first_child)
+end
+
+E.node_last_child = function()
+    extend_selections_ts(ts.get_last_child)
+end
 return E
