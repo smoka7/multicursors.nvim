@@ -57,6 +57,7 @@ local extend_keys = {
     ['y'] = { method = E.node_last_child },
     ['^'] = { method = E.caret_method },
     ['$'] = { method = E.dollar_method },
+    ['u'] = { method = E.undo_history },
     ['c'] = { method = E.custom_method },
 }
 

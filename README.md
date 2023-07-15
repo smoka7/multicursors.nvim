@@ -171,6 +171,7 @@ The anchor represents one side of the selection and stays put, while the other s
 | `t` | Extends the selection to the parent of selected node|
 | `r` | Shrinks the selection to first child of selected node |
 | `y` | Shrinks the selection to last child of selected node |
+| `u` | Undo Last selections extend or shrink |
 | `$` | `[count]` to end of line |
 | `^` | To the first non-blank character of the line |
 
