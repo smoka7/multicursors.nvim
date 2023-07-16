@@ -459,8 +459,6 @@ S.find_selected = function()
         false
     )
 
-    -- Gets the range of last selected text
-    --- FIXME multibyte characters doesn't get picked correctly
     local lines = utils.get_last_visual_range()
 
     -- when this command gets executed from a mapping it finds the next

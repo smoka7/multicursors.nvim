@@ -120,28 +120,23 @@ end
 --- Returns the text inside last visual selected range
 ---@return string[]
 M.get_last_visual_range = function()
-    local start = api.nvim_buf_get_mark(0, '<')
-    local end_ = api.nvim_buf_get_mark(0, '>')
+    local start = vim.fn.getpos "'<"
+    local end_ = vim.fn.getpos "'>"
+    local s_col = start[3] - 1
+    local e_col = end_[3]
 
-    if start[1] == end_[1] and start[2] == end_[2] then
-        return {}
+    local lines = api.nvim_buf_get_lines(0, start[2] - 1, end_[2], false)
+
+    if #lines == 0 then
+        return lines
+    elseif #lines == 1 then
+        lines[1] = vim.fn.strcharpart(lines[1], s_col, e_col - s_col)
+    else
+        lines[1] = vim.fn.strcharpart(lines[1], s_col, vim.v.maxcol)
+        lines[#lines] = vim.fn.strcharpart(lines[#lines], 0, e_col)
     end
 
-    -- when in visual line mode nvim returns v:maxcol instead of line length
-    -- so we have to find line length ourselves
-    local row = api.nvim_buf_get_lines(0, end_[1] - 1, end_[1], true)[1]
-    if end_[2] > string.len(row) then
-        end_[2] = string.len(row)
-    end
-
-    return api.nvim_buf_get_text(
-        0,
-        start[1] - 1,
-        start[2],
-        end_[1] - 1,
-        end_[2] + 1,
-        {}
-    )
+    return lines
 end
 
 --- Returns the main selection extmark
