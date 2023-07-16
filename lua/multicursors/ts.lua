@@ -23,15 +23,12 @@ local get_node_range = function(node)
     return node_range
 end
 
-local root = nil
-
 ---Returns parrent of node in range of match
 ---@param match Match
 ---@return Match
 T.extend_node = function(match)
-    if not root then
-        root = parsers.get_parser():parse()[1]:root()
-    end
+    local root = parsers.get_parser():parse()[1]:root()
+
     ---@type TSNode
     local node = root:named_descendant_for_range(
         match.s_row,
@@ -71,11 +68,8 @@ end
 ---@param match Match
 ---@return Match
 T.get_last_child = function(match)
-    --local root = parsers.get_parser():parse()[1]:root()
+    local root = parsers.get_parser():parse()[1]:root()
 
-    if not root then
-        root = parsers.get_parser():parse()[1]:root()
-    end
     ---@type TSNode
     local node = root:named_descendant_for_range(
         match.s_row,
@@ -100,9 +94,7 @@ end
 ---@param match Match
 ---@return Match
 T.get_first_child = function(match)
-    if not root then
-        root = parsers.get_parser():parse()[1]:root()
-    end
+    local root = parsers.get_parser():parse()[1]:root()
 
     ---@type TSNode
     local node = root:named_descendant_for_range(
