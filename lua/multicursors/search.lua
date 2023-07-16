@@ -360,34 +360,40 @@ end
 ---@return Match?
 S.multiline_string = function(pattern, pos)
     local s, e
+
+    -- escape regex patterns means very nomagic see :help \V
+    pattern = '\\V' .. pattern
+
+    -- 'b'	search Backward instead of forward
+    -- 'c'	accept a match at the Cursor position
+    -- 'e'	move to the End of the match
+    -- 'n'	do Not move the cursor
+    -- 'w'	Wrap around the end of the file
+    -- 'z'	start searching at the cursor column instead of Zero
+    local s_flags = 'wzn'
+    local e_flags = 'wzen'
+
     if pos == utils.position.after then
-        e = vim.fn.searchpos(pattern, 'wzen')
-        s = vim.fn.searchpos(pattern, 'wzn')
-        if s[1] == 0 and s[1] == 0 then
-            return
-        end
     elseif pos == utils.position.before then
-        e = vim.fn.searchpos(pattern, 'bwzen')
-        s = vim.fn.searchpos(pattern, 'bwzn')
-        if s[1] == 0 and s[1] == 0 then
-            return
-        end
+        s_flags = s_flags .. 'b'
+        e_flags = e_flags .. 'b'
     else
-        e = vim.fn.searchpos(pattern, 'wzecn')
-        s = vim.fn.searchpos(pattern, 'wzcn')
-        if s[1] == 0 and s[1] == 0 then
-            return
-        end
+        s_flags = s_flags .. 'c'
+        e_flags = e_flags .. 'c'
     end
 
-    local match = {
+    s = vim.fn.searchpos(pattern, s_flags)
+    e = vim.fn.searchpos(pattern, e_flags)
+    if s[1] == 0 and s[1] == 0 then
+        return
+    end
+
+    return {
         s_row = s[1] - 1,
         s_col = s[2] - 1,
         e_row = e[1] - 1,
         e_col = e[2],
     }
-
-    return match
 end
 
 --- Searches for a pattern across buffer and creates
