@@ -9,22 +9,8 @@ local search = require 'multicursors.search'
 ---@class InsertMode
 local insert_mode = require 'multicursors.insert_mode'
 
-local ESC = api.nvim_replace_termcodes('<Esc>', true, false, true)
-local CR = api.nvim_replace_termcodes('<cr>', true, false, true)
-local BS = api.nvim_replace_termcodes('<bs>', true, false, true)
-
 ---@class NormalMode
 local M = {}
-
---- Selects the word under the cursor as main selection
-M.find_cursor_word = function()
-    local match = search.find_cursor_word()
-    if not match then
-        return
-    end
-
-    utils.create_extmark(match, utils.namespace.Main)
-end
 
 M.find_next = function()
     local match = search.find_next(false)
@@ -73,6 +59,8 @@ M.run_macro = function()
     api.nvim_echo({}, false, {})
     api.nvim_echo({ { 'enter a macro register: ' } }, false, {})
     local register = utils.get_char()
+
+    local ESC = api.nvim_replace_termcodes('<Esc>', true, false, true)
     if not register or register == ESC then
         return
     end
@@ -244,124 +232,6 @@ M.yank_end = function()
         contents[#contents + 1] = text[1]:sub(selection.col + 1)
     end)
     vim.fn.setreg('', contents)
-end
-
---- Selects the text in visual mode
-M.search_selected = function()
-    -- Exit out of visual mode
-    -- TODO check from normal that it deosn't have side effects
-    api.nvim_feedkeys(
-        api.nvim_replace_termcodes('<Esc>', false, true, true),
-        'nx',
-        false
-    )
-
-    -- Gets the range of last selected text
-    --- FIXME multibyte characters doesn't get picked correctly
-    local start, end_ = utils.get_last_visual_range()
-    if not start or not end_ then
-        return
-    end
-
-    local lines = utils.get_buffer_content(start, end_)
-
-    -- joins the selected case with newlines
-    -- and searches for it
-    -- FIXME executed from command mode returns the selected range
-    -- but when from visaul mode with a mappings select next match
-    -- when cursur is at end of visual
-    local pattern = table.concat(lines, '\\n')
-    local match = search.multiline_string(pattern, 'on')
-    if not match then
-        return
-    end
-
-    vim.b.MultiCursorPattern = pattern
-    vim.b.MultiCursorMultiline = true
-
-    utils.create_extmark(match, utils.namespace.Main)
-    utils.move_cursor { match.e_row + 1, match.e_col + 1 }
-end
-
---- Searches for a pattern across buffer and creates
---- a selection for every match
----@param whole_buffer boolean
-M.pattern = function(whole_buffer)
-    local content, start, end_
-
-    if whole_buffer then
-        content = api.nvim_buf_get_lines(0, 0, -1, true)
-    else
-        start, end_ = utils.get_last_visual_range()
-        if not start or not end_ then
-            return
-        end
-        content = utils.get_buffer_content(start, end_)
-    end
-
-    if #content == 0 then
-        vim.notify('buffer or visual selection is empty', vim.log.levels.WARN)
-        return
-    end
-
-    api.nvim_echo({}, false, {})
-    api.nvim_echo({ { 'enter a pattern : ' } }, false, {})
-
-    local pattern = ''
-    while true do
-        local key = utils.get_char()
-        if not key then
-            utils.exit()
-            return
-        end
-
-        if key == ESC or key == CR then
-            break
-        end
-
-        if key == BS and #pattern then
-            pattern = pattern:sub(0, #pattern - 1)
-        else
-            pattern = pattern .. key
-        end
-
-        vim.b.MultiCursorPattern = pattern
-        --clear the old selection every key press
-        utils.clear_selections()
-
-        api.nvim_echo({}, false, {})
-        api.nvim_echo({ { 'enter a pattern : ' .. pattern } }, false, {})
-
-        if pattern ~= '' then
-            if not whole_buffer then
-                search.find_all_matches(content, pattern, start.row, start.col)
-            else
-                search.find_all_matches(content, pattern, 0, 0)
-            end
-        end
-    end
-end
-
---- Selects the char under the cursor as main selection
-M.new_under_cursor = function()
-    local cursor = api.nvim_win_get_cursor(0)
-
-    ---@type Match
-    local match = {
-        s_row = cursor[1] - 1,
-        e_row = cursor[1] - 1,
-        s_col = cursor[2],
-        e_col = cursor[2] + 1,
-    }
-
-    if match.s_col == 0 then
-        match.e_col = 0
-    end
-
-    vim.b.MultiCursorPattern = ''
-    -- vim remembers the first column when moving verticaly
-    vim.b.MultiCursorColumn = cursor[2]
-    utils.create_extmark(match, utils.namespace.Main)
 end
 
 --- Creates a selection on the line top of the cursor
