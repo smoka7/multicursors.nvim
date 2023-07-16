@@ -189,8 +189,8 @@ M.run_macro = function()
         return
     end
 
-    utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+    utils.call_on_selections(function(selection)
+        api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
         vim.cmd('normal! @' .. register)
     end)
 end
@@ -203,8 +203,8 @@ M.normal_command = function()
             if not input then
                 return
             end
-            utils.call_on_selections(function(mark)
-                api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+            utils.call_on_selections(function(selection)
+                api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
                 vim.cmd('normal ' .. input)
             end)
         end
@@ -214,10 +214,10 @@ end
 --- Puts the text inside unnamed register before or after selections
 ---@param pos ActionPosition
 local paste = function(pos)
-    utils.call_on_selections(function(mark)
-        local position = { mark[1] + 1, mark[2] }
+    utils.call_on_selections(function(selection)
+        local position = { selection.row + 1, selection.col }
         if pos == utils.position.after then
-            position = { mark[3].end_row + 1, mark[3].end_col }
+            position = { selection.end_row + 1, selection.end_col }
         end
 
         api.nvim_win_set_cursor(0, position)
@@ -235,8 +235,8 @@ end
 
 --- Repeats last edit on every selection
 M.dot_repeat = function()
-    utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+    utils.call_on_selections(function(selection)
+        api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
         vim.cmd 'normal! .'
     end)
 end
@@ -265,13 +265,13 @@ end
 --- Deletes the text inside selections and starts insert mode
 ---@param config Config
 M.change = function(config)
-    utils.call_on_selections(function(mark)
+    utils.call_on_selections(function(selection)
         api.nvim_buf_set_text(
             0,
-            mark[1],
-            mark[2],
-            mark[3].end_row,
-            mark[3].end_col,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
             {}
         )
     end)
@@ -280,13 +280,13 @@ end
 
 --- Deletes the text inside selections
 M.delete = function()
-    utils.call_on_selections(function(mark)
+    utils.call_on_selections(function(selection)
         api.nvim_buf_set_text(
             0,
-            mark[1],
-            mark[2],
-            mark[3].end_row,
-            mark[3].end_col,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
             {}
         )
     end)
@@ -294,16 +294,16 @@ end
 
 --- Deletes the line on selection
 M.delete_line = function()
-    utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+    utils.call_on_selections(function(selection)
+        api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
         vim.cmd [[ normal! "_dd ]]
     end)
 end
 
 --- Deletes from start of selection till the end of line
 M.delete_end = function()
-    utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] })
+    utils.call_on_selections(function(selection)
+        api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
         vim.cmd [[ normal! "_D ]]
     end)
 end
@@ -312,13 +312,13 @@ end
 M.yank = function()
     ---@type string[]
     local contents = {}
-    utils.call_on_selections(function(mark)
+    utils.call_on_selections(function(selection)
         local text = api.nvim_buf_get_text(
             0,
-            mark[1],
-            mark[2],
-            mark[3].end_row,
-            mark[3].end_col,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
             {}
         )
         contents[#contents + 1] = text[1]
@@ -330,9 +330,13 @@ end
 M.yank_line = function()
     ---@type string[]
     local contents = {}
-    utils.call_on_selections(function(mark)
-        local text =
-            api.nvim_buf_get_lines(0, mark[1], mark[3].end_row + 1, true)
+    utils.call_on_selections(function(selection)
+        local text = api.nvim_buf_get_lines(
+            0,
+            selection.row,
+            selection.end_row + 1,
+            true
+        )
         contents[#contents + 1] = text[1]
     end)
     vim.fn.setreg('', contents)
@@ -342,10 +346,14 @@ end
 M.yank_end = function()
     ---@type string[]
     local contents = {}
-    utils.call_on_selections(function(mark)
-        local text =
-            api.nvim_buf_get_lines(0, mark[1], mark[3].end_row + 1, true)
-        contents[#contents + 1] = text[1]:sub(mark[2] + 1)
+    utils.call_on_selections(function(selection)
+        local text = api.nvim_buf_get_lines(
+            0,
+            selection.row,
+            selection.end_row + 1,
+            true
+        )
+        contents[#contents + 1] = text[1]:sub(selection.col + 1)
     end)
     vim.fn.setreg('', contents)
 end

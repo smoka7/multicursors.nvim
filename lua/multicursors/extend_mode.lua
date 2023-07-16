@@ -114,8 +114,8 @@ end
 --- Extends selections by motion
 ---@param motion string
 local extend_selections = function(motion)
-    local marks = utils.get_all_selections(true)
-    local main = utils.get_main_selection(true)
+    local marks = utils.get_all_selections()
+    local main = utils.get_main_selection()
 
     save_history(marks, main)
 
@@ -181,7 +181,7 @@ end
 
 --- Toggles the anchor position
 E.o_method = function()
-    local main = utils.get_main_selection(true)
+    local main = utils.get_main_selection()
     if vim.b.MultiCursorAnchorStart == true then
         vim.b.MultiCursorAnchorStart = false
         utils.move_cursor { main[2] + 1, main[3] }
@@ -195,8 +195,8 @@ local extend_selections_ts = function(callback)
     if not parsers.has_parser() then
         return
     end
-    local marks = utils.get_all_selections(true)
-    local main = utils.get_main_selection(true)
+    local marks = utils.get_all_selections()
+    local main = utils.get_main_selection()
 
     save_history(marks, main)
 

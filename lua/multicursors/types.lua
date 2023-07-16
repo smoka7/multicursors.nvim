@@ -12,3 +12,10 @@
 ---@class Point
 ---@field row integer
 ---@field col integer
+
+---@class Selection
+---@field id integer
+---@field row integer
+---@field col integer
+---@field end_row integer
+---@field end_col integer
