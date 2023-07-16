@@ -117,7 +117,7 @@ M.CR_method = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
         vim.cmd('normal! R' .. CR)
-    end, true, true)
+    end)
 
     utils.move_selections_vertical(1)
     --HACK selections should start at line start
@@ -134,7 +134,7 @@ M.C_w_method = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
         vim.cmd('normal! i' .. c_w)
-    end, true, true)
+    end)
 
     -- this does not change extmark position but when
     -- we delete a text extmark start and end col will overlap and
@@ -148,7 +148,7 @@ M.Del_method = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
         vim.cmd 'normal! x'
-    end, true, true)
+    end)
 
     utils.move_selections_horizontal(0)
 end
@@ -175,7 +175,7 @@ M.C_u_method = function()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
         vim.cmd('normal! i' .. c_u)
-    end, true, true)
+    end)
 
     utils.move_selections_horizontal(0)
 end
