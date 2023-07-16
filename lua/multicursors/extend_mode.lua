@@ -2,6 +2,10 @@
 local utils = require 'multicursors.utils'
 local api = vim.api
 
+local parsers = require 'nvim-treesitter.parsers'
+
+local ts = require 'multicursors.ts'
+
 ---@class ExtendMode
 local E = {}
 
@@ -66,14 +70,54 @@ local get_new_position = function(mark, motion)
     return match
 end
 
+---@type Match[]
+local last_selections = {}
+
+local function save_history(marks, main)
+    last_selections = {}
+    for _, value in pairs(marks) do
+        table.insert(last_selections, {
+            s_row = value[2],
+            s_col = value[3],
+            e_row = value[4].end_row,
+            e_col = value[4].end_col,
+        })
+    end
+    table.insert(last_selections, {
+        s_row = main[2],
+        s_col = main[3],
+        e_row = main[4].end_row,
+        e_col = main[4].end_col,
+    })
+    utils.clear_namespace(utils.namespace.Main)
+    utils.clear_namespace(utils.namespace.Multi)
+end
+
+function E.undo_history()
+    if not last_selections or #last_selections == 0 then
+        return
+    end
+
+    utils.clear_namespace(utils.namespace.Main)
+    utils.clear_namespace(utils.namespace.Multi)
+
+    for i = 1, #last_selections, 1 do
+        utils.create_extmark(last_selections[i], utils.namespace.Multi)
+    end
+
+    utils.create_extmark(
+        last_selections[#last_selections],
+        utils.namespace.Main
+    )
+end
+
 --- Extends selections by motion
 ---@param motion string
 local extend_selections = function(motion)
     local marks = utils.get_all_selections(true)
     local main = utils.get_main_selection(true)
 
-    utils.clear_namespace(utils.namespace.Main)
-    utils.clear_namespace(utils.namespace.Multi)
+    save_history(marks, main)
 
     local new_pos
     for _, selection in pairs(marks) do
@@ -147,4 +191,44 @@ E.o_method = function()
     vim.b.MultiCursorAnchorStart = true
 end
 
+local extend_selections_ts = function(callback)
+    if not parsers.has_parser() then
+        return
+    end
+    local marks = utils.get_all_selections(true)
+    local main = utils.get_main_selection(true)
+
+    save_history(marks, main)
+
+    local new_pos
+    for _, selection in pairs(marks) do
+        new_pos = callback {
+            s_row = selection[2],
+            s_col = selection[3],
+            e_row = selection[4].end_row,
+            e_col = selection[4].end_col,
+        }
+        utils.create_extmark(new_pos, utils.namespace.Multi)
+    end
+
+    new_pos = callback {
+        s_row = main[2],
+        s_col = main[3],
+        e_row = main[4].end_row,
+        e_col = main[4].end_col,
+    }
+    utils.create_extmark(new_pos, utils.namespace.Main)
+end
+
+E.node_parent = function()
+    extend_selections_ts(ts.extend_node)
+end
+
+E.node_first_child = function()
+    extend_selections_ts(ts.get_first_child)
+end
+
+E.node_last_child = function()
+    extend_selections_ts(ts.get_last_child)
+end
 return E

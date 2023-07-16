@@ -52,8 +52,12 @@ local extend_keys = {
     ['j'] = { method = E.j_method },
     ['k'] = { method = E.k_method },
     ['l'] = { method = E.l_method },
+    ['r'] = { method = E.node_first_child },
+    ['t'] = { method = E.node_parent },
+    ['y'] = { method = E.node_last_child },
     ['^'] = { method = E.caret_method },
     ['$'] = { method = E.dollar_method },
+    ['u'] = { method = E.undo_history },
     ['c'] = { method = E.custom_method },
 }
 

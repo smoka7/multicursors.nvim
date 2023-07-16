@@ -168,6 +168,10 @@ The anchor represents one side of the selection and stays put, while the other s
 | `j` | `[count]` char down |
 | `k` | `[count]` char up |
 | `l` | `[count]` char right |
+| `t` | Extends the selection to the parent of selected node|
+| `r` | Shrinks the selection to first child of selected node |
+| `y` | Shrinks the selection to last child of selected node |
+| `u` | Undo Last selections extend or shrink |
 | `$` | `[count]` to end of line |
 | `^` | To the first non-blank character of the line |
 
@@ -175,7 +179,6 @@ The anchor represents one side of the selection and stays put, while the other s
 </details>
 
 ## TODOS
-- [ ] Move the selection by "ts" nodes (unclear)
 - [ ] Support count + actions
 - [ ] Completion works, but doesn't clear duplicates
 
