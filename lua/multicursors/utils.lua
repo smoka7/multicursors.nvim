@@ -117,29 +117,31 @@ M.debug = function(any)
     end
 end
 
---- returns selected range in visual mode
----@return Point?,Point?
+--- Returns the text inside last visual selected range
+---@return string[]
 M.get_last_visual_range = function()
     local start = api.nvim_buf_get_mark(0, '<')
     local end_ = api.nvim_buf_get_mark(0, '>')
 
     if start[1] == end_[1] and start[2] == end_[2] then
-        return nil
+        return {}
     end
 
     -- when in visual line mode nvim returns v:maxcol instead of line length
     -- so we have to find line length ourselves
-    --TODO get the text in the same function so we don't have to this
     local row = api.nvim_buf_get_lines(0, end_[1] - 1, end_[1], true)[1]
-    local e_col = end_[2]
-    if e_col > string.len(row) then
-        e_col = string.len(row)
+    if end_[2] > string.len(row) then
+        end_[2] = string.len(row)
     end
 
-    return { row = start[1] - 1, col = start[2] }, {
-        row = end_[1] - 1,
-        col = e_col + 1,
-    }
+    return api.nvim_buf_get_text(
+        0,
+        start[1] - 1,
+        start[2],
+        end_[1] - 1,
+        end_[2] + 1,
+        {}
+    )
 end
 
 --- Swaps ranges when start > end_
@@ -184,29 +186,6 @@ M.get_visual_range = function()
     end
 
     return nil
-end
-
---- Returns text inside selected range
----@param start Point
----@param end_ Point
----@return string[]
-M.get_buffer_content = function(start, end_)
-    return api.nvim_buf_get_text(
-        0,
-        start.row,
-        start.col,
-        end_.row,
-        end_.col,
-        {}
-    )
-    -- local lines = api.nvim_buf_get_lines(0, start.row, end_.row + 1, true)
-    -- if #lines == 1 then
-    --     lines[1] = lines[1]:sub(start.col + 1, end_.col)
-    -- elseif #lines>=1 then
-    --     lines[1] = lines[1]:sub(start.col + 1)
-    --     lines[#lines] = lines[#lines]:sub(0, end_.col)
-    -- end
-    -- return lines
 end
 
 --- Returns the main selection extmark

@@ -7,8 +7,8 @@ local default_config = require 'multicursors.config'
 ---@type Utils
 local utils = require 'multicursors.utils'
 
----@type NormalMode
-local normal_mode = require 'multicursors.normal_mode'
+---@type Search
+local search = require 'multicursors.search'
 
 ---@type Layers
 local layers = require 'multicursors.layers'
@@ -42,27 +42,27 @@ local function create_commands()
 end
 
 M.cursor_word = function()
-    normal_mode.find_cursor_word()
+    search.find_cursor_word()
     layers.normal_hydra:activate()
 end
 
 M.new_under_cursor = function()
-    normal_mode.new_under_cursor()
+    search.new_under_cursor()
     layers.normal_hydra:activate()
 end
 
 M.search_visual = function()
-    normal_mode.search_selected()
+    search.find_selected()
     layers.normal_hydra:activate()
 end
 
 M.new_pattern = function()
-    normal_mode.pattern(true)
+    search.find_pattern(true)
     layers.normal_hydra:activate()
 end
 
 M.new_pattern_visual = function()
-    normal_mode.pattern(false)
+    search.find_pattern(false)
     layers.normal_hydra:activate()
 end
 
