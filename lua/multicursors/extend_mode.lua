@@ -89,8 +89,8 @@ local function save_history(marks, main)
         e_row = main[4].end_row,
         e_col = main[4].end_col,
     })
-    utils.clear_namespace(utils.namespace.Main)
-    utils.clear_namespace(utils.namespace.Multi)
+
+    utils.clear_selections()
 end
 
 function E.undo_history()
@@ -98,8 +98,7 @@ function E.undo_history()
         return
     end
 
-    utils.clear_namespace(utils.namespace.Main)
-    utils.clear_namespace(utils.namespace.Multi)
+    utils.clear_selections()
 
     for i = 1, #last_selections, 1 do
         utils.create_extmark(last_selections[i], utils.namespace.Multi)

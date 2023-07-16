@@ -436,10 +436,10 @@ M.pattern = function(whole_buffer)
         else
             pattern = pattern .. key
         end
-        --clear the old selection every key press
+
         vim.b.MultiCursorPattern = pattern
-        utils.clear_namespace 'MultiCursor'
-        utils.clear_namespace 'MultiCursorMain'
+        --clear the old selection every key press
+        utils.clear_selections()
 
         api.nvim_echo({}, false, {})
         api.nvim_echo({ { 'enter a pattern : ' .. pattern } }, false, {})

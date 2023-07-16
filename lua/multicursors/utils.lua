@@ -94,7 +94,7 @@ M.delete_extmark = function(match, namespace)
     end
 end
 
---- clears the namespace in current buffer
+--- Clears the namespace in current buffer
 ---@param namespace  Namespace
 M.clear_namespace = function(namespace)
     local ns = ns_id
@@ -102,6 +102,12 @@ M.clear_namespace = function(namespace)
         ns = main_ns_id
     end
     api.nvim_buf_clear_namespace(0, ns, 0, -1)
+end
+
+--- Clears all selction in the current buffer
+M.clear_selections = function()
+    M.clear_namespace(M.namespace.Main)
+    M.clear_namespace(M.namespace.Multi)
 end
 
 ---@param any any
@@ -377,7 +383,7 @@ end
 M.update_selections = function(before)
     local marks = M.get_all_selections()
     local main = M.get_main_selection()
-    M.exit()
+    M.clear_selections()
 
     local col = main.end_col
     local row = main.end_row
@@ -416,7 +422,7 @@ end
 M.move_selections_horizontal = function(length)
     local marks = M.get_all_selections()
     local main = M.get_main_selection()
-    M.exit()
+    M.clear_selections()
 
     ---@param mark Selection
     ---@return integer,integer
@@ -456,8 +462,7 @@ end
 M.move_selections_vertical = function(length)
     local marks = M.get_all_selections()
     local main = M.get_main_selection()
-
-    M.exit()
+    M.clear_selections()
 
     ---@param mark Selection
     ---@return integer,integer
@@ -581,12 +586,11 @@ M.move_cursor = function(pos, current)
 end
 
 M.exit = function()
-    M.clear_namespace(M.namespace.Main)
-    M.clear_namespace(M.namespace.Multi)
-    ---TODO Merge this
+    M.clear_selections()
     vim.b.MultiCursorMultiline = nil
     vim.b.MultiCursorPattern = nil
     vim.b.MultiCursorColumn = nil
+    vim.b.MultiCursorSubLayer = nil
 end
 
 return M
