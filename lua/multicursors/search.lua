@@ -463,11 +463,13 @@ S.find_selected = function()
     --- FIXME multibyte characters doesn't get picked correctly
     local lines = utils.get_last_visual_range()
 
+    -- when this command gets executed from a mapping it finds the next
+    -- match so we go to start of selection to find the selected text first
+    local start = api.nvim_buf_get_mark(0, '<')
+    utils.move_cursor { start[1], start[2] }
+
     -- joins the selected case with newlines
     -- and searches for it
-    -- FIXME executed from command mode returns the selected range
-    -- but when from visaul mode with a mappings selects next match
-    -- when cursur is at end of visual
     local pattern = table.concat(lines, '\\n')
     local match = S.multiline_string(pattern, utils.position.on)
     if not match then
