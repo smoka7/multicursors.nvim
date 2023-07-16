@@ -335,14 +335,12 @@ M.get_char = function()
     return key
 end
 
---- calls a callback on all selections
+--- Calls a callback on all selections
 ---@param callback function function to call
----@param on_main boolean execute the callback on main selesction
----@param with_details boolean get the selection details
-M.call_on_selections = function(callback, on_main, with_details)
-    local marks = M.get_all_selections(with_details)
+M.call_on_selections = function(callback)
+    local marks = M.get_all_selections(false)
+    -- Get each mark again cause editing buffer might moves the other marks
     for _, selection in pairs(marks) do
-        -- get each mark again cause inserting text might moved the other marks
         local mark = api.nvim_buf_get_extmark_by_id(
             0,
             ns_id,
@@ -353,10 +351,8 @@ M.call_on_selections = function(callback, on_main, with_details)
         callback(mark)
     end
 
-    if on_main then
-        local main = M.get_main_selection(true)
-        callback { main[2], main[3], main[4] }
-    end
+    local main = M.get_main_selection(true)
+    callback { main[2], main[3], main[4] }
 end
 
 --- updates each selection to a single char
@@ -487,11 +483,18 @@ end
 ---
 ---@param text string
 M.insert_text = function(text)
-    M.call_on_selections(function(selection)
+    local marks = M.get_all_selections(false)
+    for _, mark in pairs(marks) do
+        local selection = api.nvim_buf_get_extmark_by_id(
+            0,
+            ns_id,
+            mark[1],
+            { details = true }
+        )
         local col = selection[3].end_col
         local row = selection[3].end_row
         api.nvim_buf_set_text(0, row, col, row, col, { text })
-    end, false, false)
+    end
 
     M.move_selections_horizontal(#text)
 end
@@ -504,7 +507,7 @@ M.align_text = function(line_start)
         if selection[2] > max_col then
             max_col = selection[2]
         end
-    end, true, false)
+    end)
 
     M.call_on_selections(function(selection)
         local col = selection[2]
@@ -524,7 +527,7 @@ M.align_text = function(line_start)
                 { string.rep(' ', count) }
             )
         end
-    end, true, false)
+    end)
 end
 
 M.delete_char = function()
@@ -536,7 +539,7 @@ M.delete_char = function()
 
         api.nvim_win_set_cursor(0, { mark[3].end_row + 1, col })
         vim.cmd [[normal x]]
-    end, true, false)
+    end)
 
     M.move_selections_horizontal(0)
 end
