@@ -78,9 +78,23 @@ M._insert_and_clear = function()
     M._inserted_text = ''
 end
 
+local delete_char = function()
+    utils.call_on_selections(function(selection)
+        local col = selection.end_col - 1
+        if col < 0 then
+            return
+        end
+
+        api.nvim_win_set_cursor(0, { selection.end_row + 1, col })
+        vim.cmd [[normal x]]
+    end)
+
+    utils.move_selections_horizontal(0)
+end
+
 M.BS_method = function()
     if M._inserted_text == '' then
-        utils.delete_char()
+        delete_char()
     else
         --delete the text under the cursor cause we can't modify buffer content with expr mappings
         vim.cmd 'normal X'
@@ -180,8 +194,7 @@ M.C_u_method = function()
     utils.move_selections_horizontal(0)
 end
 
---- listens for every char press and inserts the text before leaving insert mode
---TODO esc go to multicursor normal
+--- Listens for every char press and inserts the text before leaving insert mode
 ---@param config Config
 M.insert = function(config)
     set_insert_autocommands(config)
