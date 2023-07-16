@@ -19,3 +19,11 @@
 ---@field col integer
 ---@field end_row integer
 ---@field end_col integer
+
+---@class SearchContext
+---@field pattern string
+---@field text string
+---@field row integer
+---@field offset integer
+---@field till integer
+---@field skip boolean

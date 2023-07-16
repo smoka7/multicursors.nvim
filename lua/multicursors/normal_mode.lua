@@ -26,75 +26,18 @@ M.find_cursor_word = function()
     utils.create_extmark(match, utils.namespace.Main)
 end
 
---- Finds next match and marks it
----@param skip boolean
----@return Match? next next Match
-local find_next = function(skip)
-    local pattern = vim.b.MultiCursorPattern
-    if not pattern or pattern == '' then
-        return
-    end
-
-    if vim.b.MultiCursorMultiline then
-        local match = search.multiline_string(pattern, utils.position.after)
-        if match then
-            utils.mark_found_match(match, skip)
-            utils.move_cursor { match.e_row + 1, match.e_col + 1 }
-            return match
-        end
-    end
-
-    local line_count = api.nvim_buf_line_count(0)
-    local cursor = api.nvim_win_get_cursor(0)
-    local row_idx = cursor[1]
-    local column = cursor[2] + 1
-    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
-
-    -- search the same line as cursor with cursor col as offset cursor
-    local match = search.find_next_match(buffer[row_idx], pattern, column)
-
-    if match then
-        match.s_row = row_idx - 1
-        match.e_row = row_idx - 1
-        utils.mark_found_match(match, skip)
-        return match
-    end
-    ---
-
-    -- search from cursor to end of buffer for pattern
-    for idx = row_idx + 1, line_count, 1 do
-        match = search.find_next_match(buffer[idx], pattern, 0)
-        if match then
-            match.s_row = idx - 1
-            match.e_row = idx - 1
-            utils.mark_found_match(match, skip)
-            return match
-        end
-    end
-    --
-
-    -- At end wrap around the buffer when we can't match anything
-    for idx = 1, row_idx + 1, 1 do
-        match = search.find_next_match(buffer[idx], pattern, 0)
-        if match then
-            match.s_row = idx - 1
-            match.e_row = idx - 1
-            utils.mark_found_match(match, skip)
-            return match
-        end
-    end
-end
-
 M.find_next = function()
-    local match = find_next(false)
+    local match = search.find_next(false)
     if match then
+        utils.mark_found_match(match, false)
         utils.move_cursor { match.e_row + 1, match.e_col - 1 }
     end
 end
 
 M.skip_find_next = function()
-    local match = find_next(true)
+    local match = search.find_next(true)
     if match then
+        utils.mark_found_match(match, true)
         utils.move_cursor { match.e_row + 1, match.e_col - 1 }
     end
 end
@@ -109,73 +52,18 @@ M.goto_prev = function()
     utils.goto_prev_selection()
 end
 
----finds previous match and marks it
----@param skip boolean
----@return Match? prev previus match
-local find_prev = function(skip)
-    local pattern = vim.b.MultiCursorPattern
-    if not pattern or pattern == '' then
-        return
-    end
-
-    if vim.b.MultiCursorMultiline then
-        local match = search.multiline_string(pattern, utils.position.before)
-        if match then
-            utils.mark_found_match(match, skip)
-            return match
-        end
-    end
-
-    local line_count = api.nvim_buf_line_count(0)
-    local cursor = api.nvim_win_get_cursor(0)
-    local row_idx = cursor[1]
-    local column = cursor[2]
-    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
-
-    -- search the cursor line
-    local match = search.find_prev_match(buffer[row_idx], pattern, column)
-    if match then
-        match.s_row = row_idx - 1
-        match.e_row = row_idx - 1
-        utils.mark_found_match(match, skip)
-        return match
-    end
-    --
-
-    -- search from cursor to start of buffer
-    for idx = row_idx - 1, 1, -1 do
-        match = search.find_prev_match(buffer[idx], pattern, -1)
-        if match then
-            match.s_row = idx - 1
-            match.e_row = idx - 1
-            utils.mark_found_match(match, skip)
-            return match
-        end
-    end
-    --
-
-    --At end wrap around the buffer when we can't match anything
-    for idx = line_count, row_idx, -1 do
-        match = search.find_prev_match(buffer[idx], pattern, -1)
-        if match then
-            match.s_row = idx - 1
-            match.e_row = idx - 1
-            utils.mark_found_match(match, skip)
-            return match
-        end
-    end
-end
-
 M.find_prev = function()
-    local match = find_prev(false)
+    local match = search.find_prev(false)
     if match then
+        utils.mark_found_match(match, false)
         utils.move_cursor { match.s_row + 1, match.s_col }
     end
 end
 
 M.skip_find_prev = function()
-    local match = find_prev(true)
+    local match = search.find_prev(true)
     if match then
+        utils.mark_found_match(match, true)
         utils.move_cursor { match.s_row + 1, match.s_col }
     end
 end

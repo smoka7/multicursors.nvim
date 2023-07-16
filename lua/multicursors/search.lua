@@ -84,41 +84,100 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
 end
 
 --- Returns the first match for pattern after a offset in a string
----@param string string
----@param offset integer
----@return Match?
-S.find_next_match = function(string, pattern, offset)
-    if string == '' then
+---@param ctx SearchContext
+---@return Match? found
+S.find_next_match = function(ctx)
+    if ctx.text == '' then
         return
     end
 
-    local match = vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>', offset)
+    local match =
+        vim.fn.matchstrpos(ctx.text, '\\<' .. ctx.pattern .. '\\>', ctx.offset)
     -- -1 range means not found
     if match[2] == -1 and match[3] == -1 then
         return
     end
 
     --- @type Match
-    local found = {
+    return {
         s_col = match[2],
         e_col = match[3],
+        s_row = ctx.row - 1,
+        e_row = ctx.row - 1,
     }
-
-    return found
 end
 
---- Returns the last match before the cursor
----@param string string
----@param pattern string
----@param till integer
----@return Match?
-S.find_prev_match = function(string, pattern, till)
-    if string == '' then
+--- Finds next match and marks it
+---@param skip boolean
+---@return Match? next next Match
+S.find_next = function(skip)
+    ---@type SearchContext
+    local ctx = {
+        pattern = vim.b.MultiCursorPattern,
+        skip = skip,
+    }
+
+    if not ctx.pattern or ctx.pattern == '' then
         return
     end
 
-    if till ~= -1 then
-        string = string:sub(0, till)
+    if vim.b.MultiCursorMultiline then
+        local match = S.multiline_string(ctx.pattern, utils.position.after)
+        if match then
+            return match
+        end
+    end
+
+    local line_count = api.nvim_buf_line_count(0)
+    local cursor = api.nvim_win_get_cursor(0)
+    local row_idx = cursor[1]
+    local column = cursor[2] + 1
+    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
+
+    -- Search the cursor line from cursor column
+    ctx.text = buffer[row_idx]
+    ctx.offset = column
+    ctx.row = row_idx
+
+    local match = S.find_next_match(ctx)
+    if match then
+        return match
+    end
+    ---
+
+    -- search from cursor to end of buffer for pattern
+    ctx.offset = 0
+    for idx = row_idx + 1, line_count, 1 do
+        ctx.text = buffer[idx]
+        ctx.row = idx
+        match = S.find_next_match(ctx)
+        if match then
+            return match
+        end
+    end
+    --
+
+    -- At end wrap around the buffer when we can't match anything
+    for idx = 1, row_idx + 1, 1 do
+        ctx.text = buffer[idx]
+        ctx.row = idx
+        match = S.find_next_match(ctx)
+        if match then
+            return match
+        end
+    end
+end
+
+--- Returns the last match before the cursor
+---@param ctx SearchContext
+---@return Match? found
+S.find_prev_match = function(ctx)
+    if ctx.text == '' then
+        return
+    end
+
+    if ctx.till ~= -1 then
+        ctx.text = ctx.text:sub(0, ctx.till)
     end
 
     ---@type any[]
@@ -126,8 +185,11 @@ S.find_prev_match = function(string, pattern, till)
     local found = nil ---@type Match?
 
     repeat
-        match =
-            vim.fn.matchstrpos(string, '\\<' .. pattern .. '\\>', match[3] or 0)
+        match = vim.fn.matchstrpos(
+            ctx.text,
+            '\\<' .. ctx.pattern .. '\\>',
+            match[3] or 0
+        )
         if match[2] ~= -1 and match[3] ~= -1 then
             found = {
                 s_col = match[2],
@@ -136,7 +198,72 @@ S.find_prev_match = function(string, pattern, till)
         end
     until match and match[2] == -1 and match[3] == -1
 
+    if not found then
+        return
+    end
+
+    found.s_row = ctx.row - 1
+    found.e_row = ctx.row - 1
+
     return found
+end
+
+--- Finds last match before cursor
+---@param skip boolean
+---@return Match? last match
+S.find_prev = function(skip)
+    ---@type SearchContext
+    local ctx = {
+        pattern = vim.b.MultiCursorPattern,
+        skip = skip,
+    }
+
+    if not ctx.pattern or ctx.pattern == '' then
+        return
+    end
+
+    if vim.b.MultiCursorMultiline then
+        return S.multiline_string(ctx.pattern, utils.position.before)
+    end
+
+    local line_count = api.nvim_buf_line_count(0)
+    local cursor = api.nvim_win_get_cursor(0)
+    local row_idx = cursor[1]
+    local column = cursor[2]
+    local buffer = api.nvim_buf_get_lines(0, 0, -1, true)
+
+    -- search the cursor line till cursor column
+    ctx.text = buffer[row_idx]
+    ctx.till = column
+    ctx.row = row_idx
+
+    local match = S.find_prev_match(ctx)
+    if match then
+        return match
+    end
+    --
+
+    -- search from cursor to start of buffer
+    ctx.till = -1
+    for idx = row_idx - 1, 1, -1 do
+        ctx.text = buffer[idx]
+        ctx.row = idx
+        match = S.find_prev_match(ctx)
+        if match then
+            return match
+        end
+    end
+    --
+
+    -- At end wrap around the buffer when we can't match anything
+    for idx = line_count, row_idx, -1 do
+        ctx.text = buffer[idx]
+        ctx.row = idx
+        match = S.find_prev_match(ctx)
+        if match then
+            return match
+        end
+    end
 end
 
 --- Creates a selection on the char below the cursor
@@ -203,102 +330,6 @@ S.create_up = function(skip)
         skip
     )
     utils.move_cursor({ row + 1, col }, nil)
-end
-
---- Finds the actual row,col for start and end of match
----@param text string
----@param start integer
----@param end_ integer
----@return Match
-local find_real_match = function(text, start, end_)
-    -- Count newlines and characters to get the bounds
-    local row, col = 0, 0
-    for i = 1, start do
-        if text:sub(i, i) == '\n' then
-            row = row + 1
-            col = 0
-        else
-            col = col + 1
-        end
-    end
-    --
-
-    ---@type Match
-    local match = {
-        s_row = row + 1,
-        s_col = col - 1,
-    }
-
-    -- Count till finish
-    for i = start, end_ do
-        if text:sub(i, i) == '\n' then
-            row = row + 1
-            col = 0
-        else
-            col = col + 1
-        end
-    end
-
-    match.e_col = col
-    match.e_row = row + 1
-
-    return match
-end
-
---- Finds first match of the pattern in text
----@param text string
----@param pattern string
----@return Match?
-S.find_first_multiline = function(text, pattern)
-    local start, end_ = text:find(pattern)
-    if not start or not end_ then
-        return
-    end
-
-    return find_real_match(text, start, end_)
-end
-
---- Finds last match of the pattern in text
----@param text string
----@param pattern string
----@return Match?
-S.find_last_multiline = function(text, pattern)
-    local s, f, start, end_
-    local offset = 0
-    repeat
-        s, f = text:find(pattern, offset)
-        if s and f then
-            start = s
-            end_ = f
-            offset = f
-        end
-    until not s or not f
-
-    if not start or not end_ then
-        return
-    end
-
-    return find_real_match(text, start, end_)
-end
-
---- Gets the buffer text after or before the cursor
---- concatenates lines with `\n`
----@param pos ActionPosition
----@return string
-S.merge_buffer_text = function(pos)
-    local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-
-    local cursor = api.nvim_win_get_cursor(0)
-
-    if pos == utils.position.after then
-        return lines[cursor[1]]:sub(cursor[2] + 2, -1)
-            .. '\n'
-            .. table.concat(lines, '\n', cursor[1] + 1)
-    end
-
-    return lines[cursor[1]]:sub(cursor[2], -1)
-        .. '\n'
-        .. table.concat(lines, '\n', cursor[1], #lines)
 end
 
 --- Searches for multi line pattern in buffer
