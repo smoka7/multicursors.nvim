@@ -484,20 +484,6 @@ M.align_text = function(line_start)
     end)
 end
 
-M.delete_char = function()
-    M.call_on_selections(function(selection)
-        local col = selection.end_col - 1
-        if col < 0 then
-            return
-        end
-
-        api.nvim_win_set_cursor(0, { selection.end_row + 1, col })
-        vim.cmd [[normal x]]
-    end)
-
-    M.move_selections_horizontal(0)
-end
-
 --- Moves the cursor to pos and marks current cursor position in jumplist
 --- htpps://github.com/neovim/neovim/issues/20793
 ---@param pos any[]
