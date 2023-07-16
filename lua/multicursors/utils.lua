@@ -20,8 +20,7 @@ M.namespace = {
     Multi = 'MultiCursor',
 }
 
---- Checks that start is less than the end
---- otherwise swap themes.
+--- Checks that start is before end otherwise swaps theme.
 ---@param match Match
 ---@return Match
 local function check_match_bounds(match)
@@ -29,12 +28,12 @@ local function check_match_bounds(match)
         match.s_row > match.e_row
         or (match.s_row == match.e_row and match.s_col > match.e_col)
     then
-        local t = match.s_row
-        match.s_row = match.e_row
-        match.e_row = t
-        t = match.s_col
-        match.s_col = match.e_col
-        match.e_col = t
+        return {
+            s_row = match.e_row,
+            s_col = match.e_col,
+            e_row = match.s_row,
+            e_col = match.s_col,
+        }
     end
 
     return match
@@ -204,25 +203,37 @@ M.get_buffer_content = function(start, end_)
     -- return lines
 end
 
----@param details boolean
----@return any
-M.get_main_selection = function(details)
-    return api.nvim_buf_get_extmarks(
-        0,
-        main_ns_id,
-        0,
-        -1,
-        { details = details }
-    )[1]
+--- Returns the main selection extmark
+---@return Selection
+M.get_main_selection = function()
+    local main =
+        api.nvim_buf_get_extmarks(0, main_ns_id, 0, -1, { details = true })[1]
+    return {
+        id = main[1],
+        row = main[2],
+        col = main[3],
+        end_row = main[4].end_row,
+        end_col = main[4].end_col,
+    }
 end
 
---- returns the list of cursors extmarks
----@param details boolean
----@return any[]  [extmark_id, row, col] tuples in "traversal order".
-M.get_all_selections = function(details)
+--- Returns a list of selections extmarks
+---@return Selection[]
+M.get_all_selections = function()
     local extmarks =
-        api.nvim_buf_get_extmarks(0, ns_id, 0, -1, { details = details })
-    return extmarks
+        api.nvim_buf_get_extmarks(0, ns_id, 0, -1, { details = true })
+    ---@type Selection[]
+    local selections = {}
+    for _, mark in pairs(extmarks) do
+        selections[#selections + 1] = {
+            id = mark[1],
+            row = mark[2],
+            col = mark[3],
+            end_row = mark[4].end_row,
+            end_col = mark[4].end_col,
+        }
+    end
+    return selections
 end
 
 --- Creates a extmark for current match and
@@ -232,15 +243,15 @@ end
 M.mark_found_match = function(match, skip)
     -- first clear the main selection
     -- then create a selection in place of main one
-    local main = M.get_main_selection(true)
+    local main = M.get_main_selection()
     M.clear_namespace(M.namespace.Main)
 
     if not skip then
         M.create_extmark({
-            s_row = main[2],
-            s_col = main[3],
-            e_col = main[4].end_col,
-            e_row = main[4].end_row,
+            s_row = main.row,
+            s_col = main.col,
+            e_row = main.end_row,
+            e_col = main.end_col,
         }, M.namespace.Multi)
     end
     --create the main selection
@@ -252,11 +263,11 @@ end
 --- Swaps the next selection with main selection
 --- wraps around the buffer
 M.goto_next_selection = function()
-    local main = M.get_main_selection(true)
+    local main = M.get_main_selection()
     local selections = api.nvim_buf_get_extmarks(
         0,
         ns_id,
-        { main[4].end_row, main[4].end_col },
+        { main.end_row, main.end_col },
         -1,
         { details = true }
     )
@@ -273,7 +284,7 @@ M.goto_next_selection = function()
         0,
         ns_id,
         0,
-        { main[4].end_row, main[4].end_col },
+        { main.end_row, main.end_col },
         { details = true }
     )
     if #selections > 0 then
@@ -289,11 +300,11 @@ end
 --- Swaps the previous selection with main selection
 --- wraps around the buffer
 M.goto_prev_selection = function()
-    local main = M.get_main_selection(true)
+    local main = M.get_main_selection()
     local selections = api.nvim_buf_get_extmarks(
         0,
         ns_id,
-        { main[4].end_row, main[4].end_col },
+        { main.end_row, main.end_col },
         0,
         { details = true }
     )
@@ -310,7 +321,7 @@ M.goto_prev_selection = function()
         0,
         ns_id,
         -1,
-        { main[4].end_row, main[4].end_col },
+        { main.end_row, main.end_col },
         { details = true }
     )
     if #selections > 0 then
@@ -336,41 +347,45 @@ M.get_char = function()
 end
 
 --- Calls a callback on all selections
----@param callback function function to call
+---@param callback fun(selection:Selection) function to call
 M.call_on_selections = function(callback)
-    local marks = M.get_all_selections(false)
+    local marks = M.get_all_selections()
     -- Get each mark again cause editing buffer might moves the other marks
     for _, selection in pairs(marks) do
         local mark = api.nvim_buf_get_extmark_by_id(
             0,
             ns_id,
-            selection[1],
+            selection.id,
             { details = true }
         )
 
-        callback(mark)
+        callback {
+            id = selection.id,
+            row = mark[1],
+            col = mark[2],
+            end_row = mark[3].end_row,
+            end_col = mark[3].end_col,
+        }
     end
 
-    local main = M.get_main_selection(true)
-    callback { main[2], main[3], main[4] }
+    local main = M.get_main_selection()
+    callback(main)
 end
 
 --- updates each selection to a single char
 ---@param before ActionPosition
 M.update_selections = function(before)
-    local marks = M.get_all_selections(true)
-    local main = M.get_main_selection(true)
+    local marks = M.get_all_selections()
+    local main = M.get_main_selection()
     M.exit()
 
-    local col = main[4].end_col
-    local row = main[4].end_row
+    local col = main.end_col
+    local row = main.end_row
     if before == M.position.before then
-        col = main[3]
-        row = main[2]
-        M.move_cursor { main[4].end_row + 1, main[3] }
-    else
-        M.move_cursor { main[4].end_row + 1, main[4].end_col }
+        col = main.col
+        row = main.row
     end
+    M.move_cursor { row + 1, col }
 
     M.create_extmark({
         s_row = row,
@@ -380,11 +395,11 @@ M.update_selections = function(before)
     }, M.namespace.Main)
 
     for _, mark in pairs(marks) do
-        col = mark[4].end_col
-        row = mark[4].end_row
+        col = mark.end_col
+        row = mark.end_row
         if before == M.position.before then
-            col = mark[3]
-            row = mark[2]
+            col = mark.col
+            row = mark.row
         end
 
         M.create_extmark({
@@ -399,13 +414,15 @@ end
 ---
 ---@param length integer
 M.move_selections_horizontal = function(length)
-    local marks = M.get_all_selections(true)
-    local main = M.get_main_selection(true)
+    local marks = M.get_all_selections()
+    local main = M.get_main_selection()
     M.exit()
 
+    ---@param mark Selection
+    ---@return integer,integer
     local get_position = function(mark)
-        local col = mark[4].end_col + length - 1
-        local row = mark[4].end_row
+        local col = mark.end_col + length - 1
+        local row = mark.end_row
 
         local line =
             string.len(api.nvim_buf_get_lines(0, row, row + 1, true)[1])
@@ -437,14 +454,16 @@ end
 ---
 ---@param length integer
 M.move_selections_vertical = function(length)
-    local marks = M.get_all_selections(true)
-    local main = M.get_main_selection(true)
+    local marks = M.get_all_selections()
+    local main = M.get_main_selection()
 
     M.exit()
 
+    ---@param mark Selection
+    ---@return integer,integer
     local get_position = function(mark)
-        local col = mark[3]
-        local row = mark[2] + length
+        local col = mark.col
+        local row = mark.row + length
         local buf_length = api.nvim_buf_line_count(0)
 
         if row < 1 then
@@ -483,12 +502,12 @@ end
 ---
 ---@param text string
 M.insert_text = function(text)
-    local marks = M.get_all_selections(false)
+    local marks = M.get_all_selections()
     for _, mark in pairs(marks) do
         local selection = api.nvim_buf_get_extmark_by_id(
             0,
             ns_id,
-            mark[1],
+            mark.id,
             { details = true }
         )
         local col = selection[3].end_col
@@ -504,40 +523,40 @@ end
 M.align_text = function(line_start)
     local max_col = -1
     M.call_on_selections(function(selection)
-        if selection[2] > max_col then
-            max_col = selection[2]
+        if selection.col > max_col then
+            max_col = selection.col
         end
     end)
-
+    local row, col, space_count
     M.call_on_selections(function(selection)
-        local col = selection[2]
-        local row = selection[1]
-        local count = max_col - col
+        col = selection.col
+        row = selection.row
+        space_count = max_col - col
         if line_start then
             col = 0
         end
 
-        if count > 0 then
+        if space_count > 0 then
             api.nvim_buf_set_text(
                 0,
                 row,
                 col,
                 row,
                 col,
-                { string.rep(' ', count) }
+                { string.rep(' ', space_count) }
             )
         end
     end)
 end
 
 M.delete_char = function()
-    M.call_on_selections(function(mark)
-        local col = mark[3].end_col - 1
+    M.call_on_selections(function(selection)
+        local col = selection.end_col - 1
         if col < 0 then
             return
         end
 
-        api.nvim_win_set_cursor(0, { mark[3].end_row + 1, col })
+        api.nvim_win_set_cursor(0, { selection.end_row + 1, col })
         vim.cmd [[normal x]]
     end)
 
