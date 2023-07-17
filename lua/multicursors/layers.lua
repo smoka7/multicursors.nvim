@@ -27,7 +27,7 @@ L.generate_normal_heads = function(config)
                 i,
                 value.method,
                 {
-                    -- nowait = true ,
+                    nowait = config.nowait,
                     desc = value.desc,
                 },
             }
@@ -123,6 +123,7 @@ L.generate_insert_heads = function(config)
                 value.method,
                 {
                     desc = value.desc,
+                    nowait = config.nowait,
                 },
             }
         end
@@ -162,6 +163,7 @@ L.generate_extend_head = function(config)
                 value.method,
                 {
                     desc = value.desc,
+                    nowait = config.nowait,
                 },
             }
         end
