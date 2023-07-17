@@ -1,10 +1,18 @@
 ---@class Utils
 local utils = require 'multicursors.utils'
+local selections = require 'multicursors.selections'
+
 local api = vim.api
 
 ---@class InsertMode
----@field _au_group number
----@field _inserted_text string
+---@field private _au_group number
+---@field private _inserted_text string
+---@field private _user_update_time integer
+---@field private _insert_and_clear function
+---@field private _on_cursor_hold function
+---@field private _on_insert_char_pre function
+---@field private _on_insert_enter function
+---@field private _on_insert_leave function
 local M = {}
 
 M._inserted_text = ''
@@ -179,6 +187,14 @@ M.End_method = function()
     M._insert_and_clear()
 
     utils.move_selections_horizontal(vim.v.maxcol)
+end
+
+M.C_Right = function()
+    selections.move_by_motion 'w'
+end
+
+M.C_Left = function()
+    selections.move_by_motion 'b'
 end
 
 --- Deletes selections til start of line
