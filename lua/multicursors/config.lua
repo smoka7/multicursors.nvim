@@ -25,6 +25,8 @@ local normal_keys = {
     ['q'] = { method = N.skip_find_next, desc = 'Skip find next' },
     ['Q'] = { method = N.skip_find_prev, desc = 'Skip find prev' },
     ['N'] = { method = N.find_prev, desc = 'Find prev' },
+    ['}'] = { method = N.skip_goto_next, desc = 'Skip Goto next' },
+    ['{'] = { method = N.skip_goto_prev, desc = 'Skip Goto prev' },
     [']'] = { method = N.goto_next, desc = 'Goto next' },
     ['['] = { method = N.goto_prev, desc = 'Goto prev' },
     ['p'] = { method = N.paste_after, desc = 'Paste after' },

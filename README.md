@@ -101,6 +101,8 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `Q` | Skips the current selection and finds the previous one |
 | `]` | Swaps the main selection with next selection |
 | `[` | Swaps the main selection with previous selection |
+| `}` | Deletes the main selection and goes to next |
+| `{` | Deletes the main selection and goes to previous |
 | `j` | Creates a selection on the char below the cursor |
 | `J` | Skips the current selection and Creates a selection on the char below |
 | `k` | Creates a selection on the char above the cursor |

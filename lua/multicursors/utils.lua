@@ -197,76 +197,61 @@ M.mark_found_match = function(match, skip)
 end
 
 --- Swaps the next selection with main selection
---- wraps around the buffer
-M.goto_next_selection = function()
-    local main = M.get_main_selection()
+---@param a integer[]
+---@param b integer[]
+---@param skip boolean
+---@return boolean
+local goto_first_selection = function(a, b, skip)
     local selections = api.nvim_buf_get_extmarks(
         0,
         ns_id,
-        { main.end_row, main.end_col },
-        -1,
+        { a[1], a[2] },
+        { b[1], b[2] },
         { details = true }
     )
+
     if #selections > 0 then
         M.mark_found_match({
             s_row = selections[1][2],
             s_col = selections[1][3],
             e_row = selections[1][4].end_row,
             e_col = selections[1][4].end_col,
-        }, false)
+        }, skip)
+
+        M.move_cursor { selections[1][2] + 1, selections[1][3] }
+        return true
+    end
+
+    return false
+end
+
+--- Swaps the next selection with main selection
+--- wraps around the buffer
+---@param skip boolean
+M.goto_next_selection = function(skip)
+    local main = M.get_main_selection()
+    if
+        goto_first_selection({ main.end_row, main.end_col }, { -1, -1 }, skip)
+    then
         return
     end
-    selections = api.nvim_buf_get_extmarks(
-        0,
-        ns_id,
-        0,
-        { main.end_row, main.end_col },
-        { details = true }
-    )
-    if #selections > 0 then
-        M.mark_found_match({
-            s_row = selections[1][2],
-            s_col = selections[1][3],
-            e_row = selections[1][4].end_row,
-            e_col = selections[1][4].end_col,
-        }, false)
+    if goto_first_selection({ 0, 0 }, { main.end_row, main.end_col }, skip) then
+        return
     end
 end
 
 --- Swaps the previous selection with main selection
 --- wraps around the buffer
-M.goto_prev_selection = function()
+---@param skip boolean
+M.goto_prev_selection = function(skip)
     local main = M.get_main_selection()
-    local selections = api.nvim_buf_get_extmarks(
-        0,
-        ns_id,
-        { main.end_row, main.end_col },
-        0,
-        { details = true }
-    )
-    if #selections > 0 then
-        M.mark_found_match({
-            s_row = selections[1][2],
-            s_col = selections[1][3],
-            e_row = selections[1][4].end_row,
-            e_col = selections[1][4].end_col,
-        }, false)
+    if goto_first_selection({ main.end_row, main.end_col }, { 0, 0 }, skip) then
         return
     end
-    selections = api.nvim_buf_get_extmarks(
-        0,
-        ns_id,
-        -1,
-        { main.end_row, main.end_col },
-        { details = true }
-    )
-    if #selections > 0 then
-        M.mark_found_match({
-            s_row = selections[1][2],
-            s_col = selections[1][3],
-            e_row = selections[1][4].end_row,
-            e_col = selections[1][4].end_col,
-        }, false)
+    if
+        goto_first_selection({ -1, -1 }, { main.end_row, main.end_col }, skip)
+    then
+        return
     end
 end
 

@@ -28,14 +28,26 @@ M.skip_find_next = function()
     end
 end
 
+--- Deletes current selection and
+--- Moves the main selection to next selction
+M.skip_goto_next = function()
+    utils.goto_next_selection(true)
+end
+
+--- Deletes current selection and
+--- Moves the main selection to previous selction
+M.skip_goto_prev = function()
+    utils.goto_prev_selection(true)
+end
+
 --- Moves the main selection to next selction
 M.goto_next = function()
-    utils.goto_next_selection()
+    utils.goto_next_selection(false)
 end
 
 --- Moves the main selection to previous selction
 M.goto_prev = function()
-    utils.goto_prev_selection()
+    utils.goto_prev_selection(false)
 end
 
 M.find_prev = function()
