@@ -129,7 +129,7 @@ M.CR_method = function()
     local CR = api.nvim_replace_termcodes('<cr>', true, false, true)
 
     utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
+        api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
         vim.cmd('normal! R' .. CR)
     end)
 
@@ -146,7 +146,7 @@ M.C_w_method = function()
     local c_w = api.nvim_replace_termcodes('<C-w>', true, false, true)
 
     utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
+        api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
         vim.cmd('normal! i' .. c_w)
     end)
 
@@ -160,7 +160,7 @@ end
 M.Del_method = function()
     M._insert_and_clear()
     utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
+        api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
         vim.cmd 'normal! x'
     end)
 
@@ -187,7 +187,7 @@ M.C_u_method = function()
 
     local c_u = api.nvim_replace_termcodes('<C-u>', true, false, true)
     utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark[1] + 1, mark[2] + 1 })
+        api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
         vim.cmd('normal! i' .. c_u)
     end)
 
