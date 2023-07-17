@@ -75,6 +75,9 @@ local insert_keys = {
     ['<C-u>'] = { method = I.C_u_method, desc = '' },
     ['<C-j>'] = { method = I.CR_method, desc = '' },
 
+    ['<C-Right>'] = { method = I.C_Right, desc = '' },
+    ['<C-Left>'] = { method = I.C_Left, desc = '' },
+
     ['<Esc>'] = { method = nil, desc = '' },
     ['<C-c>'] = { method = nil, desc = '' },
 
