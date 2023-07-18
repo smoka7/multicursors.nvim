@@ -71,6 +71,7 @@ local insert_keys = {
     ['<Del>'] = { method = I.Del_method, desc = '' },
 
     ['<C-w>'] = { method = I.C_w_method, desc = '' },
+    ['<C-BS>'] = { method = I.C_w_method, desc = '' },
     ['<C-u>'] = { method = I.C_u_method, desc = '' },
     ['<C-j>'] = { method = I.CR_method, desc = '' },
 
@@ -91,6 +92,7 @@ local M = {
     DEBUG_MODE = false,
     create_commands = true, -- create Multicursor user commands
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
+    nowait = true, -- see :help :map-nowait
     normal_keys = normal_keys,
     insert_keys = insert_keys,
     extend_keys = extend_keys,

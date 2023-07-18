@@ -149,6 +149,7 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `<C-v>`   | Pastes the text from system clipboard |
 | `<C-r>`   | Insert the contents of a register |
 | `<C-w>`   | Deletes one word before the selections |
+| `<C-BS>`   | Deletes one word before the selections |
 | `<C-u>`   | Deletes froms start of selections till start of line |
 
 </details>
