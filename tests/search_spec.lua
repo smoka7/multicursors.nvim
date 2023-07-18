@@ -1,7 +1,6 @@
 ---@class Search
 local search = require 'multicursors.search'
 local utils = require 'multicursors.utils'
-local normal_mode = require 'multicursors.normal_mode'
 local api = vim.api
 
 local paragraph = {
@@ -19,23 +18,11 @@ describe('search', function()
 
     it('finds cursor_word', function()
         api.nvim_win_set_cursor(0, { 1, 1 })
-        local word = search.find_cursor_word()
-        assert.same(word, {
-            s_row = 0,
-            e_row = 0,
-            s_col = 0,
-            e_col = 5,
-        })
+        search.find_cursor_word()
         assert.same(vim.b.MultiCursorPattern, 'Lorem')
 
         api.nvim_win_set_cursor(0, { 1, 5 })
-        word = search.find_cursor_word()
-        assert.same(word, {
-            s_row = 0,
-            e_row = 0,
-            s_col = 6,
-            e_col = 5,
-        })
+        search.find_cursor_word()
         assert.same(vim.b.MultiCursorPattern, '')
     end)
 
@@ -87,7 +74,7 @@ describe('search', function()
 
     it('skips and creates a cursor up', function()
         api.nvim_win_set_cursor(0, { 3, 36 })
-        normal_mode.new_under_cursor()
+        search.new_under_cursor()
         search.create_up(true)
         local main = utils.get_main_selection()
         assert.same(main.row, 1)
@@ -100,7 +87,7 @@ describe('search', function()
 
     it('creates a cursor up', function()
         api.nvim_win_set_cursor(0, { 3, 36 })
-        normal_mode.new_under_cursor()
+        search.new_under_cursor()
         search.create_up(false)
         local main = utils.get_main_selection()
         assert.same(main.row, 1)
@@ -119,7 +106,7 @@ describe('search', function()
 
     it('skips and creates a cursor below', function()
         api.nvim_win_set_cursor(0, { 3, 36 })
-        normal_mode.new_under_cursor()
+        search.new_under_cursor()
         search.create_down(true)
         local main = utils.get_main_selection()
         assert.same(main.row, 3)
@@ -132,7 +119,7 @@ describe('search', function()
 
     it('creates a cursor below', function()
         api.nvim_win_set_cursor(0, { 3, 36 })
-        normal_mode.new_under_cursor()
+        search.new_under_cursor()
         search.create_down(false)
         local main = utils.get_main_selection()
         assert.same(main.row, 3)
