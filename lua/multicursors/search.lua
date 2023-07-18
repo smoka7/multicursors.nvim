@@ -6,7 +6,6 @@ local api = vim.api
 local S = {}
 
 --- Finds the word under the cursor
----@return Match?
 S.find_cursor_word = function()
     local line = api.nvim_get_current_line()
     if not line then
@@ -283,75 +282,46 @@ S.new_under_cursor = function()
     end
 
     vim.b.MultiCursorPattern = ''
-    -- vim remembers the first column when moving verticaly
-    vim.b.MultiCursorColumn = cursor[2]
     utils.create_extmark(match, utils.namespace.Main)
+end
+
+local get_new_position = function(motion)
+    local row, col
+    api.nvim_win_call(0, function()
+        vim.cmd('normal! ' .. motion)
+        row, col = unpack(api.nvim_win_get_cursor(0))
+    end)
+
+    -- TODO show an inline mark for zero width marks
+    -- for empty lines we have to create the mark at zero
+    -- and it's nt visible
+    local line = api.nvim_buf_get_lines(0, row - 1, row, true)[1]
+    local end_ = col + 1
+    if vim.fn.strdisplaywidth(line) == 0 then
+        col = 0
+        end_ = 0
+    end
+
+    return {
+        s_row = row - 1,
+        s_col = col,
+        e_row = row - 1,
+        e_col = end_,
+    }
 end
 
 --- Creates a selection on the char below the cursor
 ---@param skip boolean skips the current selection
 S.create_down = function(skip)
-    local cursor = api.nvim_win_get_cursor(0)
-    local row = cursor[1]
-    local col = vim.b.MultiCursorColumn
-    if not col then
-        col = cursor[2] - 1
-        vim.b.MultiCursorColumn = col
-    end
-
-    local buf_count = api.nvim_buf_line_count(0)
-    if row >= buf_count then
-        return
-    end
-
-    local row_text = api.nvim_buf_get_lines(0, row, row + 1, true)[1]
-    if col > #row_text then
-        col = #row_text - 1
-    end
-
-    local finish = col + 1
-    if #row_text == 0 then
-        col = 0
-        finish = 0
-    end
-
-    utils.mark_found_match(
-        { s_row = row, e_row = row, s_col = col, e_col = finish },
-        skip
-    )
-    utils.move_cursor({ row + 1, col }, nil)
+    local mark = get_new_position 'j'
+    utils.mark_found_match(mark, skip)
 end
 
 --- Creates a selection on the char above the cursor
 ---@param skip boolean skips the current selection
 S.create_up = function(skip)
-    local cursor = api.nvim_win_get_cursor(0)
-    local row = cursor[1] - 2
-    local col = vim.b.MultiCursorColumn
-    if not col then
-        col = cursor[2] - 1
-        vim.b.MultiCursorColumn = col
-    end
-
-    if row < 0 then
-        return
-    end
-
-    local row_text = api.nvim_buf_get_lines(0, row, row + 1, true)[1]
-    if col >= #row_text then
-        col = #row_text - 1
-    end
-
-    local finish = col + 1
-    if #row_text == 0 then
-        col = 0
-        finish = 0
-    end
-    utils.mark_found_match(
-        { s_row = row, e_row = row, s_col = col, e_col = finish },
-        skip
-    )
-    utils.move_cursor({ row + 1, col }, nil)
+    local mark = get_new_position 'k'
+    utils.mark_found_match(mark, skip)
 end
 
 --- Searches for multi line pattern in buffer

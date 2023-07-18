@@ -490,7 +490,6 @@ M.exit = function()
     M.clear_selections()
     vim.b.MultiCursorMultiline = nil
     vim.b.MultiCursorPattern = nil
-    vim.b.MultiCursorColumn = nil
     vim.b.MultiCursorSubLayer = nil
 end
 
