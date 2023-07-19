@@ -86,15 +86,17 @@ L.generate_normal_heads = function(config)
         end,
         { desc = 'extend mode', exit = true },
     }
-    return heads
+    return { heads, utils.generate_hints(config, heads, 'normal') }
 end
 
 ---
 ---@param config Config
 L.create_normal_hydra = function(config)
+    local heads, hints = unpack(L.generate_normal_heads(config))
+
     L.normal_hydra = Hydra {
         name = 'Multi Cursor',
-        hint = [[Multi Cursor]],
+        hint = hints,
         config = {
             buffer = 0,
             on_enter = function()
@@ -106,9 +108,13 @@ L.create_normal_hydra = function(config)
                 end
             end,
             color = 'pink',
+            hint = {
+                position = config.hydra.position,
+                border = config.hydra.border,
+            },
         },
         mode = 'n',
-        heads = L.generate_normal_heads(config),
+        heads = heads,
     }
 end
 
@@ -128,14 +134,15 @@ L.generate_insert_heads = function(config)
             }
         end
     end
-    return heads
+    return { heads, utils.generate_hints(config, heads, 'insert') }
 end
 
 ---@param config Config
 L.create_insert_hydra = function(config)
+    local heads, hints = unpack(L.generate_insert_heads(config))
     L.insert_hydra = Hydra {
         name = 'Multi Cursor insert',
-        hint = [[Multi Cursor Insert]],
+        hint = hints,
         mode = 'i',
         config = {
             buffer = 0,
@@ -147,14 +154,18 @@ L.create_insert_hydra = function(config)
                 end, 20)
             end,
             color = 'pink',
+            hint = {
+                position = config.hydra.position,
+                border = config.hydra.border,
+            },
         },
-        heads = L.generate_insert_heads(config),
+        heads = heads,
     }
 end
 
 ---@param config Config
 ---@return table
-L.generate_extend_head = function(config)
+L.generate_extend_heads = function(config)
     local heads = {}
     for i, value in pairs(config.extend_keys) do
         if value.method then
@@ -168,14 +179,16 @@ L.generate_extend_head = function(config)
             }
         end
     end
-    return heads
+    return { heads, utils.generate_hints(config, heads, 'extend') }
 end
 
 ---@param config Config
 L.create_extend_hydra = function(config)
+    local heads, hints = unpack(L.generate_extend_heads(config))
+
     L.extend_hydra = Hydra {
         name = 'Multi Cursor Extend',
-        hint = [[Multi Cursor Extend]],
+        hint = hints,
         mode = 'n',
         config = {
             buffer = 0,
@@ -189,8 +202,12 @@ L.create_extend_hydra = function(config)
                 end, 20)
             end,
             color = 'pink',
+            hint = {
+                position = config.hydra.position,
+                border = config.hydra.border,
+            },
         },
-        heads = L.generate_extend_head(config),
+        heads = heads,
     }
 end
 return L

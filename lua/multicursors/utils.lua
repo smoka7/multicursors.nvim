@@ -493,4 +493,69 @@ M.exit = function()
     vim.b.MultiCursorSubLayer = nil
 end
 
+-- Generates hints based on the configuration and input parameters.
+---@param config table configuration.
+---@param heads table heads table containing the hints.
+---@param hint_types string hint types indicating the mode.
+---@return string hints as a string.
+M.generate_hints = function(config, heads, hint_types)
+    if config.hydra.hint[hint_types] then
+        return config.hydra.hint[hint_types]
+    end
+
+    local num_items = #heads
+    local num_items_to_sort = num_items
+    local last_five_items = {}
+
+    -- Keep the last 5 items in the same pos.
+    -- Esc -> i -> c -> a -> e
+    if hint_types == 'normal' then
+        num_items_to_sort = math.max(num_items - 5, 0)
+        for i = num_items_to_sort + 1, num_items do
+            table.insert(last_five_items, heads[i])
+        end
+    end
+
+    local items_to_sort = {}
+    for i = 1, num_items_to_sort do
+        table.insert(items_to_sort, heads[i])
+    end
+
+    table.sort(items_to_sort, function(a, b)
+        -- Custom sorting logic here (alphabetical sorting with special characters at the end)
+        local is_special_a = not string.match(a[1], '[%a%d]')
+        local is_special_b = not string.match(b[1], '[%a%d]')
+
+        if is_special_a and not is_special_b then
+            return false
+        elseif not is_special_a and is_special_b then
+            return true
+        else
+            return a[1] < b[1]
+        end
+    end)
+
+    local sorted_heads = {}
+    for _, value in ipairs(items_to_sort) do
+        table.insert(sorted_heads, value)
+    end
+    for _, value in ipairs(last_five_items) do
+        table.insert(sorted_heads, value)
+    end
+
+    -- NOTE:: The above code is not required if you do not want a fixed sort
+    -- Need to remove sorted
+    local str = 'MultiCursor: '
+        .. string.upper(string.sub(hint_types, 1, 1))
+        .. string.sub(hint_types, 2)
+        .. '\n'
+    for _, value in ipairs(sorted_heads) do
+        local desc = value[3] and value[3].desc or ''
+        --  TODO:: Current issue regarding ^
+        str = str .. '_' .. value[1] .. '_: ' .. desc .. '\n'
+    end
+
+    return str
+end
+
 return M

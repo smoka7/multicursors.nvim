@@ -96,6 +96,15 @@ local M = {
     normal_keys = normal_keys,
     insert_keys = insert_keys,
     extend_keys = extend_keys,
+    hydra = {
+        border = 'none',
+        position = 'bottom',
+        hint = {
+            normal = nil,
+            insert = nil,
+            extend = nil,
+        },
+    },
 }
 
 return M
