@@ -101,7 +101,7 @@ M.insert_text = function(text)
         local row = selection[3].end_row
         api.nvim_buf_set_text(0, row, col, row, col, { text })
     end
-    selections.move_selections_horizontal(#text)
+    selections.move_by_motion(#text .. 'l')
 end
 
 local delete_char = function()
@@ -130,22 +130,22 @@ end
 
 M.Left_method = function()
     M._insert_and_clear()
-    selections.move_selections_horizontal(-1)
+    selections.move_by_motion 'h'
 end
 
 M.Right_method = function()
     M._insert_and_clear()
-    selections.move_selections_horizontal(1)
+    selections.move_by_motion 'l'
 end
 
 M.UP_method = function()
     M._insert_and_clear()
-    selections.move_selections_vertical(-1)
+    selections.move_by_motion 'k'
 end
 
 M.Down_method = function()
     M._insert_and_clear()
-    selections.move_selections_vertical(1)
+    selections.move_by_motion 'j'
 end
 
 --- Inserts a new line at selections
@@ -159,10 +159,7 @@ M.CR_method = function()
         vim.cmd('normal! R' .. CR)
     end)
 
-    selections.move_selections_vertical(1)
-    --HACK selections should start at line start
-    -- but move_selections_vertical doesn't changes col values
-    selections.move_selections_horizontal(-vim.v.maxcol)
+    selections.move_by_motion 'j^'
 end
 
 --- Deletes the word backward
@@ -197,22 +194,24 @@ end
 M.Home_method = function()
     M._insert_and_clear()
 
-    selections.move_selections_horizontal(-vim.v.maxcol)
+    selections.move_by_motion '^'
 end
 
 --- Moves the selections to end of their lines
 M.End_method = function()
     M._insert_and_clear()
 
-    selections.move_selections_horizontal(vim.v.maxcol)
+    --HACK see inside selections.get_new_position on why we do this
+    selections.move_by_motion '$'
+    selections.move_by_motion '$'
 end
 
 M.C_Right = function()
-    selections.move_by_motion 'w'
+    selections.move_by_motion 'W'
 end
 
 M.C_Left = function()
-    selections.move_by_motion 'b'
+    selections.move_by_motion 'B'
 end
 
 --- Deletes selections til start of line

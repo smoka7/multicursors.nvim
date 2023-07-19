@@ -73,6 +73,42 @@ M.create_extmark = function(match, namespace)
     return s
 end
 
+--- Updates the mark with id to new match
+--- deletes other marks overlaping with the new match
+---@param id integer
+---@param match Match
+---@param namespace Namespace
+---@return integer
+M.update_extmark = function(id, match, namespace)
+    local ns = ns_id
+    if namespace == M.namespace.Main then
+        ns = main_ns_id
+    end
+
+    local marks = api.nvim_buf_get_extmarks(
+        0,
+        ns,
+        { match.s_row, match.s_col },
+        { match.e_row, match.e_col },
+        {}
+    )
+    -- Delete the old marks
+    for _, mark in pairs(marks) do
+        if id ~= mark[1] then
+            api.nvim_buf_del_extmark(0, ns, mark[1])
+        end
+    end
+
+    match = check_match_bounds(match)
+
+    return api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
+        id = id,
+        hl_group = namespace,
+        end_row = match.e_row,
+        end_col = match.e_col,
+    })
+end
+
 --- Deletes the extmark in current buffer in range of match
 ---@param match Match
 ---@param namespace Namespace
