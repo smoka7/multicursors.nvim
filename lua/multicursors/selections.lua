@@ -64,44 +64,81 @@ S.move_by_motion = function(motion)
     utils.move_cursor { new_pos.s_row + 1, new_pos.s_col + 1 }
 end
 
---- TODO stay until inlay_hints are stable so we can get rid of
---- move_selections_horizontal(0)
----@param length integer
-S.move_selections_horizontal = function(length)
+
+--- finds index of last  char in a string
+--- considers multibyte utf-8 characters
+---@param str string
+---@return integer last col
+local function find_last_mbchar(str)
+    local index = #str
+    while
+        vim.fn.strdisplaywidth(string.sub(str, index, #str)) >= 4
+        and index >= 1
+        and index <= #str
+    do
+        index = index - 1
+    end
+    return index - 1
+end
+
+--- Reduces the selections to a single char
+---@param before ActionPosition
+S.reduce_to_char = function(before)
     local marks = utils.get_all_selections()
     local main = utils.get_main_selection()
-    utils.clear_selections()
 
-    ---@param mark Selection
-    ---@return integer,integer
-    local get_position = function(mark)
-        local col = mark.end_col + length - 1
-        local row = mark.end_row
-
-        local line =
-            string.len(api.nvim_buf_get_lines(0, row, row + 1, true)[1])
-        if col < 0 then
-            col = -1
-        elseif col >= line then
-            col = line - 1
-        end
-        return row, col
+    local row
+    if before == utils.position.before then
+        local text =
+            api.nvim_buf_get_text(0, main.row, 0, main.end_row, main.col, {})
+        main.end_col = main.col
+        main.col = find_last_mbchar(text[1])
+        row = main.row
+    else
+        local text = api.nvim_buf_get_text(
+            0,
+            main.row,
+            main.col,
+            main.end_row,
+            main.end_col,
+            {}
+        )
+        main.col = find_last_mbchar(text[#text]) + main.col
+        row = main.end_row
     end
 
-    local row, col = get_position(main)
-    utils.create_extmark(
-        { s_col = col, e_col = col + 1, s_row = row, e_row = row },
-        utils.namespace.Main
-    )
-    utils.move_cursor { row + 1, col + 1 }
+    utils.move_cursor { row + 1, main.end_col }
+
+    utils.update_extmark(main.id, {
+        s_row = row,
+        e_row = row,
+        s_col = main.col,
+        e_col = main.end_col,
+    }, utils.namespace.Main)
 
     for _, mark in pairs(marks) do
-        row, col = get_position(mark)
-
-        utils.create_extmark(
-            { s_col = col, e_col = col + 1, s_row = row, e_row = row },
-            utils.namespace.Multi
+        text = api.nvim_buf_get_text(
+            0,
+            mark.row,
+            mark.col,
+            mark.end_row,
+            mark.end_col,
+            {}
         )
+        if before == utils.position.before then
+            mark.end_col = concatenateCharsStart(text[1])
+            row = mark.row
+        else
+            mark.col = find_last_mbchar(text[#text])
+            row = mark.end_row
+        end
+
+        utils.update_extmark(mark.id, {
+            s_row = row,
+            e_row = row,
+            s_col = mark.col,
+            e_col = mark.end_col,
+        }, utils.namespace.Multi)
     end
 end
 

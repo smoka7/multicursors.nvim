@@ -115,7 +115,7 @@ local delete_char = function()
         vim.cmd [[normal x]]
     end)
 
-    selections.move_selections_horizontal(0)
+    selections.reduce_to_char(utils.position.before)
 end
 
 M.BS_method = function()
@@ -176,7 +176,7 @@ M.C_w_method = function()
     -- this does not change extmark position but when
     -- we delete a text extmark start and end col will overlap and
     -- user can't see the extmark when moving we increment end col so selection gets visible
-    selections.move_selections_horizontal(0)
+    selections.reduce_to_char(utils.position.before)
 end
 
 --- Deletes the char under selection
@@ -187,7 +187,7 @@ M.Del_method = function()
         vim.cmd 'normal! x'
     end)
 
-    selections.move_selections_horizontal(0)
+    selections.reduce_to_char(utils.position.before)
 end
 
 --- Moves the selections to start of their lines
@@ -224,20 +224,20 @@ M.C_u_method = function()
         vim.cmd('normal! i' .. c_u)
     end)
 
-    selections.move_selections_horizontal(0)
+    selections.reduce_to_char(utils.position.before)
 end
 
 --- Listens for every char press and inserts the text before leaving insert mode
 ---@param config Config
 M.insert = function(config)
     set_insert_autocommands(config)
-    utils.update_selections(utils.position.before)
+    selections.reduce_to_char(utils.position.before)
 end
 
 ---@param config Config
 M.append = function(config)
     set_insert_autocommands(config)
-    utils.update_selections(utils.position.after)
+    selections.reduce_to_char(utils.position.after)
 end
 
 M.exit = function()
