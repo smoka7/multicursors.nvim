@@ -183,7 +183,7 @@ E.o_method = function()
     local main = utils.get_main_selection()
     if vim.b.MultiCursorAnchorStart == true then
         vim.b.MultiCursorAnchorStart = false
-        utils.move_cursor { main[2] + 1, main[3] }
+        utils.move_cursor { main.row + 1, main.col }
         return
     end
     utils.move_cursor { main.end_row + 1, main.end_col - 1 }
