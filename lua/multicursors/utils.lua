@@ -329,45 +329,6 @@ M.call_on_selections = function(callback)
     callback(main)
 end
 
---- updates each selection to a single char
----@param before ActionPosition
-M.update_selections = function(before)
-    local marks = M.get_all_selections()
-    local main = M.get_main_selection()
-    M.clear_selections()
-
-    local col = main.end_col
-    local row = main.end_row
-    if before == M.position.before then
-        col = main.col
-        row = main.row
-    end
-    M.move_cursor { row + 1, col }
-
-    M.create_extmark({
-        s_row = row,
-        e_row = row,
-        s_col = col - 1,
-        e_col = col,
-    }, M.namespace.Main)
-
-    for _, mark in pairs(marks) do
-        col = mark.end_col
-        row = mark.end_row
-        if before == M.position.before then
-            col = mark.col
-            row = mark.row
-        end
-
-        M.create_extmark({
-            s_row = row,
-            e_row = row,
-            s_col = col - 1,
-            e_col = col,
-        }, M.namespace.Multi)
-    end
-end
-
 --- Aligns selections by adding space
 ---@param line_start boolean add spaces before selection or at the start of line
 M.align_text = function(line_start)
