@@ -16,23 +16,46 @@ L.normal_hydra = nil
 
 L.insert_hydra = nil
 
+L.extend_hydra = nil
+
 ---
----@param config Config
----@return table
-L.generate_normal_heads = function(config)
+---@param keys Dictionary: { [string]: Action }
+---@param nowait boolean
+---@param show_desc boolean
+---@return Head[]
+local generate_heads = function(keys, nowait, show_desc)
+    ---@type Head[]
     local heads = {}
-    for i, value in pairs(config.normal_keys) do
+    for i, value in pairs(keys) do
+        local description = nil
+        if show_desc then
+            description = value.desc or value.opts.desc
+        end
+
         if value.method then
             heads[#heads + 1] = {
                 i,
                 value.method,
                 {
-                    nowait = config.nowait,
-                    desc = value.desc,
+                    desc = description,
+                    nowait = nowait,
                 },
             }
         end
     end
+
+    return heads
+end
+
+---
+---@param config Config
+---@return Head[]
+L.generate_normal_heads = function(config)
+    local heads = generate_heads(
+        config.normal_keys,
+        config.nowait,
+        config.generate_hints.normal
+    )
     local enter_insert = function(callback)
         -- tell hydra that we're going to insert mode so it doesn't clear the selection
         vim.b.MultiCursorSubLayer = true
@@ -41,6 +64,7 @@ L.generate_normal_heads = function(config)
         L.create_insert_hydra(config)
         L.insert_hydra:activate()
     end
+
     heads[#heads + 1] = {
         '<esc>',
         nil,
@@ -86,17 +110,18 @@ L.generate_normal_heads = function(config)
         end,
         { desc = 'extend mode', exit = true },
     }
-    return { heads, utils.generate_hints(config, heads, 'normal') }
+
+    return heads
 end
 
 ---
 ---@param config Config
 L.create_normal_hydra = function(config)
-    local heads, hints = unpack(L.generate_normal_heads(config))
+    local heads = L.generate_normal_heads(config)
 
     L.normal_hydra = Hydra {
         name = 'Multi Cursor',
-        hint = hints,
+        hint = utils.generate_hints(config, heads, 'normal'),
         config = {
             buffer = 0,
             on_enter = function()
@@ -108,10 +133,7 @@ L.create_normal_hydra = function(config)
                 end
             end,
             color = 'pink',
-            hint = {
-                position = config.hydra.position,
-                border = config.hydra.border,
-            },
+            hint = config.hint_config,
         },
         mode = 'n',
         heads = heads,
@@ -119,30 +141,21 @@ L.create_normal_hydra = function(config)
 end
 
 ---@param config Config
----@return table
+---@return Head[]
 L.generate_insert_heads = function(config)
-    local heads = {}
-    for i, value in pairs(config.insert_keys) do
-        if value.method then
-            heads[#heads + 1] = {
-                i,
-                value.method,
-                {
-                    desc = value.desc,
-                    nowait = config.nowait,
-                },
-            }
-        end
-    end
-    return { heads, utils.generate_hints(config, heads, 'insert') }
+    return generate_heads(
+        config.insert_keys,
+        config.nowait,
+        config.generate_hints.insert
+    )
 end
 
 ---@param config Config
 L.create_insert_hydra = function(config)
-    local heads, hints = unpack(L.generate_insert_heads(config))
+    local heads = L.generate_insert_heads(config)
     L.insert_hydra = Hydra {
         name = 'Multi Cursor insert',
-        hint = hints,
+        hint = utils.generate_hints(config, heads, 'insert'),
         mode = 'i',
         config = {
             buffer = 0,
@@ -154,41 +167,29 @@ L.create_insert_hydra = function(config)
                 end, 20)
             end,
             color = 'pink',
-            hint = {
-                position = config.hydra.position,
-                border = config.hydra.border,
-            },
+            hint = config.hint_config,
         },
         heads = heads,
     }
 end
 
 ---@param config Config
----@return table
+---@return Head[]
 L.generate_extend_heads = function(config)
-    local heads = {}
-    for i, value in pairs(config.extend_keys) do
-        if value.method then
-            heads[#heads + 1] = {
-                i,
-                value.method,
-                {
-                    desc = value.desc,
-                    nowait = config.nowait,
-                },
-            }
-        end
-    end
-    return { heads, utils.generate_hints(config, heads, 'extend') }
+    return generate_heads(
+        config.extend_keys,
+        config.nowait,
+        config.generate_hints.extend
+    )
 end
 
 ---@param config Config
 L.create_extend_hydra = function(config)
-    local heads, hints = unpack(L.generate_extend_heads(config))
+    local heads = L.generate_extend_heads(config)
 
     L.extend_hydra = Hydra {
         name = 'Multi Cursor Extend',
-        hint = hints,
+        hint = utils.generate_hints(config, heads, 'extend'),
         mode = 'n',
         config = {
             buffer = 0,
@@ -202,12 +203,10 @@ L.create_extend_hydra = function(config)
                 end, 20)
             end,
             color = 'pink',
-            hint = {
-                position = config.hydra.position,
-                border = config.hydra.border,
-            },
+            hint = config.hint_config,
         },
         heads = heads,
     }
 end
+
 return L

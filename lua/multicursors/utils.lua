@@ -494,13 +494,15 @@ M.exit = function()
 end
 
 -- Generates hints based on the configuration and input parameters.
----@param config table configuration.
----@param heads table heads table containing the hints.
----@param hint_types string hint types indicating the mode.
+---@param config Config configuration.
+---@param heads Head[]
+---@param mode string indicating the mode.
 ---@return string hints as a string.
-M.generate_hints = function(config, heads, hint_types)
-    if config.hydra.hint[hint_types] then
-        return config.hydra.hint[hint_types]
+M.generate_hints = function(config, heads, mode)
+    if config.generate_hints[mode] == false then
+        return 'MultiCursor ' .. mode .. ' mode'
+    elseif type(config.generate_hints[mode]) == 'string' then
+        return config.generate_hints[mode]
     end
 
     local num_items = #heads
@@ -509,13 +511,14 @@ M.generate_hints = function(config, heads, hint_types)
 
     -- Keep the last 5 items in the same pos.
     -- Esc -> i -> c -> a -> e
-    if hint_types == 'normal' then
+    if mode == 'normal' then
         num_items_to_sort = math.max(num_items - 5, 0)
         for i = num_items_to_sort + 1, num_items do
             table.insert(last_five_items, heads[i])
         end
     end
 
+    ---@type Head[]
     local items_to_sort = {}
     for i = 1, num_items_to_sort do
         table.insert(items_to_sort, heads[i])
@@ -535,21 +538,24 @@ M.generate_hints = function(config, heads, hint_types)
         end
     end)
 
-    local sorted_heads = {}
+    ---@type Head[]
+    local sorted = {}
     for _, value in ipairs(items_to_sort) do
-        table.insert(sorted_heads, value)
+        table.insert(sorted, value)
     end
+
     for _, value in ipairs(last_five_items) do
-        table.insert(sorted_heads, value)
+        table.insert(sorted, value)
     end
 
     -- NOTE:: The above code is not required if you do not want a fixed sort
     -- Need to remove sorted
-    local str = 'MultiCursor: '
-        .. string.upper(string.sub(hint_types, 1, 1))
-        .. string.sub(hint_types, 2)
+    local str = ' MultiCursor: '
+        .. string.upper(string.sub(mode, 1, 1))
+        .. string.sub(mode, 2)
         .. '\n'
-    for _, value in ipairs(sorted_heads) do
+
+    for _, value in pairs(sorted) do
         local desc = value[3] and value[3].desc or ''
         --  TODO:: Current issue regarding ^
         str = str .. '_' .. value[1] .. '_: ' .. desc .. '\n'

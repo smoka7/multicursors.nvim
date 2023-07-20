@@ -45,22 +45,22 @@ local normal_keys = {
 
 ---@class Dictionary: { [string]: Action }
 local extend_keys = {
-    ['w'] = { method = E.w_method },
-    ['e'] = { method = E.e_method },
-    ['b'] = { method = E.b_method },
-    ['o'] = { method = E.o_method },
-    ['O'] = { method = E.o_method },
-    ['h'] = { method = E.h_method },
-    ['j'] = { method = E.j_method },
-    ['k'] = { method = E.k_method },
-    ['l'] = { method = E.l_method },
-    ['r'] = { method = E.node_first_child },
-    ['t'] = { method = E.node_parent },
-    ['y'] = { method = E.node_last_child },
-    ['^'] = { method = E.caret_method },
-    ['$'] = { method = E.dollar_method },
-    ['u'] = { method = E.undo_history },
-    ['c'] = { method = E.custom_method },
+    ['w'] = { method = E.w_method, opts = { desc = '' } },
+    ['e'] = { method = E.e_method, opts = { desc = '' } },
+    ['b'] = { method = E.b_method, opts = { desc = '' } },
+    ['o'] = { method = E.o_method, opts = { desc = '' } },
+    ['O'] = { method = E.o_method, opts = { desc = '' } },
+    ['h'] = { method = E.h_method, opts = { desc = '' } },
+    ['j'] = { method = E.j_method, opts = { desc = '' } },
+    ['k'] = { method = E.k_method, opts = { desc = '' } },
+    ['l'] = { method = E.l_method, opts = { desc = '' } },
+    ['r'] = { method = E.node_first_child, opts = { desc = '' } },
+    ['t'] = { method = E.node_parent, opts = { desc = '' } },
+    ['y'] = { method = E.node_last_child, opts = { desc = '' } },
+    ['^'] = { method = E.caret_method, opts = { desc = '' } },
+    ['$'] = { method = E.dollar_method, opts = { desc = '' } },
+    ['u'] = { method = E.undo_history, opts = { desc = '' } },
+    ['c'] = { method = E.custom_method, opts = { desc = '' } },
 }
 
 ---@class Dictionary: { [string]: Action }
@@ -96,15 +96,15 @@ local M = {
     normal_keys = normal_keys,
     insert_keys = insert_keys,
     extend_keys = extend_keys,
-    hydra = {
+    hint_config = {
         border = 'none',
         position = 'bottom',
-        hint = {
-            normal = nil,
-            insert = nil,
-            extend = nil,
-        },
-    },
+    }, -- see :help hydra-config.hint
+    generate_hints = {
+        normal = true,
+        insert = true,
+        extend = true,
+    }, -- true:generate hints false:don't genrate or provide your own hints
 }
 
 return M
