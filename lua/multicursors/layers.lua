@@ -141,8 +141,8 @@ L.create_insert_hydra = function(config)
             buffer = 0,
             on_enter = function() end,
             on_exit = function()
-                insert_mode.exit()
                 vim.defer_fn(function()
+                    insert_mode.exit()
                     L.normal_hydra:activate()
                 end, 20)
             end,
