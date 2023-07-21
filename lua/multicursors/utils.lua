@@ -39,6 +39,24 @@ local function check_match_bounds(match)
     return match
 end
 
+--- Checks that start is before end otherwise swaps theme.
+---@param sel Selection
+---@return Selection
+local function check_selection_bounds(sel)
+    if
+        sel.row > sel.end_row
+        or (sel.row == sel.end_row and sel.col > sel.end_col)
+    then
+        return {
+            s_row = sel.end_row,
+            s_col = sel.end_col,
+            e_row = sel.row,
+            e_col = sel.col,
+        }
+    end
+
+    return sel
+end
 --- creates a extmark for the the match
 --- doesn't create a duplicate mark
 ---@param match Match
@@ -75,11 +93,10 @@ end
 
 --- Updates the mark with id to new match
 --- deletes other marks overlaping with the new match
----@param id integer
----@param match Match
+---@param selection Selection
 ---@param namespace Namespace
 ---@return integer
-M.update_extmark = function(id, match, namespace)
+M.update_extmark = function(selection, namespace)
     local ns = ns_id
     if namespace == M.namespace.Main then
         ns = main_ns_id
@@ -88,24 +105,24 @@ M.update_extmark = function(id, match, namespace)
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
-        { match.s_row, match.s_col },
-        { match.e_row, match.e_col },
+        { selection.row, selection.col },
+        { selection.end_row, selection.end_col },
         {}
     )
     -- Delete the old marks
     for _, mark in pairs(marks) do
-        if id ~= mark[1] then
+        if selection.id ~= mark[1] then
             api.nvim_buf_del_extmark(0, ns, mark[1])
         end
     end
 
-    match = check_match_bounds(match)
+    selection = check_selection_bounds(selection)
 
-    return api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
-        id = id,
+    return api.nvim_buf_set_extmark(0, ns, selection.row, selection.col, {
+        id = selection.id,
         hl_group = namespace,
-        end_row = match.e_row,
-        end_col = match.e_col,
+        end_row = selection.end_row,
+        end_col = selection.end_col,
     })
 end
 
