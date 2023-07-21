@@ -130,12 +130,12 @@ end
 
 M.Left_method = function()
     M._insert_and_clear()
-    selections.move_by_motion 'h'
+    selections.move_char_horizontal 'before'
 end
 
 M.Right_method = function()
     M._insert_and_clear()
-    selections.move_by_motion 'l'
+    selections.move_char_horizontal 'after'
 end
 
 M.UP_method = function()
@@ -237,7 +237,7 @@ end
 ---@param config Config
 M.append = function(config)
     set_insert_autocommands(config)
-    selections.reduce_to_char(utils.position.after)
+    selections.reduce_to_char(utils.position.on)
 end
 
 M.exit = function()
