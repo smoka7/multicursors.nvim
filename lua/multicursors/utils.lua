@@ -548,19 +548,77 @@ M.generate_hints = function(config, heads, mode)
         table.insert(sorted, value)
     end
 
-    -- NOTE:: The above code is not required if you do not want a fixed sort
-    -- Need to remove sorted
     local str = ' MultiCursor: '
         .. string.upper(string.sub(mode, 1, 1))
         .. string.sub(mode, 2)
         .. '\n'
-
-    for _, value in pairs(sorted) do
-        local desc = value[3] and value[3].desc or ''
-        --  TODO:: Current issue regarding ^
-        str = str .. '_' .. value[1] .. '_: ' .. desc .. '\n'
+    local num_columns = config.generate_hints.hint_column
+    if type(num_columns) ~= 'number' and num_columns ~= 'width' then
+        -- set it to default ?
+        num_columns = 4
     end
 
+    if num_columns == 'width' then
+        -- If you dont want custom columns :
+        local width = vim.api.nvim_win_get_width(0)
+        local current_line = ''
+
+        for _, value in pairs(sorted) do
+            local desc = value[3] and value[3].desc or ''
+            local bind = '_' .. value[1] .. '_: ' .. desc
+
+            if #current_line + #bind < width then
+                current_line = current_line .. bind .. ' '
+            else
+                str = str .. current_line .. '\n'
+                current_line = bind .. ' '
+            end
+        end
+
+        str = str .. current_line .. '\n'
+        return str
+    else
+        local max_lengths = {}
+        for i = 1, num_columns do
+            max_lengths[i] = { bind = 0, desc = 0 }
+        end
+        for i, value in pairs(sorted) do
+            -- Determine which column the current element belongs to.
+            -- This is done by using the modulus operator (%) on the index.
+            local column = ((i - 1) % num_columns) + 1
+            local bind_length = #value[1]
+            local desc_length = value[3] and #value[3].desc or 0
+
+            if bind_length > max_lengths[column].bind then
+                max_lengths[column].bind = bind_length
+            end
+            if desc_length > max_lengths[column].desc then
+                max_lengths[column].desc = desc_length
+            end
+        end
+
+        -- Loop through the sorted list again, this time in chunks of num_columns.
+        for i = 1, #sorted, num_columns do
+            local line = ''
+            for j = 0, num_columns - 1 do
+                local value = sorted[i + j]
+                if value then
+                    local bind = value[1]
+                    local desc = value[3] and value[3].desc or ''
+                    local padding_length = max_lengths[j + 1].desc - #desc
+                    if #bind >= 2 then
+                        padding_length = padding_length - 1
+                    end
+
+                    -- Apply padding to the description for double binds dd and yy
+                    desc = desc .. string.rep(' ', padding_length)
+
+                    line = line .. '    _' .. bind .. '_: ' .. desc
+                end
+            end
+            str = str .. line .. '\n'
+        end
+    end
     return str
 end
 
