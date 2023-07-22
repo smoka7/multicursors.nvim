@@ -47,6 +47,79 @@ local generate_heads = function(keys, nowait, show_desc)
     return heads
 end
 
+local max_hint_length = 25
+
+--- Creates a hint for a head
+--- when necessary adds padding or cuts the hint for aligning
+---@param head Head
+---@return string
+local function get_hint(head)
+    if head[3].desc == '' then
+        return ''
+    end
+
+    local hint = ' _' .. head[1] .. '_ : ' .. head[3].desc .. '^'
+    local length = vim.fn.strdisplaywidth(hint)
+    if length < max_hint_length then
+        hint = hint .. string.rep(' ', max_hint_length - length)
+    elseif length > max_hint_length then
+        hint = string.sub(hint, 0, max_hint_length - 5) .. '... '
+    end
+
+    return hint
+end
+
+-- Generates hints based on the configuration and input parameters.
+---@param config Config configuration.
+---@param heads Head[]
+---@param mode string indicating the mode.
+---@return string hints as a string.
+local generate_hints = function(config, heads, mode)
+    if config.generate_hints[mode] == false then
+        return 'MultiCursor ' .. mode .. ' mode'
+    elseif type(config.generate_hints[mode]) == 'string' then
+        return config.generate_hints[mode]
+    end
+
+    table.sort(heads, function(a, b)
+        -- put the head with empty desc at the end
+        if a[3].desc == '' then
+            return false
+        end
+
+        -- put the special characters at the end
+        local is_special_a = not string.match(a[1], '[%a%d]')
+        local is_special_b = not string.match(b[1], '[%a%d]')
+        if is_special_a and not is_special_b then
+            return false
+        elseif not is_special_a and is_special_b then
+            return true
+        else
+            return a[1] < b[1]
+        end
+    end)
+
+    local str = ' MultiCursor: ' .. mode .. ' mode'
+
+    local columns = math.floor(vim.api.nvim_win_get_width(0) / max_hint_length)
+
+    local line
+    for i = 0, math.floor(#heads / columns) do
+        line = ''
+        for j = 1, columns, 1 do
+            if heads[(i * columns) + j] then
+                line = line .. get_hint(heads[(i * columns) + j])
+            end
+        end
+
+        if line ~= '' then
+            str = str .. '\n' .. line
+        end
+    end
+
+    return str
+end
+
 ---
 ---@param config Config
 ---@return Head[]
@@ -121,7 +194,7 @@ L.create_normal_hydra = function(config)
 
     L.normal_hydra = Hydra {
         name = 'Multi Cursor',
-        hint = utils.generate_hints(config, heads, 'normal'),
+        hint = generate_hints(config, heads, 'Normal'),
         config = {
             buffer = 0,
             on_enter = function()
@@ -155,7 +228,7 @@ L.create_insert_hydra = function(config)
     local heads = L.generate_insert_heads(config)
     L.insert_hydra = Hydra {
         name = 'Multi Cursor insert',
-        hint = utils.generate_hints(config, heads, 'insert'),
+        hint = generate_hints(config, heads, 'Insert'),
         mode = 'i',
         config = {
             buffer = 0,
@@ -189,7 +262,7 @@ L.create_extend_hydra = function(config)
 
     L.extend_hydra = Hydra {
         name = 'Multi Cursor Extend',
-        hint = utils.generate_hints(config, heads, 'extend'),
+        hint = generate_hints(config, heads, 'Extend'),
         mode = 'n',
         config = {
             buffer = 0,

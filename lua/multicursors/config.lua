@@ -101,7 +101,6 @@ local M = {
         position = 'bottom',
     }, -- see :help hydra-config.hint
     generate_hints = {
-        hint_column = 4, -- 1-9 or 'width'
         normal = true,
         insert = true,
         extend = true,
