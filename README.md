@@ -23,20 +23,20 @@ Install with your preferred package manager:
         return {
             normal_keys = {
                 -- to change default lhs of key mapping change the key
-                ['b'] = { 
-                    -- assigning nil to method exits from multi cursor mode 
-                    method = N.clear_others, 
+                ['b'] = {
+                    -- assigning nil to method exits from multi cursor mode
+                    method = N.clear_others,
                     -- description to show in hint window
-                    desc = 'Clear others' 
+                    desc = 'Clear others'
                 },
-            }, 
+            },
             insert_keys = {
                 -- to change default lhs of key mapping change the key
-                ['<CR>'] = { 
-                    -- assigning nil to method exits from multi cursor mode 
-                    method = I.Cr_method, 
+                ['<CR>'] = {
+                    -- assigning nil to method exits from multi cursor mode
+                    method = I.Cr_method,
                     -- description to show in hint window
-                    desc = 'new line' 
+                    desc = 'new line'
                 },
             },
         }
@@ -65,6 +65,15 @@ Install with your preferred package manager:
     normal_keys = normal_keys,
     insert_keys = insert_keys
     extend_keys = extend_keys
+    hydra = {
+        border = 'none',
+        position = 'bottom',
+        hint = {
+            normal = nil,
+            insert = nil,
+            extend = nil,
+        },
+    },
 }
 ```
 </details>

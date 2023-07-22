@@ -7,7 +7,8 @@
 
 ---@class Action
 ---@field method function?
----@field opts table
+---@field desc string --TODO delete in next release
+---@field opts HeadOpts
 
 ---@class Point
 ---@field row integer
@@ -27,3 +28,20 @@
 ---@field offset integer
 ---@field till integer
 ---@field skip boolean
+
+---@class Head
+---@field [1] string
+---@field [2] string | function | nil
+---@field [3] HeadOpts
+
+---@class HeadOpts
+---@field public private? boolean
+---@field exit? boolean
+---@field exit_before? boolean
+---@field on_key? boolean
+---@field mode? string[]
+---@field silent? boolean
+---@field expr? boolean
+---@field nowait? boolean
+---@field remap? boolean
+---@field desc? string
