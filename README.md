@@ -23,11 +23,11 @@ Install with your preferred package manager:
         return {
             normal_keys = {
                 -- to change default lhs of key mapping change the key
-                ['b'] = {
+                [','] = {
                     -- assigning nil to method exits from multi cursor mode
                     method = N.clear_others,
-                    -- description to show in hint window
-                    desc = 'Clear others'
+                    -- you can pass :map-arguments here
+                    opts = { desc = 'Clear others' },
                 },
             },
             insert_keys = {
@@ -35,8 +35,8 @@ Install with your preferred package manager:
                 ['<CR>'] = {
                     -- assigning nil to method exits from multi cursor mode
                     method = I.Cr_method,
-                    -- description to show in hint window
-                    desc = 'new line'
+                    -- you can pass :map-arguments here
+                    opts = { desc = 'New line' },
                 },
             },
         }
@@ -65,14 +65,19 @@ Install with your preferred package manager:
     normal_keys = normal_keys,
     insert_keys = insert_keys
     extend_keys = extend_keys
-    hydra = {
+    -- see :help hydra-config.hint
+    hint_config = {
         border = 'none',
         position = 'bottom',
-        hint = {
-            normal = nil,
-            insert = nil,
-            extend = nil,
-        },
+    },
+    -- accepted values:
+    -- -1 true: generate hints
+    -- -2 false: don't generate hints
+    -- -3 [[multi line string]] provide your own hints
+    generate_hints = {
+        normal = false,
+        insert = false,
+        extend = false,
     },
 }
 ```
@@ -151,6 +156,8 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `<Up>`    | Moves the selections one line Up |
 | `<Right>` | Moves the selections one char Right |
 | `<Down>`  | Moves the selections one line Down |
+| `<C-Left>`  | Moves the selections one word Left |
+| `<C-Right>` | Moves the selections one word Right |
 | `<Home>`  | Moves the selections to start of line |
 | `<End>`   | Moves the selections to end of line |
 | `<CR>`    | Insert one line below the selections |
@@ -158,7 +165,7 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `<C-v>`   | Pastes the text from system clipboard |
 | `<C-r>`   | Insert the contents of a register |
 | `<C-w>`   | Deletes one word before the selections |
-| `<C-BS>`   | Deletes one word before the selections |
+| `<C-BS>`  | Deletes one word before the selections |
 | `<C-u>`   | Deletes froms start of selections till start of line |
 
 </details>

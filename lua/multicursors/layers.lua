@@ -101,7 +101,9 @@ local generate_hints = function(config, heads, mode)
 
     local str = ' MultiCursor: ' .. mode .. ' mode'
 
-    local columns = math.floor(vim.api.nvim_win_get_width(0) / max_hint_length)
+    local columns = math.floor(
+        vim.api.nvim_get_option_value('columns', {}) / max_hint_length
+    )
 
     local line
     for i = 0, math.floor(#heads / columns) do
@@ -141,7 +143,7 @@ L.generate_normal_heads = function(config)
     heads[#heads + 1] = {
         '<esc>',
         nil,
-        { desc = 'exit multi cursor mode', exit = true },
+        { desc = 'exit', exit = true },
     }
 
     heads[#heads + 1] = {
@@ -194,7 +196,7 @@ L.create_normal_hydra = function(config)
 
     L.normal_hydra = Hydra {
         name = 'Multi Cursor',
-        hint = generate_hints(config, heads, 'Normal'),
+        hint = generate_hints(config, heads, 'normal'),
         config = {
             buffer = 0,
             on_enter = function()
@@ -228,7 +230,7 @@ L.create_insert_hydra = function(config)
     local heads = L.generate_insert_heads(config)
     L.insert_hydra = Hydra {
         name = 'Multi Cursor insert',
-        hint = generate_hints(config, heads, 'Insert'),
+        hint = generate_hints(config, heads, 'insert'),
         mode = 'i',
         config = {
             buffer = 0,
@@ -262,7 +264,7 @@ L.create_extend_hydra = function(config)
 
     L.extend_hydra = Hydra {
         name = 'Multi Cursor Extend',
-        hint = generate_hints(config, heads, 'Extend'),
+        hint = generate_hints(config, heads, 'extend'),
         mode = 'n',
         config = {
             buffer = 0,

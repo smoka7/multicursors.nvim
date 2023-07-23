@@ -7,7 +7,6 @@
 
 ---@class Action
 ---@field method function?
----@field desc string --TODO delete in next release
 ---@field opts HeadOpts
 
 ---@class Point
