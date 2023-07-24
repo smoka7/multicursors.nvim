@@ -1,4 +1,4 @@
-# Multicursor.nvim [WIP]
+# Multicursor.nvim
 The Multicursor Plugin for Neovim extends the native Neovim text editing capabilities, providing a more intuitive way to edit repetitive text with multiple cursors. With this plugin, you can easily create and manage multiple cursors, perform simultaneous edits, and execute commands on all cursors at once.
 
 ## Requirements
@@ -110,18 +110,18 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `a` | Enters append mode |
 | `e` | Enters extend mode |
 | `c` | Deletes the text inside selections and starts insert mode |
-| `n` | Finds the next match after the main selection |
-| `N` | Finds the previous match before the main selection |
-| `q` | Skips the current selection and finds the next one |
-| `Q` | Skips the current selection and finds the previous one |
-| `]` | Swaps the main selection with next selection |
-| `[` | Swaps the main selection with previous selection |
-| `}` | Deletes the main selection and goes to next |
-| `{` | Deletes the main selection and goes to previous |
-| `j` | Creates a selection on the char below the cursor |
-| `J` | Skips the current selection and Creates a selection on the char below |
-| `k` | Creates a selection on the char above the cursor |
-| `K` | Skips the current selection and Creates a selection on the char above |
+| `n` | `[count]` Finds the next match after the main selection |
+| `N` | `[count]` Finds the previous match before the main selection |
+| `q` | `[count]` Skips the current selection and finds the next one |
+| `Q` | `[count]` Skips the current selection and finds the previous one |
+| `]` | `[count]` Swaps the main selection with next selection |
+| `[` | `[count]` Swaps the main selection with previous selection |
+| `}` | `[count]` Deletes the main selection and goes to next |
+| `{` | `[count]` Deletes the main selection and goes to previous |
+| `j` | `[count]` Creates a selection on the char below the cursor |
+| `J` | `[count]` Skips the current selection and Creates a selection on the char below |
+| `k` | `[count]` Creates a selection on the char above the cursor |
+| `K` | `[count]` Skips the current selection and Creates a selection on the char above |
 | `p` | Puts the text inside `unnamed register` before selections |
 | `P` | Puts the text inside `unnamed register` after selections |
 | `y` | Yanks the text inside selection to `unnamed register` |
@@ -130,8 +130,8 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `z` | Aligns selections by adding space before selections |
 | `Z` | Aligns selections by adding space at beginning of line |
 | `d` | Deletes the text inside selections |
-| `D` | Deletes the text from start of selection till end of line |
-| `dd` | Deletes line of selections |
+| `D` | `count` Deletes the text from start of selection till end of line |
+| `dd` | `count` Deletes line of selections |
 | `@` | Executes a macro at beginning of every selection |
 | `.` | Reapets last change at the beginning of every selection |
 | `,` | Clears All Selections except the main one |
@@ -200,7 +200,6 @@ The anchor represents one side of the selection and stays put, while the other s
 </details>
 
 ## TODOS
-- [ ] Support count + actions
 - [ ] Completion works, but doesn't clear duplicates
 
 ## Acknowledgment

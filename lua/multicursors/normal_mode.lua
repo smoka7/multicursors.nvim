@@ -13,56 +13,72 @@ local insert_mode = require 'multicursors.insert_mode'
 local M = {}
 
 M.find_next = function()
-    local match = search.find_next(false)
-    if match then
-        utils.mark_found_match(match, false)
-        utils.move_cursor { match.e_row + 1, match.e_col - 1 }
+    for _ = 1, vim.v.count1 do
+        local match = search.find_next(false)
+        if match then
+            utils.mark_found_match(match, false)
+            utils.move_cursor { match.e_row + 1, match.e_col - 1 }
+        end
     end
 end
 
 M.skip_find_next = function()
-    local match = search.find_next(true)
-    if match then
-        utils.mark_found_match(match, true)
-        utils.move_cursor { match.e_row + 1, match.e_col - 1 }
+    for _ = 1, vim.v.count1 do
+        local match = search.find_next(true)
+        if match then
+            utils.mark_found_match(match, true)
+            utils.move_cursor { match.e_row + 1, match.e_col - 1 }
+        end
     end
 end
 
 --- Deletes current selection and
 --- Moves the main selection to next selction
 M.skip_goto_next = function()
-    utils.goto_next_selection(true)
+    for _ = 1, vim.v.count1 do
+        utils.goto_next_selection(true)
+    end
 end
 
 --- Deletes current selection and
 --- Moves the main selection to previous selction
 M.skip_goto_prev = function()
-    utils.goto_prev_selection(true)
+    for _ = 1, vim.v.count1 do
+        utils.goto_prev_selection(true)
+    end
 end
 
 --- Moves the main selection to next selction
 M.goto_next = function()
-    utils.goto_next_selection(false)
+    for _ = 1, vim.v.count1 do
+        utils.goto_next_selection(false)
+    end
 end
 
 --- Moves the main selection to previous selction
 M.goto_prev = function()
-    utils.goto_prev_selection(false)
+    for _ = 1, vim.v.count1 do
+        utils.goto_prev_selection(false)
+    end
 end
 
 M.find_prev = function()
-    local match = search.find_prev(false)
-    if match then
-        utils.mark_found_match(match, false)
-        utils.move_cursor { match.s_row + 1, match.s_col }
+    for _ = 1, vim.v.count1 do
+        local match = search.find_prev(false)
+        if match then
+            utils.mark_found_match(match, false)
+            utils.move_cursor { match.s_row + 1, match.s_col }
+        end
     end
 end
 
 M.skip_find_prev = function()
-    local match = search.find_prev(true)
-    if match then
-        utils.mark_found_match(match, true)
-        utils.move_cursor { match.s_row + 1, match.s_col }
+    for _ = 1, vim.v.count1 do
+        local match = search.find_prev(true)
+        if match then
+            utils.mark_found_match(match, true)
+            utils.move_cursor { match.s_row + 1, match.s_col }
+        end
     end
 end
 
@@ -182,17 +198,20 @@ end
 
 --- Deletes the line on selection
 M.delete_line = function()
+    local count = vim.v.count1
     utils.call_on_selections(function(selection)
         api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
-        vim.cmd [[ normal! "_dd ]]
+        utils.debug('normal! ' .. count .. '"_dd')
+        vim.cmd('normal! ' .. count .. '"_dd')
     end)
 end
 
 --- Deletes from start of selection till the end of line
 M.delete_end = function()
+    local count = vim.v.count1
     utils.call_on_selections(function(selection)
         api.nvim_win_set_cursor(0, { selection.row + 1, selection.col })
-        vim.cmd [[ normal! "_D ]]
+        vim.cmd('normal! ' .. count .. '"_D')
     end)
 end
 
@@ -248,19 +267,28 @@ end
 
 --- Creates a selection on the line top of the cursor
 M.create_up = function()
-    search.create_up(false)
+    for _ = 1, vim.v.count1 do
+        search.create_up(false)
+    end
 end
 
 M.skip_create_up = function()
-    search.create_up(true)
+    for _ = 1, vim.v.count1 do
+        search.create_up(true)
+    end
 end
 
 --- Creates a selection on the line below the cursor
 M.create_down = function()
-    search.create_down(false)
+    for _ = 1, vim.v.count1 do
+        search.create_down(false)
+    end
 end
 
 M.skip_create_down = function()
-    search.create_down(true)
+    for _ = 1, vim.v.count1 do
+        search.create_down(true)
+    end
 end
+
 return M
