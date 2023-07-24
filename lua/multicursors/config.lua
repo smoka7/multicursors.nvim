@@ -41,10 +41,10 @@ local normal_keys = {
         opts = { desc = 'Skip create down' },
     },
     ['K'] = { method = N.skip_create_up, opts = { desc = 'Skip create up' } },
-    ['y'] = { method = N.yank, opts = { desc = 'Yank' } },
+    ['y'] = { method = N.yank, opts = { desc = 'Yank', nowait = false } },
     ['Y'] = { method = N.yank_end, opts = { desc = 'Yank end' } },
     ['yy'] = { method = N.yank_line, opts = { desc = 'Yank line' } },
-    ['d'] = { method = N.delete, opts = { desc = 'Delete' } },
+    ['d'] = { method = N.delete, opts = { desc = 'Delete', nowait = false } },
     ['dd'] = { method = N.delete_line, opts = { desc = 'Delete line' } },
     ['D'] = { method = N.delete_end, opts = { desc = 'Delete end' } },
 }

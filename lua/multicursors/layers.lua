@@ -29,7 +29,7 @@ local generate_heads = function(keys, nowait, show_desc)
     for i, value in pairs(keys) do
         local description = nil
         if show_desc then
-            description = value.desc or value.opts.desc
+            description = value.opts.desc
         end
 
         if value.method then
@@ -38,7 +38,7 @@ local generate_heads = function(keys, nowait, show_desc)
                 value.method,
                 {
                     desc = description,
-                    nowait = nowait,
+                    nowait = (value.opts.nowait == false and false) or nowait,
                 },
             }
         end
