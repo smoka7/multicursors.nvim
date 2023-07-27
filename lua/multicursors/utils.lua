@@ -173,8 +173,8 @@ end
 --- Returns the text inside last visual selected range
 ---@return string[]
 M.get_last_visual_range = function()
-    local start = vim.fn.getpos "'<"
-    local end_ = vim.fn.getpos "'>"
+    local start = vim.fn.getcharpos "'<"
+    local end_ = vim.fn.getcharpos "'>"
     local s_col = start[3] - 1
     local e_col = end_[3]
 
