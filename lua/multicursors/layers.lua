@@ -26,19 +26,23 @@ L.extend_hydra = nil
 local generate_heads = function(keys, nowait, show_desc)
     ---@type Head[]
     local heads = {}
-    for i, value in pairs(keys) do
+    for lhs, action in pairs(keys) do
         local description = nil
-        if show_desc then
-            description = value.opts.desc
+        if action.opts and show_desc then
+            description = action.opts.desc
         end
 
-        if value.method then
+        if action.method then
             heads[#heads + 1] = {
-                i,
-                value.method,
+                lhs,
+                action.method,
                 {
                     desc = description,
-                    nowait = (value.opts.nowait == false and false) or nowait,
+                    nowait = (
+                        action.opts
+                        and action.opts.nowait == false
+                        and false
+                    ) or nowait,
                 },
             }
         end
