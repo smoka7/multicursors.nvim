@@ -5,6 +5,25 @@ local api = vim.api
 ---@class Search
 local S = {}
 
+--- Return last index of a pattern in string
+---@param pattern string
+---@param str string
+---@return integer
+local function findLastIndex(pattern, str)
+    local index = nil
+    local startPos = 1
+
+    repeat
+        local matchStart, matchEnd = string.find(str, pattern, startPos)
+        if matchStart then
+            index = matchStart
+            startPos = matchEnd + 1
+        end
+    until not matchStart
+
+    return index
+end
+
 --- Finds the word under the cursor
 S.find_cursor_word = function()
     local line = api.nvim_get_current_line()
@@ -358,11 +377,19 @@ S.multiline_string = function(pattern, pos)
         return
     end
 
+    -- 3 is the length of \\v thats added at the start
+    local e_col = s[2] + #pattern - 3
+    if s[1] ~= e[1] then
+        local last = findLastIndex('\\n', pattern)
+        -- 2 is the length of \n thats added at the start
+        e_col = #pattern:sub(last) - 2
+    end
+
     return {
         s_row = s[1] - 1,
         s_col = s[2] - 1,
         e_row = e[1] - 1,
-        e_col = e[2],
+        e_col = e_col,
     }
 end
 
@@ -454,7 +481,7 @@ S.find_selected = function()
     vim.b.MultiCursorMultiline = true
 
     utils.create_extmark(match, utils.namespace.Main)
-    utils.move_cursor { match.e_row + 1, match.e_col + 1 }
+    utils.move_cursor { match.e_row + 1, match.e_col }
 end
 
 return S
