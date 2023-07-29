@@ -90,15 +90,15 @@ local get_selection_context = function(selection, pos)
             0,
             selection.row,
             0,
-            selection.end_row,
+            selection.row,
             selection.col,
             {}
         )[1]
     elseif pos == utils.position.on then
         return api.nvim_buf_get_text(
             0,
-            selection.row,
-            selection.col,
+            selection.end_row,
+            0,
             selection.end_row,
             selection.end_col,
             {}
@@ -128,7 +128,7 @@ local get_reduced_selection = function(selection, pos)
         selection.col = find_last_char(text)
         selection.end_row = selection.row
     elseif pos == utils.position.on then
-        selection.col = find_last_char(text) + selection.col
+        selection.col = find_last_char(text)
         selection.row = selection.end_row
     else
         -- at the EOL do not move
@@ -190,7 +190,7 @@ S.move_char_horizontal = function(pos)
 
     new = get_reduced_selection(main, pos)
     utils.update_extmark(new, utils.namespace.Main)
-    utils.move_cursor { new.row + 1, new.col + 1 }
+    utils.move_cursor { new.row + 1, new.end_col }
 end
 
 return S
