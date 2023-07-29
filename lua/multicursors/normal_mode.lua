@@ -150,20 +150,48 @@ M.clear_others = function()
     utils.clear_namespace(utils.namespace.Multi)
 end
 
---- Aligns the selections by adding space
----@param line_start boolean
-M.align_selections = function(line_start)
-    utils.align_text(line_start)
+--- Aligns selections by adding space
+---@param line_start boolean add spaces before selection or at the start of line
+local align_text = function(line_start)
+    local max_col = -1
+    utils.call_on_selections(function(selection)
+        if selection.col > max_col then
+            max_col = selection.col
+        end
+    end)
+
+    local col_pos, length
+    utils.call_on_selections(function(selection)
+        length = max_col - selection.col
+
+        col_pos = selection.col
+        if line_start then
+            col_pos = 0
+        end
+
+        if length < 1 then
+            return
+        end
+
+        api.nvim_buf_set_text(
+            0,
+            selection.row,
+            col_pos,
+            selection.row,
+            col_pos,
+            { string.rep(' ', length) }
+        )
+    end)
 end
 
 --- Aligns the selections by adding space before selection
 M.align_selections_before = function()
-    utils.align_text(false)
+    align_text(false)
 end
 
 --- Aligns the selections by adding space at start of line
 M.align_selections_start = function()
-    utils.align_text(true)
+    align_text(true)
 end
 
 --- Deletes the text inside selections and starts insert mode

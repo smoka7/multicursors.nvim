@@ -6,10 +6,11 @@ local normal_mode = require 'multicursors.normal_mode'
 
 local paragraph = {
     'Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi lorem pariatur mollit ex esse exercitation amet.',
-    ' Nisi anim cupidatat excepteur officia.',
+    ' Nisi anim  cupidatat excepteur officia.',
     'Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet.',
     ' Nisi anim cupidatat excepteur officia.',
 }
+
 describe('find and move ', function()
     before_each(function()
         vim.cmd [[enew]]
@@ -80,20 +81,27 @@ describe('normal actions', function()
         vim.cmd [[enew]]
         api.nvim_buf_set_lines(0, 0, 4, false, paragraph)
         api.nvim_win_set_cursor(0, { 1, 1 })
+    end)
+
+    it('can clear others', function()
         search.find_all_matches(
             api.nvim_buf_get_lines(0, 0, -1, false),
             'lorem',
             0,
             0
         )
-    end)
-
-    it('can clear others', function()
         normal_mode.clear_others()
         assert.same(0, #utils.get_all_selections())
     end)
 
     it('can paste at selections', function()
+        search.find_all_matches(
+            api.nvim_buf_get_lines(0, 0, -1, false),
+            'lorem',
+            0,
+            0
+        )
+
         local paste = 'bender'
         vim.fn.setreg('', paste)
         normal_mode.paste_after()
@@ -108,9 +116,33 @@ describe('normal actions', function()
     end)
 
     it('can delete the selections', function()
+        search.find_all_matches(
+            api.nvim_buf_get_lines(0, 0, -1, false),
+            'lorem',
+            0,
+            0
+        )
+
         normal_mode.delete()
 
-        local found = vim.fn.search(lorem)
+        local found = vim.fn.search 'lorem'
         assert.same(found, 0)
+    end)
+
+    it('can align the selections', function()
+        search.find_all_matches(
+            api.nvim_buf_get_lines(0, 0, -1, false),
+            'cupidatat',
+            0,
+            0
+        )
+
+        normal_mode.align_selections_start()
+        local all = utils.get_all_selections()
+        local main = utils.get_main_selection()
+        local col = main.col
+        for _, s in pairs(all) do
+            assert.equal(col, s.col)
+        end
     end)
 end)
