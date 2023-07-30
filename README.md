@@ -41,11 +41,13 @@ Install with your preferred package manager:
             },
         }
     end,
+    cmd = { 'MCstart', 'MCvisual', 'MCclear', 'MCpattern', 'MCvisualPattern', 'MCunderCursor' },
     keys = {
             {
+                mode = { 'v', 'n' },
                 '<Leader>m',
                 '<cmd>MCstart<cr>',
-                desc = 'Create a selection for word under the cursor',
+                desc = 'Create a selection for selcted text or word under the cursor',
             },
         },
 }
@@ -87,7 +89,7 @@ Install with your preferred package manager:
 
 | Command | Description |
 |---|---|
-| MCstart | Selects the word under cursor and starts listening for the actions. |
+| MCstart | Selects the word under cursor and starts listening for the actions. In visual mode it acts like `MCvisual` |
 | MCvisual | Selects the last visual mode selection and starts listening for the actions. |
 | MCpattern | Prompts for a pattern and selects every match in the buffer. |
 | MCvisualPattern | Prompts for a pattern and selects every match in the visual selection. |

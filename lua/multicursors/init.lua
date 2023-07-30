@@ -17,7 +17,7 @@ local M = {}
 
 local function create_commands()
     vim.api.nvim_create_user_command('MCstart', function()
-        M.cursor_word()
+        M.start()
     end, {})
 
     vim.api.nvim_create_user_command('MCvisual', function()
@@ -41,8 +41,19 @@ local function create_commands()
     end, { range = 0 })
 end
 
-M.cursor_word = function()
-    search.find_cursor_word()
+--- Returns true when we are in visual mode
+---@return boolean
+local function is_visual_mode()
+    local mode = vim.fn.mode()
+    return mode == 'v' or mode == 'V' or mode == '<C-v>'
+end
+
+M.start = function()
+    if is_visual_mode() then
+        search.find_selected()
+    else
+        search.find_cursor_word()
+    end
     layers.normal_hydra:activate()
 end
 
