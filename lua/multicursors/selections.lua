@@ -151,12 +151,12 @@ S.move_by_motion = function(motion)
     local new_pos
     for _, selection in pairs(selections) do
         new_pos = get_new_position(selection, motion)
-        utils.update_extmark(new_pos, utils.namespace.Multi)
+        utils.create_extmark(new_pos, utils.namespace.Multi)
     end
 
     new_pos = get_new_position(main, motion)
 
-    utils.update_extmark(new_pos, utils.namespace.Main)
+    utils.create_extmark(new_pos, utils.namespace.Main)
     utils.move_cursor { new_pos.row + 1, new_pos.col + 1 }
 end
 
@@ -169,11 +169,11 @@ S.reduce_to_char = function(pos)
     main = get_reduced_selection(main, pos)
     utils.move_cursor { main.row + 1, main.end_col }
 
-    utils.update_extmark(main, utils.namespace.Main)
+    utils.create_extmark(main, utils.namespace.Main)
 
     for _, selection in pairs(selctions) do
         main = get_reduced_selection(selection, pos)
-        utils.update_extmark(selection, utils.namespace.Multi)
+        utils.create_extmark(selection, utils.namespace.Multi)
     end
 end
 
@@ -185,11 +185,11 @@ S.move_char_horizontal = function(pos)
     local new
     for _, selection in pairs(selections) do
         new = get_reduced_selection(selection, pos)
-        utils.update_extmark(new, utils.namespace.Multi)
+        utils.create_extmark(new, utils.namespace.Multi)
     end
 
     new = get_reduced_selection(main, pos)
-    utils.update_extmark(new, utils.namespace.Main)
+    utils.create_extmark(new, utils.namespace.Main)
     utils.move_cursor { new.row + 1, new.end_col }
 end
 

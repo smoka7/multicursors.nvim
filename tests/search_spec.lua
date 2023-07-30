@@ -44,11 +44,11 @@ describe('search', function()
         ---@type SearchContext
         local ctx = { text = string, pattern = 'sit', offset = 0, row = 1 }
         local match = search.find_next_match(ctx)
-        assert.same({ s_row = 0, e_row = 0, s_col = 18, e_col = 21 }, match)
+        assert.same({ row = 0, end_row = 0, col = 18, end_col = 21 }, match)
 
         ctx.offset = 21
         match = search.find_next_match(ctx)
-        assert.same({ s_row = 0, e_row = 0, s_col = 22, e_col = 25 }, match)
+        assert.same({ row = 0, end_row = 0, col = 22, end_col = 25 }, match)
 
         ctx.offset = 25
         match = search.find_next_match(ctx)
@@ -61,11 +61,11 @@ describe('search', function()
 
         local ctx = { text = string, pattern = 'sit', till = 50, row = 1 }
         local match = search.find_prev_match(ctx)
-        assert.same({ s_row = 0, e_row = 0, s_col = 22, e_col = 25 }, match)
+        assert.same({ row = 0, end_row = 0, col = 22, end_col = 25 }, match)
 
         ctx.till = 22
         match = search.find_prev_match(ctx)
-        assert.same({ s_row = 0, e_row = 0, s_col = 18, e_col = 21 }, match)
+        assert.same({ row = 0, end_row = 0, col = 18, end_col = 21 }, match)
 
         ctx.till = 18
         match = search.find_prev_match(ctx)
@@ -135,19 +135,19 @@ describe('search', function()
         local match =
             search.multiline_string('amet.\\n Nisi anim', utils.position.before)
         assert.same({
-            s_row = 2,
-            s_col = 144,
-            e_row = 3,
-            e_col = 10,
+            row = 2,
+            col = 144,
+            end_row = 3,
+            end_col = 10,
         }, match)
         api.nvim_win_set_cursor(0, { 3, 10 })
         match =
             search.multiline_string('amet.\\n Nisi anim', utils.position.before)
         assert.same({
-            s_row = 0,
-            s_col = 144,
-            e_row = 1,
-            e_col = 10,
+            row = 0,
+            col = 144,
+            end_row = 1,
+            end_col = 10,
         }, match)
     end)
 
@@ -156,19 +156,19 @@ describe('search', function()
         local match =
             search.multiline_string('amet.\\n Nisi anim', utils.position.after)
         assert.same({
-            s_row = 0,
-            s_col = 144,
-            e_row = 1,
-            e_col = 10,
+            row = 0,
+            col = 144,
+            end_row = 1,
+            end_col = 10,
         }, match)
         api.nvim_win_set_cursor(0, { 2, 5 })
         match =
             search.multiline_string('amet.\\n Nisi anim', utils.position.after)
         assert.same({
-            s_row = 2,
-            s_col = 144,
-            e_row = 3,
-            e_col = 10,
+            row = 2,
+            col = 144,
+            end_row = 3,
+            end_col = 10,
         }, match)
     end)
 end)

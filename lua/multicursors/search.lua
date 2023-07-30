@@ -42,10 +42,10 @@ S.find_cursor_word = function()
     vim.b.MultiCursorPattern = left[1] .. right[1]:sub(2)
 
     utils.create_extmark({
-        s_row = cursor[1] - 1,
-        e_row = cursor[1] - 1,
-        s_col = left[2],
-        e_col = right[3] + cursor[2],
+        row = cursor[1] - 1,
+        end_row = cursor[1] - 1,
+        col = left[2],
+        end_col = right[3] + cursor[2],
     }, utils.namespace.Main)
 end
 
@@ -55,7 +55,7 @@ end
 ---@param start_row integer row offset in case of searching in a visual range
 ---@param start_col integer column offset in case of searching in a visual range
 S.find_all_matches = function(content, pattern, start_row, start_col)
-    ---@type Match[]
+    ---@type Selection[]
     local all = {}
     local match = {}
     -- we have to add start_col as offset to first line
@@ -63,10 +63,10 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
         match = vim.fn.matchstrpos(content[1], pattern, match[3] or 0)
         if match[2] ~= -1 and match[3] ~= -1 then
             all[#all + 1] = {
-                s_col = match[2] + start_col,
-                e_col = match[3] + start_col,
-                s_row = start_row,
-                e_row = start_row,
+                col = match[2] + start_col,
+                end_col = match[3] + start_col,
+                row = start_row,
+                end_row = start_row,
             }
         end
     until match and match[2] == -1 and match[3] == -1
@@ -77,10 +77,10 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
             match = vim.fn.matchstrpos(content[i], pattern, match[3] or 0)
             if match[2] ~= -1 and match[3] ~= -1 then
                 all[#all + 1] = {
-                    s_col = match[2],
-                    e_col = match[3],
-                    s_row = start_row + i - 1,
-                    e_row = start_row + i - 1,
+                    col = match[2],
+                    end_col = match[3],
+                    row = start_row + i - 1,
+                    end_row = start_row + i - 1,
                 }
             end
         until match and match[2] == -1 and match[3] == -1
@@ -89,7 +89,7 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
     if #all > 0 then
         -- make last match the main one
         utils.create_extmark(all[#all], utils.namespace.Main)
-        utils.move_cursor { all[#all].s_row, all[#all].e_col }
+        utils.move_cursor { all[#all].row, all[#all].end_col }
     else
         vim.notify 'no match found'
     end
@@ -103,7 +103,7 @@ end
 
 --- Returns the first match for pattern after a offset in a string
 ---@param ctx SearchContext
----@return Match? found
+---@return Selection? found
 S.find_next_match = function(ctx)
     if ctx.text == '' then
         return
@@ -116,18 +116,18 @@ S.find_next_match = function(ctx)
         return
     end
 
-    --- @type Match
+    --- @type Selection
     return {
-        s_col = match[2],
-        e_col = match[3],
-        s_row = ctx.row - 1,
-        e_row = ctx.row - 1,
+        col = match[2],
+        end_col = match[3],
+        row = ctx.row - 1,
+        end_row = ctx.row - 1,
     }
 end
 
 --- Finds next match and marks it
 ---@param skip boolean
----@return Match? next next Match
+---@return Selection? next next Match
 S.find_next = function(skip)
     ---@type SearchContext
     local ctx = {
@@ -188,7 +188,7 @@ end
 
 --- Returns the last match before the cursor
 ---@param ctx SearchContext
----@return Match? found
+---@return Selection? found
 S.find_prev_match = function(ctx)
     if ctx.text == '' then
         return
@@ -200,7 +200,7 @@ S.find_prev_match = function(ctx)
 
     ---@type any[]
     local match = {}
-    local found = nil ---@type Match?
+    local found = nil ---@type Selection?
 
     repeat
         match = vim.fn.matchstrpos(
@@ -210,25 +210,20 @@ S.find_prev_match = function(ctx)
         )
         if match[2] ~= -1 and match[3] ~= -1 then
             found = {
-                s_col = match[2],
-                e_col = match[3],
+                col = match[2],
+                end_col = match[3],
+                row = ctx.row - 1,
+                end_row = ctx.row - 1,
             }
         end
     until match and match[2] == -1 and match[3] == -1
-
-    if not found then
-        return
-    end
-
-    found.s_row = ctx.row - 1
-    found.e_row = ctx.row - 1
 
     return found
 end
 
 --- Finds last match before cursor
 ---@param skip boolean
----@return Match? last match
+---@return Selection? last match
 S.find_prev = function(skip)
     ---@type SearchContext
     local ctx = {
@@ -288,16 +283,16 @@ end
 S.new_under_cursor = function()
     local cursor = api.nvim_win_get_cursor(0)
 
-    ---@type Match
+    ---@type Selection
     local match = {
-        s_row = cursor[1] - 1,
-        e_row = cursor[1] - 1,
-        s_col = cursor[2],
-        e_col = cursor[2] + 1,
+        col = cursor[2],
+        end_col = cursor[2] + 1,
+        row = cursor[1] - 1,
+        end_row = cursor[1] - 1,
     }
 
-    if match.s_col == 0 then
-        match.e_col = 0
+    if match.col == 0 then
+        match.end_col = 0
     end
 
     vim.b.MultiCursorPattern = ''
@@ -322,10 +317,10 @@ local get_new_position = function(motion)
     end
 
     return {
-        s_row = row - 1,
-        s_col = col,
-        e_row = row - 1,
-        e_col = end_,
+        row = row - 1,
+        end_row = row - 1,
+        col = col,
+        end_col = end_,
     }
 end
 
@@ -333,20 +328,20 @@ end
 ---@param skip boolean skips the current selection
 S.create_down = function(skip)
     local mark = get_new_position 'j'
-    utils.mark_found_match(mark, skip)
+    utils.swap_main_to(mark, skip)
 end
 
 --- Creates a selection on the char above the cursor
 ---@param skip boolean skips the current selection
 S.create_up = function(skip)
     local mark = get_new_position 'k'
-    utils.mark_found_match(mark, skip)
+    utils.swap_main_to(mark, skip)
 end
 
 --- Searches for multi line pattern in buffer
 ---@param pattern string
 ---@param pos ActionPosition
----@return Match?
+---@return Selection?
 S.multiline_string = function(pattern, pos)
     local s, e
 
@@ -378,18 +373,18 @@ S.multiline_string = function(pattern, pos)
     end
 
     -- 3 is the length of \\v thats added at the start
-    local e_col = s[2] + #pattern - 3
+    local end_col = s[2] + #pattern - 3
     if s[1] ~= e[1] then
         local last = findLastIndex('\\n', pattern)
         -- 2 is the length of \n thats added at the start
-        e_col = #pattern:sub(last) - 2
+        end_col = #pattern:sub(last) - 2
     end
 
     return {
-        s_row = s[1] - 1,
-        s_col = s[2] - 1,
-        e_row = e[1] - 1,
-        e_col = e_col,
+        row = s[1] - 1,
+        col = s[2] - 1,
+        end_row = e[1] - 1,
+        end_col = end_col,
     }
 end
 
@@ -481,7 +476,7 @@ S.find_selected = function()
     vim.b.MultiCursorMultiline = true
 
     utils.create_extmark(match, utils.namespace.Main)
-    utils.move_cursor { match.e_row + 1, match.e_col }
+    utils.move_cursor { match.end_row + 1, match.end_col }
 end
 
 return S

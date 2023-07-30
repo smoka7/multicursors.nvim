@@ -16,8 +16,8 @@ M.find_next = function()
     for _ = 1, vim.v.count1 do
         local match = search.find_next(false)
         if match then
-            utils.mark_found_match(match, false)
-            utils.move_cursor { match.e_row + 1, match.e_col - 1 }
+            utils.swap_main_to(match, false)
+            utils.move_cursor { match.end_row + 1, match.end_col - 1 }
         end
     end
 end
@@ -26,17 +26,70 @@ M.skip_find_next = function()
     for _ = 1, vim.v.count1 do
         local match = search.find_next(true)
         if match then
-            utils.mark_found_match(match, true)
-            utils.move_cursor { match.e_row + 1, match.e_col - 1 }
+            utils.swap_main_to(match, true)
+            utils.move_cursor { match.end_row + 1, match.end_col - 1 }
         end
     end
+end
+
+--- Swaps the first selection in the range with main selection
+---@param a integer[] start of range
+---@param b integer[] end of range
+---@param skip boolean skip current
+---@return boolean
+local goto_first_selection = function(a, b, skip)
+    local selections = api.nvim_buf_get_extmarks(
+        0,
+        api.nvim_create_namespace 'multicursors',
+        { a[1], a[2] },
+        { b[1], b[2] },
+        { details = true }
+    )
+
+    if #selections < 1 then
+        return false
+    end
+
+    utils.swap_main_to({
+        row = selections[1][2],
+        col = selections[1][3],
+        end_row = selections[1][4].end_row,
+        end_col = selections[1][4].end_col,
+    }, skip)
+
+    utils.move_cursor { selections[1][2] + 1, selections[1][3] }
+    return true
+end
+
+--- Swaps the next selection with main selection
+--- wraps around the buffer
+---@param skip boolean
+local goto_next_selection = function(skip)
+    local main = utils.get_main_selection()
+    if
+        goto_first_selection({ main.end_row, main.end_col }, { -1, -1 }, skip)
+    then
+        return
+    end
+    goto_first_selection({ 0, 0 }, { main.end_row, main.end_col }, skip)
+end
+
+--- Swaps the previous selection with main selection
+--- wraps around the buffer
+---@param skip boolean
+local goto_prev_selection = function(skip)
+    local main = utils.get_main_selection()
+    if goto_first_selection({ main.end_row, main.end_col }, { 0, 0 }, skip) then
+        return
+    end
+    goto_first_selection({ -1, -1 }, { main.end_row, main.end_col }, skip)
 end
 
 --- Deletes current selection and
 --- Moves the main selection to next selction
 M.skip_goto_next = function()
     for _ = 1, vim.v.count1 do
-        utils.goto_next_selection(true)
+        goto_next_selection(true)
     end
 end
 
@@ -44,21 +97,21 @@ end
 --- Moves the main selection to previous selction
 M.skip_goto_prev = function()
     for _ = 1, vim.v.count1 do
-        utils.goto_prev_selection(true)
+        goto_prev_selection(true)
     end
 end
 
 --- Moves the main selection to next selction
 M.goto_next = function()
     for _ = 1, vim.v.count1 do
-        utils.goto_next_selection(false)
+        goto_next_selection(false)
     end
 end
 
 --- Moves the main selection to previous selction
 M.goto_prev = function()
     for _ = 1, vim.v.count1 do
-        utils.goto_prev_selection(false)
+        goto_prev_selection(false)
     end
 end
 
@@ -66,8 +119,8 @@ M.find_prev = function()
     for _ = 1, vim.v.count1 do
         local match = search.find_prev(false)
         if match then
-            utils.mark_found_match(match, false)
-            utils.move_cursor { match.s_row + 1, match.s_col }
+            utils.swap_main_to(match, false)
+            utils.move_cursor { match.row + 1, match.col }
         end
     end
 end
@@ -76,8 +129,8 @@ M.skip_find_prev = function()
     for _ = 1, vim.v.count1 do
         local match = search.find_prev(true)
         if match then
-            utils.mark_found_match(match, true)
-            utils.move_cursor { match.s_row + 1, match.s_col }
+            utils.swap_main_to(match, true)
+            utils.move_cursor { match.row + 1, match.col }
         end
     end
 end

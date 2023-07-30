@@ -25,7 +25,7 @@ end
 --- Perform the motion and finds the new range for selection.
 ---@param mark Selection
 ---@param motion string
----@return Match
+---@return Selection
 local get_new_position = function(mark, motion)
     local new_pos
 
@@ -47,12 +47,12 @@ local get_new_position = function(mark, motion)
     end)
 
     -- Revert back the modified values
-    ---@type Match
+    ---@type Selection
     local match = {
-        s_row = anchor[1] - 1,
-        s_col = anchor[2] + 1,
-        e_row = new_pos[1] - 1,
-        e_col = new_pos[2] + 1,
+        row = anchor[1] - 1,
+        col = anchor[2] + 1,
+        end_row = new_pos[1] - 1,
+        end_col = new_pos[2] + 1,
     }
 
     -- INFO we could change the anchor here like how visual mode does it
@@ -62,38 +62,23 @@ local get_new_position = function(mark, motion)
         (smaller(anchor, float) and smaller(new_pos, anchor))
         or (smaller(float, anchor) and smaller(anchor, new_pos))
     then
-        match.e_row = float[1] - 1
-        match.e_col = float[2] + 1
+        match.end_row = float[1] - 1
+        match.end_col = float[2] + 1
         api.nvim_win_set_cursor(0, float)
     end
 
     return match
 end
 
----@type Match[]
+---@type Selection[]
 local last_selections = {}
 
 --- Saves current selections position
 ---@param marks Selection[]
 ---@param main Selection
 local function save_history(marks, main)
-    last_selections = {}
-    for _, mark in pairs(marks) do
-        table.insert(last_selections, {
-            s_row = mark.row,
-            s_col = mark.col,
-            e_row = mark.end_row,
-            e_col = mark.end_col,
-        })
-    end
-    table.insert(last_selections, {
-        s_row = main.row,
-        s_col = main.col,
-        e_row = main.end_row,
-        e_col = main.end_col,
-    })
-
-    utils.clear_selections()
+    last_selections = marks
+    table.insert(last_selections, main)
 end
 
 function E.undo_history()
@@ -103,7 +88,7 @@ function E.undo_history()
 
     utils.clear_selections()
 
-    for i = 1, #last_selections, 1 do
+    for i = 1, #last_selections - 1, 1 do
         utils.create_extmark(last_selections[i], utils.namespace.Multi)
     end
 
@@ -190,7 +175,7 @@ E.o_method = function()
     vim.b.MultiCursorAnchorStart = true
 end
 
----@param callback fun(mark:Match):Match
+---@param callback fun(mark:Selection):Selection
 local extend_selections_ts = function(callback)
     if not parsers.has_parser() then
         return
@@ -203,19 +188,19 @@ local extend_selections_ts = function(callback)
     local new_pos
     for _, selection in pairs(marks) do
         new_pos = callback {
-            s_row = selection.row,
-            s_col = selection.col,
-            e_row = selection.end_row,
-            e_col = selection.end_col,
+            row = selection.row,
+            col = selection.col,
+            end_row = selection.end_row,
+            end_col = selection.end_col,
         }
         utils.create_extmark(new_pos, utils.namespace.Multi)
     end
 
     new_pos = callback {
-        s_row = main.row,
-        s_col = main.col,
-        e_row = main.end_row,
-        e_col = main.end_col,
+        row = main.row,
+        col = main.col,
+        end_row = main.end_row,
+        end_col = main.end_col,
     }
     utils.create_extmark(new_pos, utils.namespace.Main)
 end

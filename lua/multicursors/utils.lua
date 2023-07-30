@@ -21,25 +21,6 @@ M.namespace = {
 }
 
 --- Checks that start is before end otherwise swaps theme.
----@param match Match
----@return Match
-local function check_match_bounds(match)
-    if
-        match.s_row > match.e_row
-        or (match.s_row == match.e_row and match.s_col > match.e_col)
-    then
-        return {
-            s_row = match.e_row,
-            s_col = match.e_col,
-            e_row = match.s_row,
-            e_col = match.s_col,
-        }
-    end
-
-    return match
-end
-
---- Checks that start is before end otherwise swaps theme.
 ---@param sel Selection
 ---@return Selection
 local function check_selection_bounds(sel)
@@ -48,55 +29,23 @@ local function check_selection_bounds(sel)
         or (sel.row == sel.end_row and sel.col > sel.end_col)
     then
         return {
-            s_row = sel.end_row,
-            s_col = sel.end_col,
-            e_row = sel.row,
-            e_col = sel.col,
+            row = sel.end_row,
+            col = sel.end_col,
+            end_row = sel.row,
+            end_col = sel.col,
         }
     end
 
     return sel
 end
---- creates a extmark for the the match
---- doesn't create a duplicate mark
----@param match Match
----@param namespace Namespace
----@return integer id of created mark
-M.create_extmark = function(match, namespace)
-    local ns = ns_id
-    if namespace == M.namespace.Main then
-        ns = main_ns_id
-    end
 
-    local marks = api.nvim_buf_get_extmarks(
-        0,
-        ns,
-        { match.s_row, match.s_col },
-        { match.e_row, match.e_col },
-        {}
-    )
-
-    if #marks > 0 then
-        M.debug('found ' .. #marks .. ' duplicate marks:')
-        return marks[1][1]
-    end
-
-    match = check_match_bounds(match)
-
-    local s = api.nvim_buf_set_extmark(0, ns, match.s_row, match.s_col, {
-        end_row = match.e_row,
-        end_col = match.e_col,
-        hl_group = namespace,
-    })
-    return s
-end
-
---- Updates the mark with id to new match
---- deletes other marks overlaping with the new match
+--- Creates a mark for selection in namespace
+--- if selection has a id updates the mark
+--- deletes old marks in range of new selection
 ---@param selection Selection
 ---@param namespace Namespace
 ---@return integer
-M.update_extmark = function(selection, namespace)
+M.create_extmark = function(selection, namespace)
     local ns = ns_id
     if namespace == M.namespace.Main then
         ns = main_ns_id
@@ -126,10 +75,10 @@ M.update_extmark = function(selection, namespace)
     })
 end
 
---- Deletes the extmark in current buffer in range of match
----@param match Match
+--- Deletes the extmark in current buffer in range of selection
+---@param selection Selection
 ---@param namespace Namespace
-M.delete_extmark = function(match, namespace)
+M.delete_extmark = function(selection, namespace)
     local ns = ns_id
     if namespace == M.namespace.Main then
         ns = main_ns_id
@@ -138,8 +87,8 @@ M.delete_extmark = function(match, namespace)
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
-        { match.s_row, match.s_col },
-        { match.s_row, match.e_col },
+        { selection.row, selection.col },
+        { selection.end_row, selection.end_col },
         {}
     )
     if #marks > 0 then
@@ -175,18 +124,18 @@ end
 M.get_last_visual_range = function()
     local start = vim.fn.getcharpos "'<"
     local end_ = vim.fn.getcharpos "'>"
-    local s_col = start[3] - 1
-    local e_col = end_[3]
+    local col = start[3] - 1
+    local end_col = end_[3]
 
     local lines = api.nvim_buf_get_lines(0, start[2] - 1, end_[2], false)
 
     if #lines == 0 then
         return lines
     elseif #lines == 1 then
-        lines[1] = vim.fn.strcharpart(lines[1], s_col, e_col - s_col)
+        lines[1] = vim.fn.strcharpart(lines[1], col, end_col - col)
     else
-        lines[1] = vim.fn.strcharpart(lines[1], s_col, vim.v.maxcol)
-        lines[#lines] = vim.fn.strcharpart(lines[#lines], 0, e_col)
+        lines[1] = vim.fn.strcharpart(lines[1], col, vim.v.maxcol)
+        lines[#lines] = vim.fn.strcharpart(lines[#lines], 0, end_col)
     end
 
     return lines
@@ -225,87 +174,24 @@ M.get_all_selections = function()
     return selections
 end
 
---- Creates a extmark for current match and
---- updates the main selection
----@param match Match match to mark
+--- Updates the main selection to new selection
+---@param new Selection
 ---@param skip boolean wheter or not skip current match
-M.mark_found_match = function(match, skip)
+M.swap_main_to = function(new, skip)
     -- first clear the main selection
     -- then create a selection in place of main one
     local main = M.get_main_selection()
-    M.clear_namespace(M.namespace.Main)
+
+    -- swap the selection ids
+    new.id = main.id
+    main.id = nil
 
     if not skip then
-        M.create_extmark({
-            s_row = main.row,
-            s_col = main.col,
-            e_row = main.end_row,
-            e_col = main.end_col,
-        }, M.namespace.Multi)
-    end
-    --create the main selection
-    M.create_extmark(match, M.namespace.Main)
-    --deletes the selection when there was a selection there
-    M.delete_extmark(match, M.namespace.Multi)
-end
-
---- Swaps the next selection with main selection
----@param a integer[]
----@param b integer[]
----@param skip boolean
----@return boolean
-local goto_first_selection = function(a, b, skip)
-    local selections = api.nvim_buf_get_extmarks(
-        0,
-        ns_id,
-        { a[1], a[2] },
-        { b[1], b[2] },
-        { details = true }
-    )
-
-    if #selections > 0 then
-        M.mark_found_match({
-            s_row = selections[1][2],
-            s_col = selections[1][3],
-            e_row = selections[1][4].end_row,
-            e_col = selections[1][4].end_col,
-        }, skip)
-
-        M.move_cursor { selections[1][2] + 1, selections[1][3] }
-        return true
+        M.create_extmark(main, M.namespace.Multi)
     end
 
-    return false
-end
-
---- Swaps the next selection with main selection
---- wraps around the buffer
----@param skip boolean
-M.goto_next_selection = function(skip)
-    local main = M.get_main_selection()
-    if
-        goto_first_selection({ main.end_row, main.end_col }, { -1, -1 }, skip)
-    then
-        return
-    end
-    if goto_first_selection({ 0, 0 }, { main.end_row, main.end_col }, skip) then
-        return
-    end
-end
-
---- Swaps the previous selection with main selection
---- wraps around the buffer
----@param skip boolean
-M.goto_prev_selection = function(skip)
-    local main = M.get_main_selection()
-    if goto_first_selection({ main.end_row, main.end_col }, { 0, 0 }, skip) then
-        return
-    end
-    if
-        goto_first_selection({ -1, -1 }, { main.end_row, main.end_col }, skip)
-    then
-        return
-    end
+    M.create_extmark(new, M.namespace.Main)
+    M.delete_extmark(new, M.namespace.Multi)
 end
 
 --- gets a single char from user
@@ -344,37 +230,6 @@ M.call_on_selections = function(callback)
 
     local main = M.get_main_selection()
     callback(main)
-end
-
---- Aligns selections by adding space
----@param line_start boolean add spaces before selection or at the start of line
-M.align_text = function(line_start)
-    local max_col = -1
-    M.call_on_selections(function(selection)
-        if selection.col > max_col then
-            max_col = selection.col
-        end
-    end)
-    local row, col, space_count
-    M.call_on_selections(function(selection)
-        col = selection.col
-        row = selection.row
-        space_count = max_col - col
-        if line_start then
-            col = 0
-        end
-
-        if space_count > 0 then
-            api.nvim_buf_set_text(
-                0,
-                row,
-                col,
-                row,
-                col,
-                { string.rep(' ', space_count) }
-            )
-        end
-    end)
 end
 
 --- Moves the cursor to pos and marks current cursor position in jumplist

@@ -2,42 +2,38 @@ local parsers = require 'nvim-treesitter.parsers'
 
 local T = {}
 
----@param a Match
----@param b Match
+---@param a Selection
+---@param b Selection
 ---@return boolean
 local same_range = function(a, b)
-    return a.s_col == b.s_col
-        and a.e_row == b.e_row
-        and a.e_col == b.e_col
-        and a.s_row == b.s_row
+    return a == b
 end
 
 --- Returns range of node
 ---@param node TSNode
----@return Match
+---@return Selection
 local get_node_range = function(node)
-    ---@type Match
+    ---@type Selection
     local node_range = {}
-    node_range.s_row, node_range.s_col, node_range.e_row, node_range.e_col =
+    node_range.row, node_range.col, node_range.end_row, node_range.end_col =
         vim.treesitter.get_node_range(node)
     return node_range
 end
 
 ---Returns parrent of node in range of match
----@param match Match
----@return Match
+---@param match Selection
+---@return Selection
 T.extend_node = function(match)
     local root = parsers.get_parser():parse()[1]:root()
 
     ---@type TSNode
     local node = root:named_descendant_for_range(
-        match.s_row,
-        match.s_col,
-        match.e_row,
-        match.e_col
+        match.row,
+        match.col,
+        match.end_row,
+        match.end_col
     )
 
-    ---@type Match
     local node_range = get_node_range(node)
     if not same_range(match, node_range) then
         return node_range
@@ -65,23 +61,23 @@ T.extend_node = function(match)
 end
 
 --- Returns last child of node in range of match
----@param match Match
----@return Match
+---@param match Selection
+---@return Selection
 T.get_last_child = function(match)
     local root = parsers.get_parser():parse()[1]:root()
 
     ---@type TSNode
     local node = root:named_descendant_for_range(
-        match.s_row,
-        match.s_col,
-        match.e_row,
-        match.e_col
+        match.row,
+        match.col,
+        match.end_row,
+        match.end_col
     )
     if node:named_child_count() < 1 then
         return match
     end
     local child = node:named_child(node:named_child_count() - 1)
-    ---@type Match
+
     local node_range = get_node_range(child)
     if not same_range(match, node_range) then
         return node_range
@@ -91,17 +87,17 @@ T.get_last_child = function(match)
 end
 
 --- Returns first child of node in range of match
----@param match Match
----@return Match
+---@param match Selection
+---@return Selection
 T.get_first_child = function(match)
     local root = parsers.get_parser():parse()[1]:root()
 
     ---@type TSNode
     local node = root:named_descendant_for_range(
-        match.s_row,
-        match.s_col,
-        match.e_row,
-        match.e_col
+        match.row,
+        match.col,
+        match.end_row,
+        match.end_col
     )
 
     if node:named_child_count() < 1 then
@@ -109,7 +105,6 @@ T.get_first_child = function(match)
     end
 
     local child = node:named_child(0)
-    ---@type Match
     local node_range = get_node_range(child)
     if not same_range(match, node_range) then
         return node_range
@@ -117,4 +112,5 @@ T.get_first_child = function(match)
 
     return match
 end
+
 return T
