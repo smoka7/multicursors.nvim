@@ -391,6 +391,7 @@ end
 --- Searches for a pattern across buffer and creates
 --- a selection for every match
 ---@param whole_buffer boolean
+---@return boolean
 S.find_pattern = function(whole_buffer)
     local content
 
@@ -402,7 +403,7 @@ S.find_pattern = function(whole_buffer)
 
     if #content == 0 then
         vim.notify('buffer or visual selection is empty', vim.log.levels.WARN)
-        return
+        return false
     end
 
     api.nvim_echo({}, false, {})
@@ -416,7 +417,7 @@ S.find_pattern = function(whole_buffer)
         local key = utils.get_char()
         if not key then
             utils.exit()
-            return
+            return false
         end
 
         if key == ESC or key == CR then
@@ -446,9 +447,15 @@ S.find_pattern = function(whole_buffer)
             vim.b.MultiCursorPattern = pattern
         end
     end
+    if utils.get_main_selection().id then
+        return true
+    end
+
+    return false
 end
 
---- Selects the text in visual mode
+--- Finds the last visualy selected text
+--- @return boolean
 S.find_selected = function()
     -- Exit out of visual mode
     api.nvim_feedkeys(
@@ -458,6 +465,10 @@ S.find_selected = function()
     )
 
     local lines = utils.get_last_visual_range()
+
+    if #lines == 0 then
+        return false
+    end
 
     -- when this command gets executed from a mapping it finds the next
     -- match so we go to start of selection to find the selected text first
@@ -469,7 +480,7 @@ S.find_selected = function()
     local pattern = table.concat(lines, '\\n')
     local match = S.multiline_string(pattern, utils.position.on)
     if not match then
-        return
+        return false
     end
 
     vim.b.MultiCursorPattern = pattern
@@ -477,6 +488,8 @@ S.find_selected = function()
 
     utils.create_extmark(match, utils.namespace.Main)
     utils.move_cursor { match.end_row + 1, match.end_col }
+
+    return true
 end
 
 return S

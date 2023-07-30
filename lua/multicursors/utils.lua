@@ -146,6 +146,11 @@ end
 M.get_main_selection = function()
     local main =
         api.nvim_buf_get_extmarks(0, main_ns_id, 0, -1, { details = true })[1]
+
+    if not main then
+        return {}
+    end
+
     return {
         id = main[1],
         row = main[2],

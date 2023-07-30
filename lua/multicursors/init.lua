@@ -52,18 +52,21 @@ M.new_under_cursor = function()
 end
 
 M.search_visual = function()
-    search.find_selected()
-    layers.normal_hydra:activate()
+    if search.find_selected() then
+        layers.normal_hydra:activate()
+    end
 end
 
 M.new_pattern = function()
-    search.find_pattern(true)
-    layers.normal_hydra:activate()
+    if search.find_pattern(true) then
+        layers.normal_hydra:activate()
+    end
 end
 
 M.new_pattern_visual = function()
-    search.find_pattern(false)
-    layers.normal_hydra:activate()
+    if search.find_pattern(false) then
+        layers.normal_hydra:activate()
+    end
 end
 
 M.exit = function()
