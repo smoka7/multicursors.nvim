@@ -231,7 +231,7 @@ Disable hint window and show the multicursor mode in your status line.
 
 local function is_active()
     local ok, hydra = pcall(require, 'hydra.statusline')
-    return ok and hydra.is_active
+    return ok and hydra.is_active()
 end
 
 local function get_name()

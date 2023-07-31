@@ -38,13 +38,16 @@ local get_new_position = function(mark, motion)
         float = { mark.end_row + 1, mark.end_col - 1 }
     end
 
+    -- modifying indexing on empty lines results in negative col value
+    if float[2] < 0 then
+        float[2] = 0
+    end
+
     -- goes to other end of selection based on anchor
     -- performs the motion then gets the new cursor position
-    api.nvim_buf_call(0, function()
-        api.nvim_win_set_cursor(0, float)
-        vim.cmd('normal! ' .. vim.v.count1 .. motion)
-        new_pos = api.nvim_win_get_cursor(0)
-    end)
+    api.nvim_win_set_cursor(0, float)
+    vim.cmd('normal! ' .. vim.v.count1 .. motion)
+    new_pos = api.nvim_win_get_cursor(0)
 
     -- Revert back the modified values
     ---@type Selection
@@ -65,6 +68,13 @@ local get_new_position = function(mark, motion)
         match.end_row = float[1] - 1
         match.end_col = float[2] + 1
         api.nvim_win_set_cursor(0, float)
+    end
+
+    -- check for empty lines
+    local line =
+        api.nvim_buf_get_lines(0, match.end_row, match.end_row + 1, false)
+    if #line[1] == 0 then
+        match.end_col = 0
     end
 
     return match
