@@ -201,11 +201,53 @@ The anchor represents one side of the selection and stays put, while the other s
 
 </details>
 
-## TODOS
-- [ ] Completion works, but doesn't clear duplicates
+### Recepies
+
+#### Custom mappings
+Create custom mapping for editing selections.
+```lua
+ require('multicursors').setup {
+    normal_keys = {
+        ['<C-/>'] = {
+            method = function()
+                require('multicursors.utils').call_on_selections(function(selection)
+                    vim.api.nvim_win_set_cursor(0, { selection.row + 1, selection.col + 1 })
+                    local line_count = selection.end_row - selection.row + 1
+                    vim.cmd('normal ' .. line_count .. 'gcc')
+                end)
+            end,
+            opts = { desc = 'comment selections' },
+        },
+    },
+}
+```
+
+#### Status Line module
+Disable hint window and show the multicursor mode in your status line.
+```lua
+ require('multicursors').setup {
+    hint_config = false,
+}
+
+local function is_active()
+    local ok, hydra = pcall(require, 'hydra.statusline')
+    return ok and hydra.is_active
+end
+
+local function get_name()
+    local ok, hydra = pcall(require, 'hydra.statusline')
+    if ok then
+        return hydra.get_name()
+    end
+    return ''
+end
+
+---for lualine add this component
+lualine_b = {
+    { get_name, cond = is_active },
+ }
+```
 
 ## Acknowledgment
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
 [hydra.nvim](https://github.com/anuvyklack/hydra.nvim)
-
-This document is mostly written with Chatgpt.
