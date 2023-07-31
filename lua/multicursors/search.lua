@@ -9,8 +9,8 @@ local S = {}
 ---@param pattern string
 ---@param str string
 ---@return integer
-local function findLastIndex(pattern, str)
-    local index = nil
+local function find_last_index(pattern, str)
+    local index = 0
     local startPos = 1
 
     repeat
@@ -140,10 +140,7 @@ S.find_next = function(skip)
     end
 
     if vim.b.MultiCursorMultiline then
-        local match = S.multiline_string(ctx.pattern, utils.position.after)
-        if match then
-            return match
-        end
+        return S.multiline_string(ctx.pattern, utils.position.after)
     end
 
     local line_count = api.nvim_buf_line_count(0)
@@ -372,11 +369,11 @@ S.multiline_string = function(pattern, pos)
         return
     end
 
-    -- 3 is the length of \\v thats added at the start
+    -- 3 is the length of \\v that's added at the start
     local end_col = s[2] + #pattern - 3
     if s[1] ~= e[1] then
-        local last = findLastIndex('\\n', pattern)
-        -- 2 is the length of \n thats added at the start
+        local last = find_last_index('\\n', pattern)
+        -- 2 is the length of \n that's added at the start
         end_col = #pattern:sub(last) - 2
     end
 
