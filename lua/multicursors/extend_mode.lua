@@ -64,13 +64,28 @@ local get_new_position = function(mark, motion)
     -- INFO we could change the anchor here like how visual mode does it
     -- but for multiple selections is easy to mess up selections
     -- When motion goes past the anchor do not modify the selection
-    if
-        (smaller(anchor, float) and smaller(new_pos, anchor))
-        or (smaller(float, anchor) and smaller(anchor, new_pos))
-    then
+
+    -- Anchor is at start and new position passes it
+    local passed_start = vim.b.MultiCursorAnchorStart
+        and smaller(anchor, float)
+        and smaller(new_pos, anchor)
+        and math.abs(new_pos[2] - anchor[2]) >= 1
+
+    -- Anchor is at the end and new position passes it
+    local passed_right = not vim.b.MultiCursorAnchorStart
+        and smaller(float, anchor)
+        and smaller(anchor, new_pos)
+        and math.abs(new_pos[2] - anchor[2]) >= 0
+
+    if passed_start or passed_right then
         match.end_row = float[1] - 1
         match.end_col = float[2]
         api.nvim_win_set_cursor(0, float)
+    end
+
+    -- Up we decremented end_col value for forward extends
+    if vim.b.MultiCursorAnchorStart then
+        match.end_col = match.end_col + 1
     end
 
     -- check for empty lines
@@ -78,11 +93,6 @@ local get_new_position = function(mark, motion)
         api.nvim_buf_get_lines(0, match.end_row, match.end_row + 1, false)
     if #line[1] == 0 then
         match.end_col = 0
-    end
-
-    -- Up we decremented end_col value for forward extends
-    if vim.b.MultiCursorAnchorStart then
-        match.end_col = match.end_col + 1
     end
 
     return match
