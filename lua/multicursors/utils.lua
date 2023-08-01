@@ -29,6 +29,7 @@ local function check_selection_bounds(sel)
         or (sel.row == sel.end_row and sel.col > sel.end_col)
     then
         return {
+            id = sel.id,
             row = sel.end_row,
             col = sel.end_col,
             end_row = sel.row,

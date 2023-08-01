@@ -30,15 +30,17 @@ local get_new_position = function(mark, motion)
     local new_pos
 
     -- modify float so it has same indexing as win_set_cursor
-    local float = { mark.row + 1, mark.col - 1 }
-    local anchor = { mark.end_row + 1, mark.end_col - 1 }
+    local float = { mark.row + 1, mark.col }
+    local anchor = { mark.end_row + 1, mark.end_col }
 
+    --- decrement end_col value so we go to last char of selection
     if vim.b.MultiCursorAnchorStart then
-        anchor = { mark.row + 1, mark.col - 1 }
+        anchor = { mark.row + 1, mark.col }
         float = { mark.end_row + 1, mark.end_col - 1 }
     end
 
-    -- modifying indexing on empty lines results in negative col value
+    -- Extending to a empty line results to a negative col value
+    -- that we cannot jump to so we make it zero
     if float[2] < 0 then
         float[2] = 0
     end
@@ -52,10 +54,11 @@ local get_new_position = function(mark, motion)
     -- Revert back the modified values
     ---@type Selection
     local match = {
+        id = mark.id,
         row = anchor[1] - 1,
-        col = anchor[2] + 1,
+        col = anchor[2],
         end_row = new_pos[1] - 1,
-        end_col = new_pos[2] + 1,
+        end_col = new_pos[2],
     }
 
     -- INFO we could change the anchor here like how visual mode does it
@@ -66,7 +69,7 @@ local get_new_position = function(mark, motion)
         or (smaller(float, anchor) and smaller(anchor, new_pos))
     then
         match.end_row = float[1] - 1
-        match.end_col = float[2] + 1
+        match.end_col = float[2]
         api.nvim_win_set_cursor(0, float)
     end
 
@@ -75,6 +78,11 @@ local get_new_position = function(mark, motion)
         api.nvim_buf_get_lines(0, match.end_row, match.end_row + 1, false)
     if #line[1] == 0 then
         match.end_col = 0
+    end
+
+    -- Up we decremented end_col value for forward extends
+    if vim.b.MultiCursorAnchorStart then
+        match.end_col = match.end_col + 1
     end
 
     return match
