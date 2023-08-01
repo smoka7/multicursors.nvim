@@ -95,8 +95,13 @@ local last_selections = {}
 ---@param marks Selection[]
 ---@param main Selection
 local function save_history(marks, main)
-    last_selections = marks
-    table.insert(last_selections, main)
+    last_selections = {}
+
+    for _, value in pairs(marks) do
+        last_selections[#last_selections + 1] = value
+    end
+
+    last_selections[#last_selections + 1] = main
 end
 
 function E.undo_history()
@@ -114,6 +119,7 @@ function E.undo_history()
         last_selections[#last_selections],
         utils.namespace.Main
     )
+    last_selections = {}
 end
 
 --- Extends selections by motion
