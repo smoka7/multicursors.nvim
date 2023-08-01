@@ -351,12 +351,12 @@ S.multiline_string = function(pattern, pos)
     -- 'n'	do Not move the cursor
     -- 'w'	Wrap around the end of the file
     -- 'z'	start searching at the cursor column instead of Zero
-    local s_flags = 'wzn'
-    local e_flags = 'wzen'
+    local s_flags = 'wz'
+    local e_flags = 'wze'
 
     if pos == utils.position.after then
     elseif pos == utils.position.before then
-        s_flags = s_flags .. 'b'
+        s_flags = s_flags .. 'bn'
         e_flags = e_flags .. 'b'
     else
         s_flags = s_flags .. 'c'

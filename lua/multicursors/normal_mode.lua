@@ -86,7 +86,7 @@ local goto_prev_selection = function(skip)
 end
 
 --- Deletes current selection and
---- Moves the main selection to next selction
+--- Moves the main selection to next selection
 M.skip_goto_next = function()
     for _ = 1, vim.v.count1 do
         goto_next_selection(true)
@@ -94,21 +94,21 @@ M.skip_goto_next = function()
 end
 
 --- Deletes current selection and
---- Moves the main selection to previous selction
+--- Moves the main selection to previous selection
 M.skip_goto_prev = function()
     for _ = 1, vim.v.count1 do
         goto_prev_selection(true)
     end
 end
 
---- Moves the main selection to next selction
+--- Moves the main selection to next selection
 M.goto_next = function()
     for _ = 1, vim.v.count1 do
         goto_next_selection(false)
     end
 end
 
---- Moves the main selection to previous selction
+--- Moves the main selection to previous selection
 M.goto_prev = function()
     for _ = 1, vim.v.count1 do
         goto_prev_selection(false)
