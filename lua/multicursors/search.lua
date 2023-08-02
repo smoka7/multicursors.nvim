@@ -39,7 +39,7 @@ S.find_cursor_word = function()
         return
     end
 
-    vim.b.MultiCursorPattern = left[1] .. right[1]:sub(2)
+    vim.b.MultiCursorPattern = '\\<' .. left[1] .. right[1]:sub(2) .. '\\>'
 
     utils.create_extmark({
         row = cursor[1] - 1,
@@ -109,8 +109,7 @@ S.find_next_match = function(ctx)
         return
     end
 
-    local match =
-        vim.fn.matchstrpos(ctx.text, '\\<' .. ctx.pattern .. '\\>', ctx.offset)
+    local match = vim.fn.matchstrpos(ctx.text, ctx.pattern, ctx.offset)
     -- -1 range means not found
     if match[2] == -1 and match[3] == -1 then
         return
@@ -200,11 +199,7 @@ S.find_prev_match = function(ctx)
     local found = nil ---@type Selection?
 
     repeat
-        match = vim.fn.matchstrpos(
-            ctx.text,
-            '\\<' .. ctx.pattern .. '\\>',
-            match[3] or 0
-        )
+        match = vim.fn.matchstrpos(ctx.text, ctx.pattern, match[3] or 0)
         if match[2] ~= -1 and match[3] ~= -1 then
             found = {
                 col = match[2],
@@ -480,11 +475,15 @@ S.find_selected = function()
         return false
     end
 
-    vim.b.MultiCursorPattern = pattern
-    vim.b.MultiCursorMultiline = true
+    if #lines > 1 then
+        vim.b.MultiCursorPattern = pattern
+        vim.b.MultiCursorMultiline = true
+    else
+        vim.b.MultiCursorPattern = lines[1]
+    end
 
     utils.create_extmark(match, utils.namespace.Main)
-    utils.move_cursor { match.end_row + 1, match.end_col }
+    utils.move_cursor { match.end_row + 1, match.end_col - 1 }
 
     return true
 end
