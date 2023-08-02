@@ -358,8 +358,14 @@ S.multiline_string = function(pattern, pos)
         e_flags = e_flags .. 'c'
     end
 
-    s = vim.fn.searchpos(pattern, s_flags)
-    e = vim.fn.searchpos(pattern, e_flags)
+    if pos == utils.position.before then
+        e = vim.fn.searchpos(pattern, e_flags)
+        s = vim.fn.searchpos(pattern, s_flags)
+    else
+        s = vim.fn.searchpos(pattern, s_flags)
+        e = vim.fn.searchpos(pattern, e_flags)
+    end
+
     if s[1] == 0 and s[1] == 0 then
         return
     end
