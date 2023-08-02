@@ -77,43 +77,66 @@ end
 ---@param selection Selection
 ---@param pos ActionPosition
 ---@return string
-local get_selection_context = function(selection, pos)
-    if pos == utils.position.before then
-        --HACK when selection is at first of line return empty text
-        -- otherwise it wraps around the line
-        -- why selection.col is at end of line??
-        if selection.end_col == 0 then
-            return ''
-        end
+local get_selection_content = function(selection, pos)
+    local lines =
+        api.nvim_buf_get_lines(0, selection.row, selection.end_row + 1, false)
 
-        return api.nvim_buf_get_text(
-            0,
-            selection.row,
-            0,
-            selection.row,
-            selection.col,
-            {}
-        )[1]
+    -- From start of  first line till start of selection
+    if pos == utils.position.before then
+        return lines[1]:sub(0, selection.col)
+
+    -- From start of last line till end of selection
     elseif pos == utils.position.on then
-        return api.nvim_buf_get_text(
-            0,
-            selection.end_row,
-            0,
-            selection.end_row,
-            selection.end_col,
-            {}
-        )[1]
+        return lines[#lines]:sub(0, selection.end_col)
     end
 
-    return string.sub(
-        api.nvim_buf_get_lines(
-            0,
-            selection.end_row,
-            selection.end_row + 1,
-            false
-        )[1],
-        selection.end_col + 1
-    )
+    -- From end of selection till end of line
+    return lines[#lines]:sub(selection.end_col + 1)
+end
+
+--- Reduces the selection to the char before it
+---@param selection Selection
+---@param text string content of selection
+---@return Selection
+local function reduce_to_before(selection, text)
+    -- selection is at start of line
+    if
+        selection.col >= selection.end_col
+        and selection.end_col == 0
+        and selection.row == selection.end_row
+    then
+        selection.col = -1
+    else
+        selection.end_col = selection.col
+        selection.col = find_last_char(text)
+        selection.end_row = selection.row
+    end
+    return selection
+end
+
+--- Reduces the selection to last char of it
+---@param selection Selection
+---@param text string content of selection
+---@return Selection
+local function reduce_to_last(selection, text)
+    selection.col = find_last_char(text)
+    selection.row = selection.end_row
+    return selection
+end
+
+--- Reduces the selection to the char of it
+---@param selection Selection
+---@param text string content of selection
+---@return Selection
+local function reduce_to_after(selection, text)
+    -- at the EOL do not move
+    if #text == 0 then
+        return selection
+    end
+    selection.col = selection.end_col
+    selection.end_col = find_first_char(text) + selection.end_col
+    selection.row = selection.end_row
+    return selection
 end
 
 --- Reduces a selection to a char in position
@@ -121,23 +144,16 @@ end
 ---@param pos ActionPosition
 ---@return Selection
 local get_reduced_selection = function(selection, pos)
-    local text = get_selection_context(selection, pos)
+    local text = get_selection_content(selection, pos)
 
     if pos == utils.position.before then
-        selection.end_col = selection.col
-        selection.col = find_last_char(text)
-        selection.end_row = selection.row
+        selection = reduce_to_before(selection, text)
     elseif pos == utils.position.on then
-        selection.col = find_last_char(text)
-        selection.row = selection.end_row
+        selection = reduce_to_last(selection, text)
     else
-        -- at the EOL do not move
-        if #text ~= 0 then
-            selection.col = selection.end_col
-            selection.end_col = find_first_char(text) + selection.end_col
-            selection.row = selection.end_row
-        end
+        selection = reduce_to_after(selection, text)
     end
+
     return selection
 end
 
@@ -189,7 +205,9 @@ S.move_char_horizontal = function(pos)
     end
 
     new = get_reduced_selection(main, pos)
+    --utils.debug { 'from', new }
     utils.create_extmark(new, utils.namespace.Main)
+    --utils.debug { 'to', utils.get_main_selection() }
     utils.move_cursor { new.row + 1, new.end_col }
 end
 
