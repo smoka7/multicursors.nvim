@@ -8,7 +8,7 @@ The Multicursor Plugin for Neovim extends the native Neovim text editing capabil
 
 ## Installation
 
-lazy.nim:
+lazy.nvim:
 
 ```lua
 {
