@@ -1,5 +1,5 @@
-# Multicursor.nvim
-The Multicursor Plugin for Neovim extends the native Neovim text editing capabilities, providing a more intuitive way to edit repetitive text with multiple cursors. With this plugin, you can easily create and manage multiple cursors, perform simultaneous edits, and execute commands on all cursors at once.
+# Multicursors.nvim
+The Multicursor Plugin for Neovim extends the native Neovim text editing capabilities, providing a more intuitive way to edit repetitive text with multiple selections. With this plugin, you can easily create and manage multiple selections, perform simultaneous edits, and execute commands on all selections at once.
 
 ## Requirements
 
@@ -10,6 +10,7 @@ The Multicursor Plugin for Neovim extends the native Neovim text editing capabil
 Install with your preferred package manager:
 
 ```lua
+-- lazy.nvim:
 {
     "smoka7/multicursors.nvim",
     event = "VeryLazy",
@@ -47,7 +48,7 @@ Install with your preferred package manager:
                 mode = { 'v', 'n' },
                 '<Leader>m',
                 '<cmd>MCstart<cr>',
-                desc = 'Create a selection for selcted text or word under the cursor',
+                desc = 'Create a selection for selected text or word under the cursor',
             },
         },
 }
@@ -65,8 +66,8 @@ Install with your preferred package manager:
     updatetime = 50, -- selections get updated if this many milliseconds nothing is typed in the insert mode see :help updatetime
     nowait = true, -- see :help :map-nowait
     normal_keys = normal_keys,
-    insert_keys = insert_keys
-    extend_keys = extend_keys
+    insert_keys = insert_keys,
+    extend_keys = extend_keys,
     -- see :help hydra-config.hint
     hint_config = {
         border = 'none',
@@ -83,26 +84,29 @@ Install with your preferred package manager:
     },
 }
 ```
+
 </details>
 
 ## Usage
 
 | Command | Description |
 |---|---|
-| MCstart | Selects the word under cursor and starts listening for the actions. In visual mode it acts like `MCvisual` |
-| MCvisual | Selects the last visual mode selection and starts listening for the actions. |
+| MCstart | Select the word under the cursor and start listening for the actions. In visual mode, it acts like `MCvisual`. |
+| MCvisual | Select the last visual mode selection and start listening for the actions. |
 | MCpattern | Prompts for a pattern and selects every match in the buffer. |
 | MCvisualPattern | Prompts for a pattern and selects every match in the visual selection. |
-| MCunderCursor | Selects the char under cursor and starts listening for the actions. |
-| MCclear | Clears all the selection. |
+| MCunderCursor | Select the char under the cursor and start listening for the actions. |
+| MCclear | Clears all the selections. |
 
-To enter multi cursor mode, use the one of above commands.
+To enter Multicursor mode, use one of the above commands.
 
 ### Multi cursor mode
-Note that keys which aren't mapped **do not affect other selections** .
+
+> [!IMPORTANT]  
+> Keys that aren't mapped **do not affect other selections** .
 
 <details>
-  <summary>Click me</summary>
+  <summary>Click to see mappings.</summary>
 
 | Key | Description |
 |---|---|
@@ -126,18 +130,18 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `K` | `[count]` Skips the current selection and Creates a selection on the char above |
 | `p` | Puts the text inside `unnamed register` before selections |
 | `P` | Puts the text inside `unnamed register` after selections |
-| `y` | Yanks the text inside selection to `unnamed register` |
-| `Y` | Yanks the text from start of selection till end of line to `unnamed register` |
+| `y` | Yanks the text inside selections to `unnamed register` |
+| `Y` | Yanks the text from the start of selection till the end of the line to `unnamed register` |
 | `yy` | Yanks the line of selection to `unnamed register` |
 | `z` | Aligns selections by adding space before selections |
-| `Z` | Aligns selections by adding space at beginning of line |
+| `Z` | Aligns selections by adding space at the start of the line |
 | `d` | Deletes the text inside selections |
-| `D` | `count` Deletes the text from start of selection till end of line |
+| `D` | `count` Deletes the text from the start of selections till the end of the line |
 | `dd` | `count` Deletes line of selections |
-| `@` | Executes a macro at beginning of every selection |
-| `.` | Reapets last change at the beginning of every selection |
+| `@` | Executes a macro at the start of selections |
+| `.` | Reapets last change at the start of selections |
 | `,` | Clears All Selections except the main one |
-| `:` | Prompts for a normal command and Executes it at beginning of every selection |
+| `:` | Prompts for a normal command and Executes it at the start of selections | 
 | `u` | Undo changes |
 | `<C-r>` | Redo changes |
 
@@ -146,12 +150,12 @@ Note that keys which aren't mapped **do not affect other selections** .
 ### Insert, Append and Change mode:
 
 <details>
-  <summary>Click me</summary>
+  <summary>Click to see mappings.</summary>
 
 | Key | Description |
 |---|---|
-| `<Esc>`   | Goes back to multicursor normal mode |
-| `<C-c>`   | Goes back to multicursor normal mode |
+| `<Esc>`   | Returns to multicursor normal mode |
+| `<C-c>`   | Returns to multicursor normal mode |
 | `<BS>`    | Deletes the char before the selections |
 | `<Del>`   | Deletes the char under the selections |
 | `<Left>`  | Moves the selections one char Left |
@@ -168,43 +172,47 @@ Note that keys which aren't mapped **do not affect other selections** .
 | `<C-r>`   | Insert the contents of a register |
 | `<C-w>`   | Deletes one word before the selections |
 | `<C-BS>`  | Deletes one word before the selections |
-| `<C-u>`   | Deletes froms start of selections till start of line |
+| `<C-u>`   | Deletes from the start of selections till the start of line |
 
 </details>
 
 ### Extend mode
-Once you enter the Extend mode, you have the ability to expand or shrink your selections using Vim motions.
-The anchor represents one side of the selection and stays put, while the other side moves based on the performed motion.
+
+Once you enter the Extend mode, you can expand or shrink your selections using Vim motions or Treesitter nodes.
+At first, the left side of the selections stays put, and selections get extended from the right side.
+But you can change which side of selections stay put by pressing `o`.
+
 <details>
-  <summary>Click me</summary>
+  <summary>Click to see mappings.</summary>
 
 | Key | Description |
 |---|---|
-| `<Esc>`   | Goes back to multicursor normal mode |
+| `<Esc>`   | Returns to multicursor normal mode |
 | `c` | Prompts user for a motion and performs it |
-| `o` | Toggles the anchor's side |
-| `O` | Toggles the anchor's side |
-| `w` | `[count]` word foreward |
-| `e` | `[count]` foreward to end of word |
+| `o` | Toggles the anchor side |
+| `O` | Toggles the anchor side |
+| `w` | `[count]` word forward |
+| `e` | `[count]` forward to end of word |
 | `b` | `[count]` word backward |
 | `h` | `[count]` char left |
 | `j` | `[count]` char down |
 | `k` | `[count]` char up |
 | `l` | `[count]` char right |
-| `t` | Extends the selection to the parent of selected node|
-| `r` | Shrinks the selection to first child of selected node |
-| `y` | Shrinks the selection to last child of selected node |
+| `t` | Extends the selection to the parent of the selected node |
+| `r` | Shrinks the selection to the first child of the selected node |
+| `y` | Shrinks the selection to the last child of the selected node |
 | `u` | Undo Last selections extend or shrink |
 | `$` | `[count]` to end of line |
 | `^` | To the first non-blank character of the line |
 
-
 </details>
 
-### Recepies
+### Recipes
 
 #### Custom mappings
+
 Create custom mapping for editing selections.
+
 ```lua
  require('multicursors').setup {
     normal_keys = {
@@ -223,7 +231,9 @@ Create custom mapping for editing selections.
 ```
 
 #### Status Line module
-Disable hint window and show the multicursor mode in your status line.
+
+Disable the hint window and show Multicursor mode in your status line.
+
 ```lua
  require('multicursors').setup {
     hint_config = false,
@@ -242,12 +252,13 @@ local function get_name()
     return ''
 end
 
----for lualine add this component
+--- for lualine add this component
 lualine_b = {
     { get_name, cond = is_active },
  }
 ```
 
 ## Acknowledgment
+
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
 [hydra.nvim](https://github.com/anuvyklack/hydra.nvim)
