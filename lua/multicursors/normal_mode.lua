@@ -346,7 +346,7 @@ M.yank_end = function()
     vim.fn.setreg('', contents)
 end
 
---- Creates a selection on the line top of the cursor
+--- Creates a selection on the line above the cursor
 M.create_up = function()
     for _ = 1, vim.v.count1 do
         search.create_up(false)
@@ -370,6 +370,11 @@ M.skip_create_down = function()
     for _ = 1, vim.v.count1 do
         search.create_down(true)
     end
+end
+
+--- Creates a selection for the char under cursor
+M.create_char = function()
+    search.create_under()
 end
 
 return M

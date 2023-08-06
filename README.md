@@ -124,6 +124,7 @@ To enter Multicursor mode, use one of the above commands.
 | `[` | `[count]` Swaps the main selection with previous selection |
 | `}` | `[count]` Deletes the main selection and goes to next |
 | `{` | `[count]` Deletes the main selection and goes to previous |
+| `<C-n>` | Creates a selection for the char under the cursor |
 | `j` | `[count]` Creates a selection on the char below the cursor |
 | `J` | `[count]` Skips the current selection and Creates a selection on the char below |
 | `k` | `[count]` Creates a selection on the char above the cursor |

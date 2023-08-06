@@ -271,8 +271,9 @@ S.find_prev = function(skip)
     end
 end
 
---- Selects the char under the cursor as main selection
-S.new_under_cursor = function()
+--- Returns a selection for the char under cursor
+---@return Selection
+local get_cursor_char = function()
     local cursor = api.nvim_win_get_cursor(0)
 
     ---@type Selection
@@ -287,6 +288,12 @@ S.new_under_cursor = function()
         match.end_col = 0
     end
 
+    return match
+end
+
+--- Selects the char under the cursor as main selection
+S.new_under_cursor = function()
+    local match = get_cursor_char()
     vim.b.MultiCursorPattern = ''
     utils.create_extmark(match, utils.namespace.Main)
 end
@@ -328,6 +335,12 @@ end
 S.create_up = function(skip)
     local mark = get_new_position 'k'
     utils.swap_main_to(mark, skip)
+end
+
+--- Creates a selection on the char above the cursor
+S.create_under = function()
+    local match = get_cursor_char()
+    utils.swap_main_to(match, false)
 end
 
 --- Searches for multi line pattern in buffer

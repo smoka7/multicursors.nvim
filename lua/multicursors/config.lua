@@ -21,6 +21,10 @@ local normal_keys = {
         method = N.clear_others,
         opts = { desc = 'Clear others' },
     },
+    ['<C-n>'] = {
+        method = N.create_char,
+        opts = { desc = 'Creates a Selection under cursor' },
+    },
     ['j'] = { method = N.create_down, opts = { desc = 'Create down' } },
     ['k'] = { method = N.create_up, opts = { desc = 'Create up' } },
     ['.'] = { method = N.dot_repeat, opts = { desc = 'Dot repeat' } },
