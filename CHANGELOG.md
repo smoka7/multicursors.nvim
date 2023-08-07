@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/smoka7/multicursors.nvim/compare/v0.7.0...v0.7.1) (2023-08-07)
+
+
+### Bug Fixes
+
+* allow disabling of mappings ([0ee8858](https://github.com/smoka7/multicursors.nvim/commit/0ee88581b1c6668d70247c74a578b826cf4c2f87))
+
 ## [0.7.0](https://github.com/smoka7/multicursors.nvim/compare/v0.6.3...v0.7.0) (2023-08-06)
 
 
