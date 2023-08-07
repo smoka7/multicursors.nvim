@@ -1,6 +1,6 @@
 
 ---@class Action
----@field method function?
+---@field method function?| false -- nil value creates a exit head false value remove's the mapping
 ---@field opts HeadOpts
 
 ---@class Point
@@ -38,3 +38,11 @@
 ---@field nowait? boolean
 ---@field remap? boolean
 ---@field desc? string
+
+---@class GenerateHints
+---@field normal boolean|string
+---@field insert boolean|string
+---@field extend boolean|string
+
+---@class Config
+---@field generate_hints GenerateHints

@@ -18,30 +18,7 @@ Install with your preferred package manager:
         'nvim-treesitter/nvim-treesitter',
         'smoka7/hydra.nvim',
     },
-    opts = function()
-        local N = require 'multicursors.normal_mode'
-        local I = require 'multicursors.insert_mode'
-        return {
-            normal_keys = {
-                -- to change default lhs of key mapping change the key
-                [','] = {
-                    -- assigning nil to method exits from multi cursor mode
-                    method = N.clear_others,
-                    -- you can pass :map-arguments here
-                    opts = { desc = 'Clear others' },
-                },
-            },
-            insert_keys = {
-                -- to change default lhs of key mapping change the key
-                ['<CR>'] = {
-                    -- assigning nil to method exits from multi cursor mode
-                    method = I.Cr_method,
-                    -- you can pass :map-arguments here
-                    opts = { desc = 'New line' },
-                },
-            },
-        }
-    end,
+    opts = {},
     cmd = { 'MCstart', 'MCvisual', 'MCclear', 'MCpattern', 'MCvisualPattern', 'MCunderCursor' },
     keys = {
             {
@@ -217,6 +194,14 @@ Create custom mapping for editing selections.
 ```lua
  require('multicursors').setup {
     normal_keys = {
+        -- to change default lhs of key mapping change the key
+        [','] = {
+            -- assigning nil to method exits from multi cursor mode
+            -- assigning false to method removes the binding
+            method = N.clear_others,
+            -- you can pass :map-arguments here
+            opts = { desc = 'Clear others' },
+        },
         ['<C-/>'] = {
             method = function()
                 require('multicursors.utils').call_on_selections(function(selection)

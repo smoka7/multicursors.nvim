@@ -21,29 +21,30 @@ L.extend_hydra = nil
 ---
 ---@param keys Dictionary: { [string]: Action }
 ---@param nowait boolean
----@param show_desc boolean
+---@param show_desc boolean|string
 ---@return Head[]
 local generate_heads = function(keys, nowait, show_desc)
     ---@type Head[]
     local heads = {}
     for lhs, action in pairs(keys) do
-        local description = nil
-        if action.opts and show_desc then
-            description = action.opts.desc
-        end
+        if action.method ~= false then
+            local opts = action.opts or {}
 
-        if action.method then
+            opts.description = nil
+            if action.opts and show_desc then
+                opts.description = action.opts.desc
+            end
+
+            if action.opts.nowait ~= nil then
+                opts.nowait = action.opts.nowait
+            else
+                opts.nowait = nowait
+            end
+
             heads[#heads + 1] = {
                 lhs,
                 action.method,
-                {
-                    desc = description,
-                    nowait = (
-                        action.opts
-                        and action.opts.nowait == false
-                        and false
-                    ) or nowait,
-                },
+                opts,
             }
         end
     end
@@ -199,7 +200,7 @@ L.create_normal_hydra = function(config)
     local heads = L.generate_normal_heads(config)
 
     L.normal_hydra = Hydra {
-        name = 'Multi Cursor',
+        name = 'MC Normal',
         hint = generate_hints(config, heads, 'normal'),
         config = {
             buffer = 0,
@@ -233,7 +234,7 @@ end
 L.create_insert_hydra = function(config)
     local heads = L.generate_insert_heads(config)
     L.insert_hydra = Hydra {
-        name = 'Multi Cursor insert',
+        name = 'MC Insert',
         hint = generate_hints(config, heads, 'insert'),
         mode = 'i',
         config = {
@@ -267,7 +268,7 @@ L.create_extend_hydra = function(config)
     local heads = L.generate_extend_heads(config)
 
     L.extend_hydra = Hydra {
-        name = 'Multi Cursor Extend',
+        name = 'MC Extend',
         hint = generate_hints(config, heads, 'extend'),
         mode = 'n',
         config = {
