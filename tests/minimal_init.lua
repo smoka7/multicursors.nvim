@@ -22,7 +22,7 @@ if hydra_exists then
         hydra_exists,
     }
 end
-
+vim.opt.directory = ''
 vim.opt.rtp:append '.'
 vim.opt.rtp:append(plenary_dir)
 vim.opt.rtp:append(hydra_dir)
