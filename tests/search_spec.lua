@@ -19,11 +19,11 @@ describe('search', function()
     it('finds cursor_word', function()
         api.nvim_win_set_cursor(0, { 1, 1 })
         search.find_cursor_word()
-        assert.same(vim.b.MultiCursorPattern, 'Lorem')
+        assert.same('\\<Lorem\\>', vim.b.MultiCursorPattern)
 
         api.nvim_win_set_cursor(0, { 1, 5 })
         search.find_cursor_word()
-        assert.same(vim.b.MultiCursorPattern, '')
+        assert.same('', vim.b.MultiCursorPattern)
     end)
 
     it('finds all matches', function()

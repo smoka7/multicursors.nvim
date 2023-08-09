@@ -25,7 +25,9 @@ local function find_last_index(pattern, str)
 end
 
 --- Finds the word under the cursor
+--- @return true? returns true if it creates a selection
 S.find_cursor_word = function()
+    vim.b.MultiCursorPattern = ''
     local line = api.nvim_get_current_line()
     if not line then
         return
@@ -39,7 +41,12 @@ S.find_cursor_word = function()
         return
     end
 
-    vim.b.MultiCursorPattern = '\\<' .. left[1] .. right[1]:sub(2) .. '\\>'
+    local pattern = left[1] .. right[1]:sub(2)
+    if pattern == '' then
+        return
+    end
+
+    vim.b.MultiCursorPattern = '\\<' .. pattern .. '\\>'
 
     utils.create_extmark({
         row = cursor[1] - 1,
@@ -47,6 +54,8 @@ S.find_cursor_word = function()
         col = left[2],
         end_col = right[3] + cursor[2],
     }, utils.namespace.Main)
+
+    return true
 end
 
 --- Finds and marks all matches of a pattern in content

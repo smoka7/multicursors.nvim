@@ -49,12 +49,16 @@ local function is_visual_mode()
 end
 
 M.start = function()
+    local found
     if is_visual_mode() then
-        search.find_selected()
+        found = search.find_selected()
     else
-        search.find_cursor_word()
+        found = search.find_cursor_word()
     end
-    layers.normal_hydra:activate()
+
+    if found then
+        layers.normal_hydra:activate()
+    end
 end
 
 M.new_under_cursor = function()
