@@ -4,11 +4,15 @@
 Table of Contents                             *multicursors-table-of-contents*
 
 1. Multicursors.nvim                          |multicursors-multicursors.nvim|
-  - Requirements                 |multicursors-multicursors.nvim-requirements|
-  - Installation                 |multicursors-multicursors.nvim-installation|
-  - Default Configuration|multicursors-multicursors.nvim-default-configuration|
-  - Usage                               |multicursors-multicursors.nvim-usage|
-  - Acknowledgment             |multicursors-multicursors.nvim-acknowledgment|
+2. Requirements                                    |multicursors-requirements|
+3. Installation                                    |multicursors-installation|
+4. Default Configuration                  |multicursors-default-configuration|
+5. Usage                                                  |multicursors-usage|
+  - Multi cursor mode                   |multicursors-usage-multi-cursor-mode|
+  - Insert, Append and Change mode:|multicursors-usage-insert,-append-and-change-mode:|
+  - Extend mode                               |multicursors-usage-extend-mode|
+  - Recipes                                       |multicursors-usage-recipes|
+6. Acknowledgment                                |multicursors-acknowledgment|
 
 ==============================================================================
 1. Multicursors.nvim                          *multicursors-multicursors.nvim*
@@ -20,12 +24,14 @@ multiple selections, perform simultaneous edits, and execute commands on all
 selections at once.
 
 
-REQUIREMENTS                     *multicursors-multicursors.nvim-requirements*
+==============================================================================
+2. Requirements                                    *multicursors-requirements*
 
 - Neovim >= **0.9.0**
 
 
-INSTALLATION                     *multicursors-multicursors.nvim-installation*
+==============================================================================
+3. Installation                                    *multicursors-installation*
 
 Install with your preferred package manager:
 
@@ -52,7 +58,8 @@ Install with your preferred package manager:
 <
 
 
-DEFAULT CONFIGURATION   *multicursors-multicursors.nvim-default-configuration*
+==============================================================================
+4. Default Configuration                  *multicursors-default-configuration*
 
 Click me ~
 
@@ -83,7 +90,8 @@ Click me ~
 <
 
 
-USAGE                                   *multicursors-multicursors.nvim-usage*
+==============================================================================
+5. Usage                                                  *multicursors-usage*
 
   -----------------------------------------------------------------------
   Command                             Description
@@ -113,7 +121,7 @@ USAGE                                   *multicursors-multicursors.nvim-usage*
 To enter Multicursor mode, use one of the above commands.
 
 
-MULTI CURSOR MODE ~
+MULTI CURSOR MODE                       *multicursors-usage-multi-cursor-mode*
 
 
   [!IMPORTANT] Keys that aren’t mapped **do not affect other selections**.
@@ -226,7 +234,7 @@ Click to see mappings. ~
   <C-r>                               Redo changes
   -----------------------------------------------------------------------
 
-INSERT, APPEND AND CHANGE MODE: ~
+INSERT, APPEND AND CHANGE MODE:*multicursors-usage-insert,-append-and-change-mode:*
 
 Click to see mappings. ~
 
@@ -281,7 +289,7 @@ Click to see mappings. ~
                                       selections till the start of line
   -----------------------------------------------------------------------
 
-EXTEND MODE ~
+EXTEND MODE                                   *multicursors-usage-extend-mode*
 
 Once you enter the Extend mode, you can expand or shrink your selections using
 Vim motions or Treesitter nodes. At first, the left side of the selections
@@ -310,10 +318,10 @@ Click to see mappings. ~
   $       [count] to end of line
   ^       To the first non-blank character of the line
 
-RECIPES ~
+RECIPES                                           *multicursors-usage-recipes*
 
 
-CUSTOM MAPPINGS
+CUSTOM MAPPINGS ~
 
 Create custom mapping for editing selections.
 
@@ -343,7 +351,7 @@ Create custom mapping for editing selections.
 <
 
 
-STATUS LINE MODULE
+STATUS LINE MODULE ~
 
 Disable the hint window and show Multicursor mode in your status line.
 
@@ -372,7 +380,8 @@ Disable the hint window and show Multicursor mode in your status line.
 <
 
 
-ACKNOWLEDGMENT                 *multicursors-multicursors.nvim-acknowledgment*
+==============================================================================
+6. Acknowledgment                                *multicursors-acknowledgment*
 
 vim-visual-multi <https://github.com/mg979/vim-visual-multi> hydra.nvim
 <https://github.com/anuvyklack/hydra.nvim>
