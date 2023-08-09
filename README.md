@@ -1,11 +1,11 @@
 # Multicursors.nvim
 The Multicursor Plugin for Neovim extends the native Neovim text editing capabilities, providing a more intuitive way to edit repetitive text with multiple selections. With this plugin, you can easily create and manage multiple selections, perform simultaneous edits, and execute commands on all selections at once.
 
-## Requirements
+# Requirements
 
 - Neovim >= **0.9.0**
 
-## Installation
+# Installation
 
 Install with your preferred package manager:
 
@@ -31,7 +31,7 @@ Install with your preferred package manager:
 }
 ```
 
-## Default Configuration
+# Default Configuration
 
 <details>
   <summary>Click me</summary>
@@ -64,7 +64,7 @@ Install with your preferred package manager:
 
 </details>
 
-## Usage
+# Usage
 
 | Command | Description |
 |---|---|
@@ -77,7 +77,7 @@ Install with your preferred package manager:
 
 To enter Multicursor mode, use one of the above commands.
 
-### Multi cursor mode
+## Multi cursor mode
 
 > [!IMPORTANT]  
 > Keys that aren't mapped **do not affect other selections** .
@@ -125,7 +125,7 @@ To enter Multicursor mode, use one of the above commands.
 
 </details>
 
-### Insert, Append and Change mode:
+## Insert, Append and Change mode:
 
 <details>
   <summary>Click to see mappings.</summary>
@@ -154,7 +154,7 @@ To enter Multicursor mode, use one of the above commands.
 
 </details>
 
-### Extend mode
+## Extend mode
 
 Once you enter the Extend mode, you can expand or shrink your selections using Vim motions or Treesitter nodes.
 At first, the left side of the selections stays put, and selections get extended from the right side.
@@ -185,9 +185,9 @@ But you can change which side of selections stay put by pressing `o`.
 
 </details>
 
-### Recipes
+## Recipes
 
-#### Custom mappings
+### Custom mappings
 
 Create custom mapping for editing selections.
 
@@ -216,7 +216,7 @@ Create custom mapping for editing selections.
 }
 ```
 
-#### Status Line module
+### Status Line module
 
 Disable the hint window and show Multicursor mode in your status line.
 
@@ -244,7 +244,7 @@ lualine_b = {
  }
 ```
 
-## Acknowledgment
+# Acknowledgment
 
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
 [hydra.nvim](https://github.com/anuvyklack/hydra.nvim)
