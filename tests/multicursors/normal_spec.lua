@@ -5,10 +5,10 @@ local search = require 'multicursors.search'
 local normal_mode = require 'multicursors.normal_mode'
 
 local paragraph = {
-    'Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi lorem pariatur mollit ex esse exercitation amet.',
-    ' Nisi anim  cupidatat excepteur officia.',
-    'Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet.',
-    ' Nisi anim cupidatat excepteur officia.',
+    'lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi lorem pariatur mollit ex esse exercitation amet.',
+    ' nisi anim  cupidatat excepteur officia.',
+    'lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi lorem pariatur mollit ex esse exercitation amet.',
+    ' nisi anim cupidatat excepteur officia.',
 }
 
 describe('find and move ', function()
@@ -23,10 +23,13 @@ describe('find and move ', function()
 
         local main = utils.get_main_selection()
         assert.is_not(main, nil)
-        assert.same(main.row, 0)
-        assert.same(main.col, 0)
-        assert.same(main.end_col, 5)
-        assert.same(main.end_row, 0)
+        assert.same({
+            id = 1,
+            row = 0,
+            col = 0,
+            end_col = 5,
+            end_row = 0,
+        }, main)
 
         normal_mode.find_next()
         local cursor = api.nvim_win_get_cursor(0)
