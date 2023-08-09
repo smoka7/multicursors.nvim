@@ -1,5 +1,5 @@
 on: [pull_request]
-name: lint-test
+name: stylua
 
 jobs:
   stylua:
