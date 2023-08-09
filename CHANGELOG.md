@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/smoka7/multicursors.nvim/compare/v0.7.1...v0.7.2) (2023-08-09)
+
+
+### Bug Fixes
+
+* don't enter normal mode when we can't find &lt;cword&gt; ([92b77cc](https://github.com/smoka7/multicursors.nvim/commit/92b77cc85ba8b12499d1a2d4834910f30d850c83))
+
 ## [0.7.1](https://github.com/smoka7/multicursors.nvim/compare/v0.7.0...v0.7.1) (2023-08-07)
 
 
