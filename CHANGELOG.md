@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.3](https://github.com/smoka7/multicursors.nvim/compare/v0.7.2...v0.7.3) (2023-08-10)
+
+
+### Bug Fixes
+
+* delete text from end of selections ([8e668a4](https://github.com/smoka7/multicursors.nvim/commit/8e668a45822e757be216755830afdce131ae56fc))
+* set nowait value for modes ([6b3b323](https://github.com/smoka7/multicursors.nvim/commit/6b3b32395536b20747480b4d30b8d32ba2db7690))
+
 ## [0.7.2](https://github.com/smoka7/multicursors.nvim/compare/v0.7.1...v0.7.2) (2023-08-09)
 
 
