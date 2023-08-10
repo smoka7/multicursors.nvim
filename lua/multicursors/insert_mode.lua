@@ -169,13 +169,14 @@ M.C_w_method = function()
     local c_w = api.nvim_replace_termcodes('<C-w>', true, false, true)
 
     utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
+        api.nvim_win_set_cursor(0, { mark.row + 1, mark.end_col })
         vim.cmd('normal! i' .. c_w)
     end)
 
     -- this does not change extmark position but when
     -- we delete a text extmark start and end col will overlap and
-    -- user can't see the extmark when moving we increment end col so selection gets visible
+    -- user can't see the extmark when moving so we reduces to a char
+    -- to get visible
     selections.reduce_to_char(utils.position.before)
 end
 
@@ -220,7 +221,7 @@ M.C_u_method = function()
 
     local c_u = api.nvim_replace_termcodes('<C-u>', true, false, true)
     utils.call_on_selections(function(mark)
-        api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
+        api.nvim_win_set_cursor(0, { mark.row + 1, mark.end_col })
         vim.cmd('normal! i' .. c_u)
     end)
 
