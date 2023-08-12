@@ -3,24 +3,28 @@ name: panvimdoc
 on: [push]
 
 jobs:
-  docs:
+ changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs:
+      readme: ${{ steps.filter.outputs.readme }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          readme:
+            - 'README.md'
+ docs:
+    needs: changes
+    if: ${{ needs.changes.outputs.readme == 'true' }}
     runs-on: ubuntu-latest
     name: pandoc to vimdoc
     steps:
       - uses: actions/checkout@v3
-      - uses: dorny/paths-filter@v2
-        id: source-files-filter
-        with:
-          filters: |
-            source-files:
-              - 'README.md'
-
-      - uses: Ana06/get-changed-files@v2.2.0
-        id: source-files
-        continue-on-error: true
-        with:
-          format: 'space-delimited'
-
       - name: panvimdoc
         uses: kdheepak/panvimdoc@main
         with:
