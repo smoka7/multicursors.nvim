@@ -41,38 +41,6 @@ local get_new_position = function(selection, motion)
     return selection
 end
 
---- finds index of last  char in a string
---- considers multibyte utf-8 characters
----@param str string
----@return integer last col
-local function find_first_char(str)
-    local index = 1
-    while
-        vim.fn.strdisplaywidth(string.sub(str, 0, index)) >= 4
-        and index >= 1
-        and index <= #str
-    do
-        index = index + 1
-    end
-    return index
-end
-
---- finds index of last  char in a string
---- considers multibyte utf-8 characters
----@param str string
----@return integer last col
-local function find_last_char(str)
-    local index = #str
-    while
-        vim.fn.strdisplaywidth(string.sub(str, index, #str)) >= 4
-        and index >= 1
-        and index <= #str
-    do
-        index = index - 1
-    end
-    return index - 1
-end
-
 --- Gets the text before, on or after a selection
 ---@param selection Selection
 ---@param pos ActionPosition
@@ -94,6 +62,14 @@ local get_selection_content = function(selection, pos)
     return lines[#lines]:sub(selection.end_col + 1)
 end
 
+--- returns byte index of last char in text
+---@param text string
+---@return integer
+local function find_last_char_byte_idx(text)
+    local charlen = vim.fn.strcharlen(text)
+    return vim.fn.byteidx(text, charlen - 1, false) or -1
+end
+
 --- Reduces the selection to the char before it
 ---@param selection Selection
 ---@param text string content of selection
@@ -108,7 +84,7 @@ local function reduce_to_before(selection, text)
         selection.col = -1
     else
         selection.end_col = selection.col
-        selection.col = find_last_char(text)
+        selection.col = find_last_char_byte_idx(text)
         selection.end_row = selection.row
     end
     return selection
@@ -119,7 +95,7 @@ end
 ---@param text string content of selection
 ---@return Selection
 local function reduce_to_last(selection, text)
-    selection.col = find_last_char(text)
+    selection.col = find_last_char_byte_idx(text)
     selection.row = selection.end_row
     return selection
 end
@@ -134,7 +110,7 @@ local function reduce_to_after(selection, text)
         return selection
     end
     selection.col = selection.end_col
-    selection.end_col = find_first_char(text) + selection.end_col
+    selection.end_col = vim.fn.byteidx(text, 1, false) + selection.end_col
     selection.row = selection.end_row
     return selection
 end
@@ -143,9 +119,8 @@ end
 ---@param selection Selection
 ---@param pos ActionPosition
 ---@return Selection
-local get_reduced_selection = function(selection, pos)
+S._get_reduced_selection = function(selection, pos)
     local text = get_selection_content(selection, pos)
-
     if pos == utils.position.before then
         selection = reduce_to_before(selection, text)
     elseif pos == utils.position.on then
@@ -182,13 +157,13 @@ S.reduce_to_char = function(pos)
     local selctions = utils.get_all_selections()
     local main = utils.get_main_selection()
 
-    main = get_reduced_selection(main, pos)
+    main = S._get_reduced_selection(main, pos)
     utils.move_cursor { main.row + 1, main.end_col }
 
     utils.create_extmark(main, utils.namespace.Main)
 
     for _, selection in pairs(selctions) do
-        main = get_reduced_selection(selection, pos)
+        main = S._get_reduced_selection(selection, pos)
         utils.create_extmark(selection, utils.namespace.Multi)
     end
 end
@@ -200,14 +175,12 @@ S.move_char_horizontal = function(pos)
 
     local new
     for _, selection in pairs(selections) do
-        new = get_reduced_selection(selection, pos)
+        new = S._get_reduced_selection(selection, pos)
         utils.create_extmark(new, utils.namespace.Multi)
     end
 
-    new = get_reduced_selection(main, pos)
-    --utils.debug { 'from', new }
+    new = S._get_reduced_selection(main, pos)
     utils.create_extmark(new, utils.namespace.Main)
-    --utils.debug { 'to', utils.get_main_selection() }
     utils.move_cursor { new.row + 1, new.end_col }
 end
 
