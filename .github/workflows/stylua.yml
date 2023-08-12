@@ -2,11 +2,37 @@ on: [pull_request]
 name: stylua
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      lua: ${{ steps.filter.outputs.lua }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+            lua:
+              - 'lua/**'
+              - 'tests/**'
   stylua:
+    needs: changes
+    if: ${{ needs.changes.outputs.readme == 'true' }}
     name: stylua
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: dorny/paths-filter@v2
+        id: changed
+        with:
+          filters: |
+            lua:
+              - 'lua/**'
+              - 'tests/**'
+
       - uses: JohnnyMorganz/stylua-action@v3
         with:
           version: latest

@@ -3,7 +3,24 @@ name: panvimdoc
 on: [push]
 
 jobs:
-  docs:
+ changes:
+    runs-on: ubuntu-latest
+    # Required permissions
+    permissions:
+      pull-requests: read
+    outputs:
+      readme: ${{ steps.filter.outputs.readme }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          readme:
+            - 'README.md'
+ docs:
+    needs: changes
+    if: ${{ needs.changes.outputs.readme == 'true' }}
     runs-on: ubuntu-latest
     name: pandoc to vimdoc
     steps:
