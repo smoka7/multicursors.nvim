@@ -14,18 +14,12 @@ jobs:
         uses: actions/checkout@v3
 
       - uses: dorny/paths-filter@v2
-        id: source-files-filter
+        id: changed
         with:
           filters: |
-            source-files:
+            lua:
               - 'lua/**'
               - 'tests/**'
-
-      - uses: Ana06/get-changed-files@v2.2.0
-        id: source-files
-        continue-on-error: true
-        with:
-          format: 'space-delimited'
 
       - uses: rhysd/action-setup-vim@v1
         with:
@@ -33,4 +27,5 @@ jobs:
           version: ${{ matrix.nvim-versions }}
 
       - name: run tests
+        if: steps.changed.outputs.lua == 'true'
         run: make test
