@@ -13,6 +13,20 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - uses: dorny/paths-filter@v2
+        id: source-files-filter
+        with:
+          filters: |
+            source-files:
+              - 'lua/**'
+              - 'tests/**'
+
+      - uses: Ana06/get-changed-files@v2.2.0
+        id: source-files
+        continue-on-error: true
+        with:
+          format: 'space-delimited'
+
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
