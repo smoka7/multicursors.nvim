@@ -7,11 +7,11 @@ local S = {}
 ---@param selection Selection
 ---@param motion string
 ---@return Selection
-local get_new_position = function(selection, motion)
+S._get_new_position = function(selection, motion)
     local new_pos
 
     -- modify anchor so it has same indexing as win_set_cursor
-    local anchor = { selection.end_row + 1, selection.end_col }
+    local anchor = { selection.end_row + 1, selection.col + 1 }
     if anchor[2] < 0 then
         anchor[2] = 0
     end
@@ -20,17 +20,6 @@ local get_new_position = function(selection, motion)
     api.nvim_win_set_cursor(0, anchor)
     vim.cmd('normal! ' .. motion)
     new_pos = api.nvim_win_get_cursor(0)
-
-    -- HACK cursor doesn't goto the end of line
-    -- caveat: going forward on the last col moves the cursor 1 col left
-    -- caveat: for other motions going to end of line we could perform it twice
-    local line = api.nvim_buf_get_lines(0, anchor[1] - 1, anchor[1], true)[1]
-    if
-        new_pos[2] == anchor[2]
-        and vim.fn.strdisplaywidth(line) == new_pos[2] + 1
-    then
-        new_pos[2] = new_pos[2] + 1
-    end
 
     -- Revert back the modified values
     selection.row = new_pos[1] - 1
@@ -141,11 +130,11 @@ S.move_by_motion = function(motion)
 
     local new_pos
     for _, selection in pairs(selections) do
-        new_pos = get_new_position(selection, motion)
+        new_pos = S._get_new_position(selection, motion)
         utils.create_extmark(new_pos, utils.namespace.Multi)
     end
 
-    new_pos = get_new_position(main, motion)
+    new_pos = S._get_new_position(main, motion)
 
     utils.create_extmark(new_pos, utils.namespace.Main)
     utils.move_cursor { new_pos.row + 1, new_pos.col + 1 }

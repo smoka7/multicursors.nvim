@@ -15,6 +15,22 @@ describe('find and move ', function()
         vim.cmd [[enew]]
         api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
     end)
+
+    it('gets new position by motion', function()
+        ---@type Selection
+        local s = { id = 1, col = 28, end_col = 29, row = 0, end_row = 0 }
+
+        local new = selections._get_new_position(s, 'j')
+        assert.same({ id = 1, col = 28, end_col = 29, row = 1, end_row = 1 }, new)
+         new = selections._get_new_position(s, 'k')
+        assert.same({ id = 1, col = 28, end_col = 29, row = 0, end_row = 0 }, new)
+
+         new = selections._get_new_position(s, 'W')
+        assert.same({ id = 1, col = 35, end_col = 36, row = 0, end_row = 0 }, new)
+         new = selections._get_new_position(s, 'B')
+        assert.same({ id = 1, col = 27, end_col = 28, row = 0, end_row = 0 }, new)
+    end)
+    
     it('reduces selection', function()
         ---@type Selection
         local s = { id = 1, col = 2, end_col = 19, row = 4, end_row = 4 }

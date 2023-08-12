@@ -101,7 +101,7 @@ M.insert_text = function(text)
         local row = selection[3].end_row
         api.nvim_buf_set_text(0, row, col, row, col, { text })
     end
-    selections.move_by_motion(#text .. 'l')
+    selections.move_by_motion(vim.fn.strcharlen(text) .. 'l')
 end
 
 local delete_char = function()
@@ -202,9 +202,9 @@ end
 M.End_method = function()
     M._insert_and_clear()
 
-    --HACK see inside selections.get_new_position on why we do this
+    --HACK we can't go to the last char???
     selections.move_by_motion '$'
-    selections.move_by_motion '$'
+    selections.move_char_horizontal 'after'
 end
 
 M.C_Right = function()
