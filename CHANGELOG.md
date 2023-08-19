@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.4](https://github.com/smoka7/multicursors.nvim/compare/v0.7.3...v0.7.4) (2023-08-19)
+
+
+### Bug Fixes
+
+* move selections by char length ([ce94d39](https://github.com/smoka7/multicursors.nvim/commit/ce94d39cecb62a15b4bfb1b31b401781073d5ae5))
+* Remove extra param from byteidx ([#37](https://github.com/smoka7/multicursors.nvim/issues/37)) ([fc50fc9](https://github.com/smoka7/multicursors.nvim/commit/fc50fc930a636fe46c6f859a7aa60ae901108146))
+
 ## [0.7.3](https://github.com/smoka7/multicursors.nvim/compare/v0.7.2...v0.7.3) (2023-08-10)
 
 
