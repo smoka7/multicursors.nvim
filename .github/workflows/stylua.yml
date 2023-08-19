@@ -19,20 +19,11 @@ jobs:
               - 'tests/**'
   stylua:
     needs: changes
-    if: ${{ needs.changes.outputs.readme == 'true' }}
+    if: ${{ needs.changes.outputs.lua == 'true' }}
     name: stylua
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: changed
-        with:
-          filters: |
-            lua:
-              - 'lua/**'
-              - 'tests/**'
-
       - uses: JohnnyMorganz/stylua-action@v3
         with:
           version: latest
