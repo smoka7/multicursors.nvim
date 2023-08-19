@@ -56,7 +56,7 @@ end
 ---@return integer
 local function find_last_char_byte_idx(text)
     local charlen = vim.fn.strcharlen(text)
-    return vim.fn.byteidx(text, charlen - 1, false) or -1
+    return vim.fn.byteidx(text, charlen - 1) or -1
 end
 
 --- Reduces the selection to the char before it
@@ -99,7 +99,7 @@ local function reduce_to_after(selection, text)
         return selection
     end
     selection.col = selection.end_col
-    selection.end_col = vim.fn.byteidx(text, 1, false) + selection.end_col
+    selection.end_col = vim.fn.byteidx(text, 1) + selection.end_col
     selection.row = selection.end_row
     return selection
 end
