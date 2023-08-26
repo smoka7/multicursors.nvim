@@ -16,7 +16,7 @@ local paragraph = {
 describe('inserts mode', function()
     before_each(function()
         vim.cmd [[enew]]
-        api.nvim_buf_set_lines(0, 0, 4, false, paragraph)
+        api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
         local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
         search.find_all_matches(buffer, 'lorem', 0, 0)
     end)
