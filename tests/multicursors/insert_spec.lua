@@ -21,6 +21,10 @@ describe('inserts mode', function()
         search.find_all_matches(buffer, 'lorem', 0, 0)
     end)
 
+    after_each(function()
+        vim.cmd [[q!]]
+    end)
+
     it('appends text', function()
         local selections = utils.get_all_selections()
         assert.equal(#selections, 3)
