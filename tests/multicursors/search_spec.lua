@@ -16,6 +16,10 @@ describe('search', function()
         api.nvim_buf_set_lines(0, 0, 4, false, paragraph)
     end)
 
+    after_each(function()
+        vim.cmd.bdelete { bang = true }
+    end)
+
     it('finds cursor_word', function()
         api.nvim_win_set_cursor(0, { 1, 1 })
         search.find_cursor_word()

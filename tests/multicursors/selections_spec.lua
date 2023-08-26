@@ -16,6 +16,10 @@ describe('find and move ', function()
         api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
     end)
 
+    after_each(function()
+        vim.cmd.bdelete { bang = true }
+    end)
+
     it('gets new position by motion', function()
         ---@type Selection
         local s = { id = 1, col = 28, end_col = 29, row = 0, end_row = 0 }

@@ -22,7 +22,7 @@ describe('inserts mode', function()
     end)
 
     after_each(function()
-        vim.cmd [[q!]]
+        vim.cmd.bdelete { bang = true }
     end)
 
     it('appends text', function()
