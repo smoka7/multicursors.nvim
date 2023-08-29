@@ -68,21 +68,18 @@ local get_new_position = function(mark, motion)
         and math.abs(new_pos[2] - anchor[2]) >= 1
 
     -- Anchor is at the end and new position passes it
-    local passed_right = not vim.b.MultiCursorAnchorStart
+    local passed_end = not vim.b.MultiCursorAnchorStart
         and smaller(float, anchor)
         and smaller(anchor, new_pos)
         and math.abs(new_pos[2] - anchor[2]) >= 0
 
     local passed = 0
-    if passed_start or passed_right then
+    if passed_start or passed_end then
         passed = 1
-        match.end_row = float[1] - 1
-        match.end_col = float[2]
-        api.nvim_win_set_cursor(0, float)
     end
 
     -- Up we decremented end_col value for forward extends
-    if vim.b.MultiCursorAnchorStart then
+    if vim.b.MultiCursorAnchorStart or passed_end then
         match.end_col = match.end_col + 1
     end
 
@@ -146,7 +143,7 @@ local function extend_selections(motion)
         utils.create_extmark(new_pos, utils.namespace.Multi)
     end
 
-    new_pos = get_new_position(main, motion)
+    new_pos, passed = get_new_position(main, motion)
     passed_count = passed_count + passed
     utils.create_extmark(new_pos, utils.namespace.Main)
 
@@ -154,7 +151,6 @@ local function extend_selections(motion)
     -- toggle the anchor to copy visual mode behavior
     if passed_count == #selections + 1 then
         E.o_method()
-        extend_selections(motion)
     end
 end
 
