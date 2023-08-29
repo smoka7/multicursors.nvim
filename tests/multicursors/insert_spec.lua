@@ -17,8 +17,6 @@ describe('inserts mode', function()
     before_each(function()
         vim.cmd [[enew]]
         api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
-        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
-        search.find_all_matches(buffer, 'lorem', 0, 0)
     end)
 
     after_each(function()
@@ -26,6 +24,8 @@ describe('inserts mode', function()
     end)
 
     it('appends text', function()
+        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        search.find_all_matches(buffer, 'lorem', 0, 0)
         local selections = utils.get_all_selections()
         assert.equal(#selections, 3)
 
@@ -37,7 +37,7 @@ describe('inserts mode', function()
         vim.cmd 'normal! ipot'
         insert_mode.exit()
 
-        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        buffer = api.nvim_buf_get_lines(0, 0, -1, false)
         utils.clear_selections()
         search.find_all_matches(buffer, 'lorempot', 0, 0)
         selections = utils.get_all_selections()
@@ -45,6 +45,8 @@ describe('inserts mode', function()
     end)
 
     it('inserts text', function()
+        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        search.find_all_matches(buffer, 'lorem', 0, 0)
         local selections = utils.get_all_selections()
         assert.equal(#selections, 3)
 
@@ -52,7 +54,7 @@ describe('inserts mode', function()
         vim.cmd 'normal! ipot'
         insert_mode.exit()
 
-        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        buffer = api.nvim_buf_get_lines(0, 0, -1, false)
         utils.clear_selections()
         search.find_all_matches(buffer, 'potlorem', 0, 0)
         selections = utils.get_all_selections()
@@ -60,6 +62,8 @@ describe('inserts mode', function()
     end)
 
     it('changes text', function()
+        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        search.find_all_matches(buffer, 'lorem', 0, 0)
         local selections = utils.get_all_selections()
         assert.equal(#selections, 3)
 
@@ -67,7 +71,7 @@ describe('inserts mode', function()
         vim.cmd 'normal! ipot'
         insert_mode.exit()
 
-        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        buffer = api.nvim_buf_get_lines(0, 0, -1, false)
         utils.clear_selections()
         search.find_all_matches(buffer, 'pot', 0, 0)
         selections = utils.get_all_selections()
@@ -80,6 +84,8 @@ describe('inserts mode', function()
     end)
 
     it('deletes a char', function()
+        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        search.find_all_matches(buffer, 'lorem', 0, 0)
         local selections = utils.get_all_selections()
         assert.equal(#selections, 3)
 
