@@ -17,7 +17,7 @@ describe('inserts mode', function()
     before_each(function()
         vim.cmd [[enew]]
         api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
-        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        local buffer = api.nvim_buf_get_lines(0, 0, 4, false)
         search.find_all_matches(buffer, 'lorem', 0, 0)
     end)
 
@@ -26,6 +26,7 @@ describe('inserts mode', function()
     end)
 
     it('appends text', function()
+        print(api.nvim_buf_get_lines(0, 0, 4, false))
         local selections = utils.get_all_selections()
         assert.equal(#selections, 3)
 
