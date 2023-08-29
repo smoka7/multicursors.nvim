@@ -1,9 +1,37 @@
-name: Tests
-
 on: [pull_request]
+name: tests and styling
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      lua: ${{ steps.filter.outputs.lua }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+            lua:
+              - 'lua/**'
+              - 'tests/**'
+  stylua:
+    needs: changes
+    if: ${{ needs.changes.outputs.lua == 'true' }}
+    name: stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: JohnnyMorganz/stylua-action@v3
+        with:
+          version: latest
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --color always --check lua
   test:
+    needs: changes
+    if: ${{ needs.changes.outputs.lua == 'true' }}
     runs-on: ubuntu-latest
     name: test
     strategy:
@@ -12,20 +40,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
-
-      - uses: dorny/paths-filter@v2
-        id: changed
-        with:
-          filters: |
-            lua:
-              - 'lua/**'
-              - 'tests/**'
-
+      
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
           version: ${{ matrix.nvim-versions }}
 
       - name: run tests
-        if: steps.changed.outputs.lua == 'true'
         run: make test
