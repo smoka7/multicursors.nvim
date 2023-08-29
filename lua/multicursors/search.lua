@@ -98,7 +98,7 @@ S.find_all_matches = function(content, pattern, start_row, start_col)
     if #all > 0 then
         -- make last match the main one
         utils.create_extmark(all[#all], utils.namespace.Main)
-        utils.move_cursor { all[#all].end_row, all[#all].end_col }
+        utils.move_cursor { all[#all].end_row + 1, all[#all].end_col }
     else
         vim.notify 'no match found'
     end
