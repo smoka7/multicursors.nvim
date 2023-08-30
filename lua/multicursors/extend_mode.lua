@@ -25,7 +25,7 @@ end
 --- Perform the motion and finds the new range for selection.
 ---@param mark Selection
 ---@param motion string
----@return Selection
+---@return Selection,integer
 local get_new_position = function(mark, motion)
     local new_pos
 
@@ -61,10 +61,6 @@ local get_new_position = function(mark, motion)
         end_col = new_pos[2],
     }
 
-    -- INFO we could change the anchor here like how visual mode does it
-    -- but for multiple selections is easy to mess up selections
-    -- When motion goes past the anchor do not modify the selection
-
     -- Anchor is at start and new position passes it
     local passed_start = vim.b.MultiCursorAnchorStart
         and smaller(anchor, float)
@@ -72,19 +68,18 @@ local get_new_position = function(mark, motion)
         and math.abs(new_pos[2] - anchor[2]) >= 1
 
     -- Anchor is at the end and new position passes it
-    local passed_right = not vim.b.MultiCursorAnchorStart
+    local passed_end = not vim.b.MultiCursorAnchorStart
         and smaller(float, anchor)
         and smaller(anchor, new_pos)
         and math.abs(new_pos[2] - anchor[2]) >= 0
 
-    if passed_start or passed_right then
-        match.end_row = float[1] - 1
-        match.end_col = float[2]
-        api.nvim_win_set_cursor(0, float)
+    local passed = 0
+    if passed_start or passed_end then
+        passed = 1
     end
 
     -- Up we decremented end_col value for forward extends
-    if vim.b.MultiCursorAnchorStart then
+    if vim.b.MultiCursorAnchorStart or passed_end then
         match.end_col = match.end_col + 1
     end
 
@@ -95,7 +90,7 @@ local get_new_position = function(mark, motion)
         match.end_col = 0
     end
 
-    return match
+    return match, passed
 end
 
 ---@type Selection[]
@@ -134,21 +129,29 @@ end
 
 --- Extends selections by motion
 ---@param motion string
-local extend_selections = function(motion)
-    local marks = utils.get_all_selections()
+local function extend_selections(motion)
+    local selections = utils.get_all_selections()
     local main = utils.get_main_selection()
 
-    save_history(marks, main)
+    save_history(selections, main)
 
-    local new_pos
-    for _, selection in pairs(marks) do
-        new_pos = get_new_position(selection, motion)
-
+    local new_pos, passed
+    local passed_count = 0
+    for _, selection in pairs(selections) do
+        new_pos, passed = get_new_position(selection, motion)
+        passed_count = passed_count + passed
         utils.create_extmark(new_pos, utils.namespace.Multi)
     end
 
-    new_pos = get_new_position(main, motion)
+    new_pos, passed = get_new_position(main, motion)
+    passed_count = passed_count + passed
     utils.create_extmark(new_pos, utils.namespace.Main)
+
+    -- When every extension results in passing the anchor
+    -- toggle the anchor to copy visual mode behavior
+    if passed_count == #selections + 1 then
+        E.o_method()
+    end
 end
 
 E.h_method = function()
