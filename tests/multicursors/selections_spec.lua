@@ -10,7 +10,7 @@ local paragraph = {
     '🫠🫠🫠🫠🫠',
 }
 
-describe('find and move ', function()
+describe('selections', function()
     before_each(function()
         vim.cmd [[enew]]
         api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
