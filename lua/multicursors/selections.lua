@@ -10,6 +10,15 @@ local S = {}
 S._get_new_position = function(selection, motion)
     local new_pos
 
+    -- INFO for extmarks before start of lines nvim changes the col value
+    -- to line length so we have to zero it ourself
+    if
+        selection.row == selection.end_row
+        and selection.col > selection.end_col
+    then
+        selection.col = -1
+    end
+
     -- modify anchor so it has same indexing as win_set_cursor
     local anchor = { selection.end_row + 1, selection.col + 1 }
     if anchor[2] < 0 then
