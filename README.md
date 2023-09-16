@@ -15,7 +15,6 @@ Install with your preferred package manager:
     "smoka7/multicursors.nvim",
     event = "VeryLazy",
     dependencies = {
-        'nvim-treesitter/nvim-treesitter',
         'smoka7/hydra.nvim',
     },
     opts = {},
