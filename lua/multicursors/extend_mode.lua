@@ -1,8 +1,5 @@
----@type Utils
 local utils = require 'multicursors.utils'
 local api = vim.api
-
-local parsers = require 'nvim-treesitter.parsers'
 
 local ts = require 'multicursors.ts'
 
@@ -214,9 +211,6 @@ end
 
 ---@param callback fun(mark:Selection):Selection
 local extend_selections_ts = function(callback)
-    if not parsers.has_parser() then
-        return
-    end
     local marks = utils.get_all_selections()
     local main = utils.get_main_selection()
 
