@@ -101,7 +101,7 @@ M.insert_text = function(text)
         local row = selection[3].end_row
         api.nvim_buf_set_text(0, row, col, row, col, { text })
     end
-    selections.move_by_motion(vim.fn.strcharlen(text) .. 'l')
+    selections._move_forward(vim.fn.strcharlen(text))
 end
 
 local delete_char = function()

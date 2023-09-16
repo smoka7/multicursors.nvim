@@ -101,14 +101,15 @@ end
 --- Reduces the selection to the char of it
 ---@param selection Selection
 ---@param text string content of selection
+---@param count integer count of chars
 ---@return Selection
-local function reduce_to_after(selection, text)
+local function reduce_to_after(selection, text, count)
     -- at the EOL do not move
     if #text == 0 then
         return selection
     end
     selection.col = selection.end_col
-    selection.end_col = vim.fn.byteidx(text, 1) + selection.end_col
+    selection.end_col = vim.fn.byteidx(text, count) + selection.end_col
     selection.row = selection.end_row
     return selection
 end
@@ -116,15 +117,16 @@ end
 --- Reduces a selection to a char in position
 ---@param selection Selection
 ---@param pos ActionPosition
+---@param count integer?
 ---@return Selection
-S._get_reduced_selection = function(selection, pos)
+S._get_reduced_selection = function(selection, pos, count)
     local text = get_selection_content(selection, pos)
     if pos == utils.position.before then
         selection = reduce_to_before(selection, text)
     elseif pos == utils.position.on then
         selection = reduce_to_last(selection, text)
     else
-        selection = reduce_to_after(selection, text)
+        selection = reduce_to_after(selection, text, count or 1)
     end
 
     return selection
@@ -162,6 +164,23 @@ S.reduce_to_char = function(pos)
 
     for _, selection in pairs(selctions) do
         main = S._get_reduced_selection(selection, pos)
+        utils.create_extmark(selection, utils.namespace.Multi)
+    end
+end
+
+--- Moves the selections forward
+---@param count integer
+S._move_forward = function(count)
+    local selctions = utils.get_all_selections()
+    local main = utils.get_main_selection()
+
+    main = S._get_reduced_selection(main, utils.position.after, count)
+    utils.move_cursor { main.row + 1, main.end_col }
+
+    utils.create_extmark(main, utils.namespace.Main)
+
+    for _, selection in pairs(selctions) do
+        main = S._get_reduced_selection(selection, utils.position.after, count)
         utils.create_extmark(selection, utils.namespace.Multi)
     end
 end
