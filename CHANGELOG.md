@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.8.0](https://github.com/smoka7/multicursors.nvim/compare/v0.7.4...v0.8.0) (2023-09-16)
+
+
+### Features
+
+* auto change anchor in extend mode ([#38](https://github.com/smoka7/multicursors.nvim/issues/38)) ([1c97c10](https://github.com/smoka7/multicursors.nvim/commit/1c97c10778804b9a57465663bc7082b751b5db4f))
+
+
+### Bug Fixes
+
+* fix ci errors ([#39](https://github.com/smoka7/multicursors.nvim/issues/39)) ([9b2753b](https://github.com/smoka7/multicursors.nvim/commit/9b2753b8501e137b0821d182a11f1131d92a1c86))
+* move selections forward when inserting text at the start or end of line ([#43](https://github.com/smoka7/multicursors.nvim/issues/43)) ([1b68c19](https://github.com/smoka7/multicursors.nvim/commit/1b68c19a583e6883c483abcdae0b509219172005))
+
 ## [0.7.4](https://github.com/smoka7/multicursors.nvim/compare/v0.7.3...v0.7.4) (2023-08-19)
 
 
