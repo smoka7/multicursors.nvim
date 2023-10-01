@@ -152,7 +152,7 @@ L.generate_normal_heads = function(config)
     }
 
     heads[#heads + 1] = {
-        'i',
+        config.mode_keys.insert,
         function()
             enter_insert(function()
                 insert_mode.insert(config)
@@ -162,7 +162,7 @@ L.generate_normal_heads = function(config)
     }
 
     heads[#heads + 1] = {
-        'c',
+        config.mode_keys.change,
         function()
             enter_insert(function()
                 normal_mode.change(config)
@@ -172,7 +172,7 @@ L.generate_normal_heads = function(config)
     }
 
     heads[#heads + 1] = {
-        'a',
+        config.mode_keys.append,
         function()
             enter_insert(function()
                 insert_mode.append(config)
@@ -182,7 +182,7 @@ L.generate_normal_heads = function(config)
     }
 
     heads[#heads + 1] = {
-        'e',
+        config.mode_keys.extend,
         function()
             vim.b.MultiCursorSubLayer = true
             L.create_extend_hydra(config)
