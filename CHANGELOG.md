@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/smoka7/multicursors.nvim/compare/v0.8.0...v0.8.1) (2023-10-02)
+
+
+### Bug Fixes
+
+* make mode bindings configurable ([#46](https://github.com/smoka7/multicursors.nvim/issues/46)) ([2c21968](https://github.com/smoka7/multicursors.nvim/commit/2c21968436d59f7b18628e380b508832feca92cd))
+
 ## [0.8.0](https://github.com/smoka7/multicursors.nvim/compare/v0.7.4...v0.8.0) (2023-09-16)
 
 
