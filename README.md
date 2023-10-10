@@ -122,7 +122,7 @@ To enter Multicursor mode, use one of the above commands.
 | `D` | `count` Deletes the text from the start of selections till the end of the line |
 | `dd` | `count` Deletes line of selections |
 | `@` | Executes a macro at the start of selections |
-| `.` | Reapets last change at the start of selections |
+| `.` | Repeats last change at the start of selections |
 | `,` | Clears All Selections except the main one |
 | `:` | Prompts for a normal command and Executes it at the start of selections | 
 | `u` | Undo changes |
