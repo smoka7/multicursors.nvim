@@ -224,7 +224,7 @@ Click to see mappings. ~
   @                                   Executes a macro at the start of
                                       selections
 
-  .                                   Reapets last change at the start of
+  .                                   Repeats last change at the start of
                                       selections
 
   ,                                   Clears All Selections except the
