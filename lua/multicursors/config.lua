@@ -147,12 +147,11 @@ local M = {
     -- -2 false: don't generate hints
     -- -3 [[multi line string]] provide your own hints
     generate_hints = {
-        normal = false,
-        insert = false,
-        extend = false,
+        normal = true,
+        insert = true,
+        extend = true,
         config = {
-            -- number of columns to used when generating hints. Use 1 for a vertical display.
-            -- When nil, it will be computed based on 'columns' and the maximum hint length.
+            -- determines how many columns are used to display the hints. If you leave this option nil, the number of columns will depend on the size of your window.
             column_count = nil,
         },
     },
