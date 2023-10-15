@@ -21,19 +21,13 @@ L.extend_hydra = nil
 ---
 ---@param keys Dictionary: { [string]: Action }
 ---@param nowait boolean
----@param show_desc boolean|string
 ---@return Head[]
-local generate_heads = function(keys, nowait, show_desc)
+local set_heads_options = function(keys, nowait)
     ---@type Head[]
     local heads = {}
     for lhs, action in pairs(keys) do
         if action.method ~= false then
             local opts = action.opts or {}
-
-            opts.desc = nil
-            if action.opts and show_desc then
-                opts.desc = action.opts.desc
-            end
 
             if action.opts.nowait ~= nil then
                 opts.nowait = action.opts.nowait
@@ -59,7 +53,7 @@ local max_hint_length = 25
 ---@param head Head
 ---@return string
 local function get_hint(head)
-    if head[3].desc == '' then
+    if not head[3].desc or head[3].desc == '' then
         return ''
     end
 
@@ -134,11 +128,7 @@ end
 ---@param config Config
 ---@return Head[]
 L.generate_normal_heads = function(config)
-    local heads = generate_heads(
-        config.normal_keys,
-        config.nowait,
-        config.generate_hints.normal
-    )
+    local heads = set_heads_options(config.normal_keys, config.nowait)
     local enter_insert = function(callback)
         -- tell hydra that we're going to insert mode so it doesn't clear the selection
         vim.b.MultiCursorSubLayer = true
@@ -226,11 +216,7 @@ end
 ---@param config Config
 ---@return Head[]
 L.generate_insert_heads = function(config)
-    return generate_heads(
-        config.insert_keys,
-        config.nowait,
-        config.generate_hints.insert
-    )
+    return set_heads_options(config.insert_keys, config.nowait)
 end
 
 ---@param config Config
@@ -259,11 +245,7 @@ end
 ---@param config Config
 ---@return Head[]
 L.generate_extend_heads = function(config)
-    return generate_heads(
-        config.extend_keys,
-        config.nowait,
-        config.generate_hints.extend
-    )
+    return set_heads_options(config.extend_keys, config.nowait)
 end
 
 ---@param config Config

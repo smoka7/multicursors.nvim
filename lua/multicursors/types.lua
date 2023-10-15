@@ -40,9 +40,9 @@
 ---@field desc? string
 
 ---@class GenerateHints
----@field normal boolean|string
----@field insert boolean|string
----@field extend boolean|string
+---@field normal boolean|string| fun(heads: Head[]): string
+---@field insert boolean|string| fun(heads: Head[]): string
+---@field extend boolean|string| fun(heads: Head[]): string
 ---@field config GenerateHintsConfig
 
 ---@class GenerateHintsConfig
