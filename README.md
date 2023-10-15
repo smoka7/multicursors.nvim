@@ -63,6 +63,11 @@ Install with your preferred package manager:
         normal = false,
         insert = false,
         extend = false,
+        config = {
+            -- number of columns to used when generating hints. Use 1 for a vertical display.
+            -- When nil, it will be computed based on 'columns' and the maximum hint length.
+            column_count = nil,
+        }
     },
 }
 ```
