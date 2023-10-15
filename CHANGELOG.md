@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.0](https://github.com/smoka7/multicursors.nvim/compare/v0.8.1...v0.9.0) (2023-10-15)
+
+
+### Features
+
+* **highlights:** allow overriding highlights ([#56](https://github.com/smoka7/multicursors.nvim/issues/56)) ([f12195e](https://github.com/smoka7/multicursors.nvim/commit/f12195e2cc7bf12c76b2ab09ca81a82481ede78d))
+* **hints:** add columns option ([#57](https://github.com/smoka7/multicursors.nvim/issues/57)) ([1b7b1e1](https://github.com/smoka7/multicursors.nvim/commit/1b7b1e1fdb231486089d86f6cd431560370a5ce7))
+* **hints:** allow functions in generate_hints ([#58](https://github.com/smoka7/multicursors.nvim/issues/58)) ([6af8a8a](https://github.com/smoka7/multicursors.nvim/commit/6af8a8a785cb66b545118641b9c0bbee5b821859))
+
 ## [0.8.1](https://github.com/smoka7/multicursors.nvim/compare/v0.8.0...v0.8.1) (2023-10-02)
 
 
