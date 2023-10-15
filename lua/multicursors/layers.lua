@@ -30,9 +30,9 @@ local generate_heads = function(keys, nowait, show_desc)
         if action.method ~= false then
             local opts = action.opts or {}
 
-            opts.description = nil
+            opts.desc = nil
             if action.opts and show_desc then
-                opts.description = action.opts.desc
+                opts.desc = action.opts.desc
             end
 
             if action.opts.nowait ~= nil then
@@ -84,6 +84,8 @@ local generate_hints = function(config, heads, mode)
         return 'MultiCursor ' .. mode .. ' mode'
     elseif type(config.generate_hints[mode]) == 'string' then
         return config.generate_hints[mode]
+    elseif type(config.generate_hints[mode]) == 'function' then
+        return config.generate_hints[mode](heads)
     end
 
     table.sort(heads, function(a, b)
