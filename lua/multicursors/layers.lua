@@ -84,6 +84,8 @@ local generate_hints = function(config, heads, mode)
         return 'MultiCursor ' .. mode .. ' mode'
     elseif type(config.generate_hints[mode]) == 'string' then
         return config.generate_hints[mode]
+    elseif type(config.generate_hints[mode]) == 'function' then
+        return config.generate_hints[mode](heads)
     end
 
     table.sort(heads, function(a, b)

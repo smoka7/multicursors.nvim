@@ -59,6 +59,7 @@ Install with your preferred package manager:
     -- -1 true: generate hints
     -- -2 false: don't generate hints
     -- -3 [[multi line string]] provide your own hints
+    -- -4 fun(heads: Head[]): string - provide your own hints
     generate_hints = {
         normal = false,
         insert = false,
