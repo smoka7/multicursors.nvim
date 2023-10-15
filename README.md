@@ -249,6 +249,14 @@ lualine_b = {
  }
 ```
 
+# Highlight Groups
+The following groups are used by `multicursors.nvim` and can be overriden:
+
+| Name | Description |
+|---|---|
+| MultiCursor | Multicursor selections. |
+| MultiCursorMain | Main selection in which multicursor began. |
+
 # Acknowledgment
 
 [vim-visual-multi](https://github.com/mg979/vim-visual-multi)
