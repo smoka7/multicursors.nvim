@@ -59,6 +59,7 @@ Install with your preferred package manager:
     -- -1 true: generate hints
     -- -2 false: don't generate hints
     -- -3 [[multi line string]] provide your own hints
+    -- -4 fun(heads: Head[]): string - provide your own hints
     generate_hints = {
         normal = true,
         insert = true,
@@ -272,6 +273,14 @@ A configuration like this can be used to show hints in a vertical window similar
     },
 }
 ```
+
+# Highlight Groups
+The following groups are used by `multicursors.nvim` and can be overriden:
+
+| Name | Description |
+|---|---|
+| MultiCursor | Multicursor selections. |
+| MultiCursorMain | Main selection in which multicursor began. |
 
 # Acknowledgment
 

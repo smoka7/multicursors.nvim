@@ -12,7 +12,8 @@ Table of Contents                             *multicursors-table-of-contents*
   - Insert, Append and Change mode:|multicursors-usage-insert,-append-and-change-mode:|
   - Extend mode                               |multicursors-usage-extend-mode|
   - Recipes                                       |multicursors-usage-recipes|
-6. Acknowledgment                                |multicursors-acknowledgment|
+6. Highlight Groups                            |multicursors-highlight-groups|
+7. Acknowledgment                                |multicursors-acknowledgment|
 
 ==============================================================================
 1. Multicursors.nvim                          *multicursors-multicursors.nvim*
@@ -86,6 +87,7 @@ Click me ~
         -- -1 true: generate hints
         -- -2 false: don't generate hints
         -- -3 [[multi line string]] provide your own hints
+        -- -4 fun(heads: Head[]): string - provide your own hints
         generate_hints = {
             normal = false,
             insert = false,
@@ -386,7 +388,17 @@ Disable the hint window and show Multicursor mode in your status line.
 
 
 ==============================================================================
-6. Acknowledgment                                *multicursors-acknowledgment*
+6. Highlight Groups                            *multicursors-highlight-groups*
+
+The following groups are used by `multicursors.nvim` and can be overriden:
+
+  Name              Description
+  ----------------- --------------------------------------------
+  MultiCursor       Multicursor selections.
+  MultiCursorMain   Main selection in which multicursor began.
+
+==============================================================================
+7. Acknowledgment                                *multicursors-acknowledgment*
 
 vim-visual-multi <https://github.com/mg979/vim-visual-multi> hydra.nvim
 <https://github.com/anuvyklack/hydra.nvim>
