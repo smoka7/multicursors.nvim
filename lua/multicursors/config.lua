@@ -148,9 +148,13 @@ local M = {
     -- -3 [[multi line string]] - provide your own hints
     -- -4 fun(heads: Head[]): string - provide your own hints
     generate_hints = {
-        normal = false,
-        insert = false,
-        extend = false,
+        normal = true,
+        insert = true,
+        extend = true,
+        config = {
+            -- determines how many columns are used to display the hints. If you leave this option nil, the number of columns will depend on the size of your window.
+            column_count = nil,
+        },
     },
 }
 

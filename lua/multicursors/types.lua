@@ -43,6 +43,10 @@
 ---@field normal boolean|string
 ---@field insert boolean|string
 ---@field extend boolean|string
+---@field config GenerateHintsConfig
+
+---@class GenerateHintsConfig
+---@field column_count? integer
 
 ---@class Config
 ---@field generate_hints GenerateHints

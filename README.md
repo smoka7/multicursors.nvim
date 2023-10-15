@@ -61,9 +61,13 @@ Install with your preferred package manager:
     -- -3 [[multi line string]] provide your own hints
     -- -4 fun(heads: Head[]): string - provide your own hints
     generate_hints = {
-        normal = false,
-        insert = false,
-        extend = false,
+        normal = true,
+        insert = true,
+        extend = true,
+        config = {
+             -- determines how many columns are used to display the hints. If you leave this option nil, the number of columns will depend on the size of your window.
+            column_count = nil,
+        }
     },
 }
 ```
@@ -248,6 +252,26 @@ end
 lualine_b = {
     { get_name, cond = is_active },
  }
+```
+
+### Vertical hints
+A configuration like this can be used to show hints in a vertical window similar to helix.
+
+```lua
+ require('multicursors').setup {
+    hint_config = {
+        border = 'rounded',
+        position = 'bottom-right',
+    },
+    generate_hints = {
+        normal = true,
+        insert = true,
+        extend = true,
+        config = {
+            column_count = 1,
+        },
+    },
+}
 ```
 
 # Highlight Groups

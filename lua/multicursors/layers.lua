@@ -108,9 +108,10 @@ local generate_hints = function(config, heads, mode)
 
     local str = ' MultiCursor: ' .. mode .. ' mode'
 
-    local columns = math.floor(
-        vim.api.nvim_get_option_value('columns', {}) / max_hint_length
-    )
+    local columns = config.generate_hints.config.column_count
+        or math.floor(
+            vim.api.nvim_get_option_value('columns', {}) / max_hint_length
+        )
 
     local line
     for i = 0, math.floor(#heads / columns) do
