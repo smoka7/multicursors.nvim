@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/smoka7/multicursors.nvim/compare/v0.9.0...v0.9.1) (2023-10-15)
+
+
+### Bug Fixes
+
+* handle nil key descriptions ([#60](https://github.com/smoka7/multicursors.nvim/issues/60)) ([3101b53](https://github.com/smoka7/multicursors.nvim/commit/3101b536deaf536b16e2a974b720517fd3a82f78))
+
 ## [0.9.0](https://github.com/smoka7/multicursors.nvim/compare/v0.8.1...v0.9.0) (2023-10-15)
 
 
