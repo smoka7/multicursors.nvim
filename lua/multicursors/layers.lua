@@ -46,13 +46,12 @@ local set_heads_options = function(keys, nowait)
     return heads
 end
 
-local max_hint_length = 25
-
 --- Creates a hint for a head
 --- when necessary adds padding or cuts the hint for aligning
 ---@param head Head
+---@param max_hint_length integer
 ---@return string
-local function get_hint(head)
+local function get_hint(head, max_hint_length)
     if not head[3].desc or head[3].desc == '' then
         return ''
     end
@@ -102,6 +101,7 @@ local generate_hints = function(config, heads, mode)
 
     local str = ' MultiCursor: ' .. mode .. ' mode'
 
+    local max_hint_length = config.generate_hints.config.max_hint_length
     local columns = config.generate_hints.config.column_count
         or math.floor(
             vim.api.nvim_get_option_value('columns', {}) / max_hint_length
@@ -112,7 +112,8 @@ local generate_hints = function(config, heads, mode)
         line = ''
         for j = 1, columns, 1 do
             if heads[(i * columns) + j] then
-                line = line .. get_hint(heads[(i * columns) + j])
+                line = line
+                    .. get_hint(heads[(i * columns) + j], max_hint_length)
             end
         end
 

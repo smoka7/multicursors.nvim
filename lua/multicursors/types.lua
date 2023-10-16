@@ -47,6 +47,7 @@
 
 ---@class GenerateHintsConfig
 ---@field column_count? integer
+---@field max_hint_length integer
 
 ---@class Config
 ---@field generate_hints GenerateHints
