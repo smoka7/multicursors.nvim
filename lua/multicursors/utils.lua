@@ -238,6 +238,39 @@ M.call_on_selections = function(callback)
     callback(main)
 end
 
+-- Calls the callback on each selection
+-- Deletes and recreats each extmark
+---@param callback function
+M.update_selections_with = function(callback)
+    local marks = M.get_all_selections()
+    -- Get each mark again cause editing buffer might moves the other marks
+    for _, selection in pairs(marks) do
+        local mark = api.nvim_buf_get_extmark_by_id(
+            0,
+            ns_id,
+            selection.id,
+            { details = true }
+        )
+        local s = {
+            id = selection.id,
+            row = mark[1],
+            col = mark[2],
+            end_row = mark[3].end_row,
+            end_col = mark[3].end_col,
+        }
+
+        -- Delete each mark and recreate it after running callbacks
+        api.nvim_buf_del_extmark(0, ns_id, s.id)
+        callback(s)
+        M.create_extmark(s, 'MultiCursor')
+    end
+
+    local main = M.get_main_selection()
+    api.nvim_buf_del_extmark(0, main_ns_id, main.id)
+    callback(main)
+    M.create_extmark(main, 'MultiCursorMain')
+end
+
 --- Moves the cursor to pos and marks current cursor position in jumplist
 --- htpps://github.com/neovim/neovim/issues/20793
 ---@param pos any[]

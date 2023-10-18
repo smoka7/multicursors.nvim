@@ -346,6 +346,53 @@ M.yank_end = function()
     vim.fn.setreg('', contents)
 end
 
+M.upper_case = function()
+    utils.update_selections_with(function(selection)
+        local text = api.nvim_buf_get_text(
+            0,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
+            {}
+        )
+        for i, line in ipairs(text) do
+            text[i] = line:upper()
+        end
+        api.nvim_buf_set_text(
+            0,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
+            text
+        )
+    end)
+end
+
+M.lower_case = function()
+    utils.update_selections_with(function(selection)
+        local text = api.nvim_buf_get_text(
+            0,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
+            {}
+        )
+        for i, line in ipairs(text) do
+            text[i] = line:lower()
+        end
+        api.nvim_buf_set_text(
+            0,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
+            text
+        )
+    end)
+end
 --- Creates a selection on the line above the cursor
 M.create_up = function()
     for _ = 1, vim.v.count1 do

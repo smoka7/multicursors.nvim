@@ -40,6 +40,8 @@ local normal_keys = {
     ['P'] = { method = N.paste_before, opts = { desc = 'Paste before' } },
     ['@'] = { method = N.run_macro, opts = { desc = 'Run macro' } },
     [':'] = { method = N.normal_command, opts = { desc = 'Normal command' } },
+    ['U'] = { method = N.upper_case, opts = { desc = 'Upper case' } },
+    ['u'] = { method = N.lower_case, opts = { desc = 'lower case' } },
     ['J'] = {
         method = N.skip_create_down,
         opts = { desc = 'Skip create down' },
