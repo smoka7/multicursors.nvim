@@ -215,6 +215,12 @@ Click to see mappings. ~
   yy                                  Yanks the line of selection to
                                       unnamed register
 
+  u                                   changes selections case to
+                                      lowercase
+
+  U                                   changes selections case to
+                                      UPPERCASE
+
   z                                   Aligns selections by adding space
                                       before selections
 
