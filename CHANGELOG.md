@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/smoka7/multicursors.nvim/compare/v0.9.1...v0.10.0) (2023-10-19)
+
+
+### Features
+
+* change selections case ([#64](https://github.com/smoka7/multicursors.nvim/issues/64)) ([ce446c8](https://github.com/smoka7/multicursors.nvim/commit/ce446c829a0eb88a8d8dd432c7820a10d9b9a38d))
+* **hints:** add width option ([#62](https://github.com/smoka7/multicursors.nvim/issues/62)) ([1e41efd](https://github.com/smoka7/multicursors.nvim/commit/1e41efd5c70b31e1642754457eab7c6f019c4b1c))
+
 ## [0.9.1](https://github.com/smoka7/multicursors.nvim/compare/v0.9.0...v0.9.1) (2023-10-15)
 
 
