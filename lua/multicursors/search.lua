@@ -118,7 +118,8 @@ S.find_next_match = function(ctx)
         return
     end
 
-    local match = vim.fn.matchstrpos(ctx.text, ctx.pattern, ctx.offset)
+    -- \\V means very nomagic see :h \\V
+    local match = vim.fn.matchstrpos(ctx.text, '\\V' .. ctx.pattern, ctx.offset)
     -- -1 range means not found
     if match[2] == -1 and match[3] == -1 then
         return
@@ -208,7 +209,9 @@ S.find_prev_match = function(ctx)
     local found = nil ---@type Selection?
 
     repeat
-        match = vim.fn.matchstrpos(ctx.text, ctx.pattern, match[3] or 0)
+        -- \\V means very nomagic see :h \\V
+        match =
+            vim.fn.matchstrpos(ctx.text, '\\V' .. ctx.pattern, match[3] or 0)
         if match[2] ~= -1 and match[3] ~= -1 then
             found = {
                 col = match[2],
