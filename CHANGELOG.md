@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/smoka7/multicursors.nvim/compare/v0.10.0...v0.10.1) (2023-11-03)
+
+
+### Bug Fixes
+
+* ignore special characters when searching ([3e9459d](https://github.com/smoka7/multicursors.nvim/commit/3e9459d8e742653bdaf5f5793ce3310b3e66ef93)), closes [#65](https://github.com/smoka7/multicursors.nvim/issues/65)
+
 ## [0.10.0](https://github.com/smoka7/multicursors.nvim/compare/v0.9.1...v0.10.0) (2023-10-19)
 
 
