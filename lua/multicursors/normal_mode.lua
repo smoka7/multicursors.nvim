@@ -182,6 +182,35 @@ local paste = function(pos)
     end)
 end
 
+-- Replaces each selections text with
+-- the corespondent line from the unnamed register
+M.replace = function()
+    local register = vim.fn.getreg ''
+    local selection_count = #utils.get_all_selections() + 1
+
+    -- split register contents by lines
+    if type(register) == 'string' then
+        register = vim.fn.split(register, '\n')
+    end
+
+    if register and #register ~= selection_count then
+        return
+    end
+
+    local index = 1
+    utils.call_on_selections(function(selection)
+        api.nvim_buf_set_text(
+            0,
+            selection.row,
+            selection.col,
+            selection.end_row,
+            selection.end_col,
+            { register[index] }
+        )
+        index = index + 1
+    end)
+end
+
 M.paste_after = function()
     paste(utils.position.after)
 end

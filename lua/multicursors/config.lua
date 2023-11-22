@@ -37,6 +37,7 @@ local normal_keys = {
     [']'] = { method = N.goto_next, opts = { desc = 'Goto next' } },
     ['['] = { method = N.goto_prev, opts = { desc = 'Goto prev' } },
     ['p'] = { method = N.paste_after, opts = { desc = 'Paste after' } },
+    ['r'] = { method = N.replace, opts = { desc = 'Replace selections text' } },
     ['P'] = { method = N.paste_before, opts = { desc = 'Paste before' } },
     ['@'] = { method = N.run_macro, opts = { desc = 'Run macro' } },
     [':'] = { method = N.normal_command, opts = { desc = 'Normal command' } },
