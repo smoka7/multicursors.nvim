@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/smoka7/multicursors.nvim/compare/v0.10.1...v0.10.2) (2023-11-22)
+
+
+### Bug Fixes
+
+* delete the overlapping selections ([#69](https://github.com/smoka7/multicursors.nvim/issues/69)) ([e9de1fa](https://github.com/smoka7/multicursors.nvim/commit/e9de1fa025284fccc54b8920016ad6ffd8d266b1))
+
 ## [0.10.1](https://github.com/smoka7/multicursors.nvim/compare/v0.10.0...v0.10.1) (2023-11-03)
 
 
