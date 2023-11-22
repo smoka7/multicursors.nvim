@@ -99,3 +99,40 @@ describe('inserts mode', function()
         assert.equal(#selections, 0)
     end)
 end)
+-- isuue #67
+paragraph = {
+    'word',
+    'word',
+    'word',
+    'word',
+}
+
+describe('insert mode', function()
+    before_each(function()
+        vim.cmd [[enew]]
+        api.nvim_buf_set_lines(0, 0, -1, false, paragraph)
+        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        search.find_all_matches(buffer, 'word', 0, 0)
+        vim.cmd [[w! before]]
+    end)
+
+    after_each(function()
+        vim.cmd [[w! after]]
+        vim.cmd.bdelete { bang = true }
+    end)
+
+    it('inserts text', function()
+        local selections = utils.get_all_selections()
+        assert.equal(#selections, 3)
+
+        insert_mode.insert(config)
+        vim.cmd 'normal! ia '
+        insert_mode.exit()
+
+        local buffer = api.nvim_buf_get_lines(0, 0, -1, false)
+        utils.clear_selections()
+        search.find_all_matches(buffer, 'a word', 0, 0)
+        selections = utils.get_all_selections()
+        assert.equal(#selections, 3)
+    end)
+end)
