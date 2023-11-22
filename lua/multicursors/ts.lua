@@ -1,6 +1,5 @@
 local T = {}
 
-local utils = require 'multicursors.utils'
 ---@param a Selection
 ---@param b Selection
 ---@return boolean

@@ -52,12 +52,18 @@ M.create_extmark = function(selection, namespace)
         ns = main_ns_id
     end
 
+    --TODO delete for next nvim release
+    local opts = {}
+    if vim.version.gt(vim.version(), { 0, 9, 9 }) then
+        opts = { overlap = true }
+    end
+
     local marks = api.nvim_buf_get_extmarks(
         0,
         ns,
         { selection.row, selection.col },
         { selection.end_row, selection.end_col },
-        {}
+        opts
     )
     -- Delete the old marks
     for _, mark in pairs(marks) do
