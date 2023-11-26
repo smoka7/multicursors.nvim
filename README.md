@@ -118,6 +118,7 @@ To enter Multicursor mode, use one of the above commands.
 | `J` | `[count]` Skips the current selection and Creates a selection on the char below |
 | `k` | `[count]` Creates a selection on the char above the cursor |
 | `K` | `[count]` Skips the current selection and Creates a selection on the char above |
+| `r` | Replaces the text inside selections with content of `unnamed register` |
 | `p` | Puts the text inside `unnamed register` before selections |
 | `P` | Puts the text inside `unnamed register` after selections |
 | `y` | Yanks the text inside selections to `unnamed register` |

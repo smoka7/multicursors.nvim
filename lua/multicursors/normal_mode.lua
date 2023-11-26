@@ -188,24 +188,41 @@ M.replace = function()
     local register = vim.fn.getreg ''
     local selection_count = #utils.get_all_selections() + 1
 
-    -- split register contents by lines
-    if type(register) == 'string' then
-        register = vim.fn.split(register, '\n')
+    if not register then
+        return
     end
 
-    if register and #register ~= selection_count then
+    local content ---@type string[]
+    -- split register contents by lines
+    if type(register) == 'string' then
+        content = vim.fn.split(register, '\n') ---@type string[]
+    else
+        content = register
+    end
+
+    if #content ~= selection_count then
+        utils.update_selections_with(function(selection)
+            api.nvim_buf_set_text(
+                0,
+                selection.row,
+                selection.col,
+                selection.end_row,
+                selection.end_col,
+                content
+            )
+        end)
         return
     end
 
     local index = 1
-    utils.call_on_selections(function(selection)
+    utils.update_selections_with(function(selection)
         api.nvim_buf_set_text(
             0,
             selection.row,
             selection.col,
             selection.end_row,
             selection.end_col,
-            { register[index] }
+            { content[index] }
         )
         index = index + 1
     end)
