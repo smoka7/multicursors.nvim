@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.11.0](https://github.com/smoka7/multicursors.nvim/compare/v0.10.2...v0.11.0) (2023-11-27)
+
+
+### Features
+
+* replace selections text with register content ([#72](https://github.com/smoka7/multicursors.nvim/issues/72)) ([ebd4e3f](https://github.com/smoka7/multicursors.nvim/commit/ebd4e3f647bf233ee95fa8c5186108aaada2c8e1))
+
+
+### Bug Fixes
+
+* **insert_mode:** add missing bangs to `normal` commands ([#75](https://github.com/smoka7/multicursors.nvim/issues/75)) ([1d4bf39](https://github.com/smoka7/multicursors.nvim/commit/1d4bf39ac6b7a2c2076eb11def095212ab04a039))
+
 ## [0.10.2](https://github.com/smoka7/multicursors.nvim/compare/v0.10.1...v0.10.2) (2023-11-22)
 
 
