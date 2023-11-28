@@ -37,6 +37,7 @@ M._on_insert_char_pre = function()
     api.nvim_create_autocmd({ 'InsertCharPre' }, {
         group = M._au_group,
         callback = function()
+            if vim.v.char == '\x1d' then return end
             M._inserted_text = M._inserted_text .. vim.v.char
         end,
     })
