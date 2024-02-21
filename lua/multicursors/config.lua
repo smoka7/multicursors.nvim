@@ -32,6 +32,7 @@ local normal_keys = {
     ['q'] = { method = N.skip_find_next, opts = { desc = 'Skip find next' } },
     ['Q'] = { method = N.skip_find_prev, opts = { desc = 'Skip find prev' } },
     ['N'] = { method = N.find_prev, opts = { desc = 'Find prev' } },
+    ['<C-a>'] = { method = N.find_all_matches, opts = { desc = 'Find all' } },
     ['}'] = { method = N.skip_goto_next, opts = { desc = 'Skip Goto next' } },
     ['{'] = { method = N.skip_goto_prev, opts = { desc = 'Skip Goto prev' } },
     [']'] = { method = N.goto_next, opts = { desc = 'Goto next' } },
