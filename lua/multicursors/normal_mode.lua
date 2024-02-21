@@ -125,6 +125,12 @@ M.find_prev = function()
     end
 end
 
+M.find_all_matches = function()
+    utils.clear_selections()
+    local content = api.nvim_buf_get_lines(0, 0, -1, true)
+    search.find_all_matches(content, vim.b.MultiCursorPattern, 0, 0)
+end
+
 M.skip_find_prev = function()
     for _ = 1, vim.v.count1 do
         local match = search.find_prev(true)
