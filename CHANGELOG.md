@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/smoka7/multicursors.nvim/compare/v0.11.0...v0.12.0) (2024-02-21)
+
+
+### Features
+
+* add select all matches in normal mode ([#82](https://github.com/smoka7/multicursors.nvim/issues/82)) ([8f62321](https://github.com/smoka7/multicursors.nvim/commit/8f62321064acc8409ff4b1c3a4d36f0f12dcb0af))
+
 ## [0.11.0](https://github.com/smoka7/multicursors.nvim/compare/v0.10.2...v0.11.0) (2023-11-27)
 
 
