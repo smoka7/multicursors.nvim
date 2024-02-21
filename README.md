@@ -107,7 +107,7 @@ To enter Multicursor mode, use one of the above commands.
 | `c` | Deletes the text inside selections and starts insert mode |
 | `n` | `[count]` Finds the next match after the main selection |
 | `N` | `[count]` Finds the previous match before the main selection |
-| `<C-a>` | Creates a selection for all the matches |
+| `<C-a>` | Creates selections for all the matches |
 | `q` | `[count]` Skips the current selection and finds the next one |
 | `Q` | `[count]` Skips the current selection and finds the previous one |
 | `]` | `[count]` Swaps the main selection with next selection |
