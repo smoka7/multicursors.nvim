@@ -164,7 +164,7 @@ Click to see mappings. ~
   N                                   [count] Finds the previous match
                                       before the main selection
 
-  <C-a>                               Creates a selection for all the
+  <C-a>                               Creates selections for all the
                                       matches
 
   q                                   [count] Skips the current selection
