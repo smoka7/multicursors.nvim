@@ -125,8 +125,8 @@ To enter Multicursor mode, use one of the above commands.
 | `y` | Yanks the text inside selections to `unnamed register` |
 | `Y` | Yanks the text from the start of selection till the end of the line to `unnamed register` |
 | `yy` | Yanks the line of selection to `unnamed register` |
-| `u` | changes selections case to lowercase |
-| `U` | changes selections case to UPPERCASE |
+| `gu` | changes selections case to lowercase |
+| `gU` | changes selections case to UPPERCASE |
 | `z` | Aligns selections by adding space before selections |
 | `Z` | Aligns selections by adding space at the start of the line |
 | `d` | Deletes the text inside selections |
