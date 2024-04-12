@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/smoka7/multicursors.nvim/compare/v0.12.0...v1.0.0) (2024-04-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* changed default mappings for `lower_case` and `upper_case` methods ([#87](https://github.com/smoka7/multicursors.nvim/issues/87))
+
+### Bug Fixes
+
+* changed default mappings for `lower_case` and `upper_case` methods ([#87](https://github.com/smoka7/multicursors.nvim/issues/87)) ([db0f49d](https://github.com/smoka7/multicursors.nvim/commit/db0f49d77e63ec6c31a2dc2ca6cc715e0bb9f3b1))
+
 ## [0.12.0](https://github.com/smoka7/multicursors.nvim/compare/v0.11.0...v0.12.0) (2024-02-21)
 
 
