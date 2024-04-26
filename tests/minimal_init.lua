@@ -22,7 +22,7 @@ if plenary_exists then
 end
 
 if hydra_exists then
-    clone('https://github.com/smoka7/hydra.nvim', hydra_dir)
+    clone('https://github.com/nvimtools/hydra.nvim', hydra_dir)
 end
 
 vim.opt.directory = ''

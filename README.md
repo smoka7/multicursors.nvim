@@ -15,7 +15,7 @@ Install with your preferred package manager:
     "smoka7/multicursors.nvim",
     event = "VeryLazy",
     dependencies = {
-        'smoka7/hydra.nvim',
+        'nvimtools/hydra.nvim',
     },
     opts = {},
     cmd = { 'MCstart', 'MCvisual', 'MCclear', 'MCpattern', 'MCvisualPattern', 'MCunderCursor' },
