@@ -42,7 +42,7 @@ Install with your preferred package manager:
         "smoka7/multicursors.nvim",
         event = "VeryLazy",
         dependencies = {
-            'smoka7/hydra.nvim',
+            'nvimtools/hydra.nvim',
         },
         opts = {},
         cmd = { 'MCstart', 'MCvisual', 'MCclear', 'MCpattern', 'MCvisualPattern', 'MCunderCursor' },
@@ -80,7 +80,9 @@ Click me ~
         extend_keys = extend_keys,
         -- see :help hydra-config.hint
         hint_config = {
-            border = 'none',
+            float_opts = {
+                border = 'none',
+            },
             position = 'bottom',
         },
         -- accepted values:
@@ -384,12 +386,12 @@ Disable the hint window and show Multicursor mode in your status line.
      require('multicursors').setup {
         hint_config = false,
     }
-    
+
     local function is_active()
         local ok, hydra = pcall(require, 'hydra.statusline')
         return ok and hydra.is_active()
     end
-    
+
     local function get_name()
         local ok, hydra = pcall(require, 'hydra.statusline')
         if ok then
@@ -397,7 +399,7 @@ Disable the hint window and show Multicursor mode in your status line.
         end
         return ''
     end
-    
+
     --- for lualine add this component
     lualine_b = {
         { get_name, cond = is_active },
@@ -413,7 +415,9 @@ similar to helix.
 >lua
      require('multicursors').setup {
         hint_config = {
-            border = 'rounded',
+            float_opts = {
+                border = 'rounded',
+            },
             position = 'bottom-right',
         },
         generate_hints = {

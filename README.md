@@ -15,7 +15,7 @@ Install with your preferred package manager:
     "smoka7/multicursors.nvim",
     event = "VeryLazy",
     dependencies = {
-        'smoka7/hydra.nvim',
+        'nvimtools/hydra.nvim',
     },
     opts = {},
     cmd = { 'MCstart', 'MCvisual', 'MCclear', 'MCpattern', 'MCvisualPattern', 'MCunderCursor' },
@@ -52,7 +52,9 @@ Install with your preferred package manager:
     extend_keys = extend_keys,
     -- see :help hydra-config.hint
     hint_config = {
-        border = 'none',
+        float_opts = {
+            border = 'none',
+        },
         position = 'bottom',
     },
     -- accepted values:
@@ -91,7 +93,7 @@ To enter Multicursor mode, use one of the above commands.
 
 ## Multi cursor mode
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > Keys that aren't mapped **do not affect other selections** .
 
 <details>
@@ -135,7 +137,7 @@ To enter Multicursor mode, use one of the above commands.
 | `@` | Executes a macro at the start of selections |
 | `.` | Repeats last change at the start of selections |
 | `,` | Clears All Selections except the main one |
-| `:` | Prompts for a normal command and Executes it at the start of selections | 
+| `:` | Prompts for a normal command and Executes it at the start of selections |
 | `u` | Undo changes |
 | `<C-r>` | Redo changes |
 
@@ -266,7 +268,9 @@ A configuration like this can be used to show hints in a vertical window similar
 ```lua
  require('multicursors').setup {
     hint_config = {
-        border = 'rounded',
+        float_opts = {
+            border = 'rounded',
+        },
         position = 'bottom-right',
     },
     generate_hints = {
