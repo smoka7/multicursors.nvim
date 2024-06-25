@@ -386,12 +386,12 @@ Disable the hint window and show Multicursor mode in your status line.
      require('multicursors').setup {
         hint_config = false,
     }
-
+    
     local function is_active()
         local ok, hydra = pcall(require, 'hydra.statusline')
         return ok and hydra.is_active()
     end
-
+    
     local function get_name()
         local ok, hydra = pcall(require, 'hydra.statusline')
         if ok then
@@ -399,7 +399,7 @@ Disable the hint window and show Multicursor mode in your status line.
         end
         return ''
     end
-
+    
     --- for lualine add this component
     lualine_b = {
         { get_name, cond = is_active },
