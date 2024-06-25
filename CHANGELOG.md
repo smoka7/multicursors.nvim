@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.0.0](https://github.com/smoka7/multicursors.nvim/compare/v1.0.0...v2.0.0) (2024-06-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* Switch to maintained fork of hydra.nvim ([#91](https://github.com/smoka7/multicursors.nvim/issues/91))
+
+### Features
+
+* Switch to maintained fork of hydra.nvim ([#91](https://github.com/smoka7/multicursors.nvim/issues/91)) ([52b9179](https://github.com/smoka7/multicursors.nvim/commit/52b9179e99b8d17389c3f30c8819e28ffbe2b30e))
+
+
+### Performance Improvements
+
+* don't setreg when deleting in insert mode ([#94](https://github.com/smoka7/multicursors.nvim/issues/94)) ([b7a03b4](https://github.com/smoka7/multicursors.nvim/commit/b7a03b463bf30c408a6bb795fe523b7a2b6b9d3f))
+
 ## [1.0.0](https://github.com/smoka7/multicursors.nvim/compare/v0.12.0...v1.0.0) (2024-04-12)
 
 
