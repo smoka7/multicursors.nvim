@@ -112,7 +112,7 @@ local delete_char = function()
         end
 
         api.nvim_win_set_cursor(0, { selection.end_row + 1, col })
-        vim.cmd 'normal! x'
+        vim.cmd 'normal! "_x'
     end)
 
     selections.reduce_to_char(utils.position.before)
@@ -123,7 +123,7 @@ M.BS_method = function()
         delete_char()
     else
         --delete the text under the cursor cause we can't modify buffer content with expr mappings
-        vim.cmd 'normal! X'
+        vim.cmd 'normal! "_X'
         M._inserted_text = M._inserted_text:sub(0, #M._inserted_text - 1)
     end
 end
@@ -185,7 +185,7 @@ M.Del_method = function()
     M._insert_and_clear()
     utils.call_on_selections(function(mark)
         api.nvim_win_set_cursor(0, { mark.row + 1, mark.col + 1 })
-        vim.cmd 'normal! x'
+        vim.cmd 'normal! "_x'
     end)
 
     selections.reduce_to_char(utils.position.before)
