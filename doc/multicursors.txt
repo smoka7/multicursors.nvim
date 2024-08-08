@@ -354,6 +354,7 @@ Create custom mapping for editing selections.
 
 >lua
      require('multicursors').setup {
+        local N = require("multicursors.normal_mode")
         normal_keys = {
             -- to change default lhs of key mapping change the key
             [','] = {
