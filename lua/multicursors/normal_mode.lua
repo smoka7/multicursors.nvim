@@ -216,6 +216,8 @@ M.replace = function()
                 selection.end_col,
                 content
             )
+
+            selection.end_col = selection.col + #content[1]
         end)
         return
     end
@@ -230,6 +232,8 @@ M.replace = function()
             selection.end_col,
             { content[index] }
         )
+
+        selection.end_col = selection.col + #content[index]
         index = index + 1
     end)
 end
